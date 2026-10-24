@@ -6,3 +6,9 @@ export const primaryButtonClass =
 
 export const quietButtonClass =
   "inline-flex cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-blue hover:text-blue disabled:cursor-not-allowed disabled:opacity-60";
+
+export const dangerButtonClass =
+  "inline-flex cursor-pointer items-center justify-center rounded-full border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-800 transition-colors hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60";
+
+export const dangerPrimaryButtonClass =
+  "inline-flex cursor-pointer items-center justify-center rounded-full bg-red-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60";

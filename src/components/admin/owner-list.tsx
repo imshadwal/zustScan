@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { OwnerIdentity } from "@/components/initials-badge";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import {
+  dangerButtonClass,
   fieldClass,
   primaryButtonClass,
   quietButtonClass,
 } from "@/components/admin/styles";
+import { displayTitle } from "@/lib/initials";
 import { PasswordInput, RevealableSecret } from "@/components/password-input";
 
 type OwnerCardData = {
@@ -19,12 +23,17 @@ type OwnerCardData = {
 };
 
 function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: string }) {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [shown, setShown] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const pageUrl = `${siteOrigin}/c/${owner.loginId}`;
+  const label = displayTitle(owner.businessName, owner.loginId);
 
   async function reset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,7 +73,65 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
     setCopied(true);
   }
 
+  function openDeleteDialog() {
+    setDeleteError(null);
+    setDeleteOpen(true);
+  }
+
+  async function confirmDelete() {
+    setDeleteError(null);
+    setDeletePending(true);
+    try {
+      const response = await fetch(`/api/admin/business-owners/${owner.loginId}`, {
+        method: "DELETE",
+      });
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        setDeleteError(body?.error ?? "This business could not be deleted.");
+        setDeletePending(false);
+        return;
+      }
+      setDeleteOpen(false);
+      setDeletePending(false);
+      router.refresh();
+    } catch {
+      setDeleteError("The request could not be sent.");
+      setDeletePending(false);
+    }
+  }
+
   return (
+    <>
+    <ConfirmDialog
+      open={deleteOpen}
+      tone="danger"
+      title="Delete this business?"
+      description={
+        <>
+          <p>
+            You are about to remove <span className="font-semibold text-ink">{label}</span>{" "}
+            <span className="font-mono text-ink">({owner.loginId})</span>.
+          </p>
+          <ul className="mt-3 list-disc space-y-1 pl-5">
+            <li>Business login and password</li>
+            <li>Guest QR link and public page</li>
+            <li>All services and products</li>
+          </ul>
+          {deleteError ? (
+            <p className="mt-4 text-sm text-red-700" role="alert">
+              {deleteError}
+            </p>
+          ) : null}
+        </>
+      }
+      cancelLabel="Keep business"
+      confirmLabel="Delete permanently"
+      pending={deletePending}
+      onCancel={() => {
+        if (!deletePending) setDeleteOpen(false);
+      }}
+      onConfirm={confirmDelete}
+    />
     <article className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
       <div className="flex flex-col gap-5 sm:flex-row">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -83,12 +150,22 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
             {owner.setupComplete ? " · Ready for guests" : " · Setup incomplete"}
           </p>
           <p className="mt-1 text-sm break-all text-muted">{pageUrl}</p>
-          <a
-            href={`/api/admin/business-owners/${owner.loginId}/qr?download=1`}
-            className={`${quietButtonClass} mt-4`}
-          >
-            Download QR
-          </a>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a
+              href={`/api/admin/business-owners/${owner.loginId}/qr?download=1`}
+              className={quietButtonClass}
+            >
+              Download QR
+            </a>
+            <button
+              type="button"
+              onClick={openDeleteDialog}
+              disabled={deletePending || pending}
+              className={dangerButtonClass}
+            >
+              Delete business
+            </button>
+          </div>
           {shown ? (
             <div className="mt-5 rounded-2xl bg-mist p-4" role="status">
               <p className="text-sm font-semibold">New password</p>
@@ -126,6 +203,7 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
         </div>
       </div>
     </article>
+    </>
   );
 }
 

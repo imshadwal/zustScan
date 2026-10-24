@@ -1,6 +1,7 @@
 import { json } from "@/lib/admin-http";
 import { loadGuestExperience } from "@/lib/business-owners";
 import { generateGuestDraft } from "@/lib/guest-draft";
+import { normalizeGuestLanguages } from "@/lib/guest-languages";
 import { displayTitle } from "@/lib/initials";
 import { normalizeLoginId } from "@/lib/login-id";
 
@@ -9,8 +10,10 @@ const TIERS = new Set(["Good", "Better", "Best"]);
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const loginRaw = typeof body?.loginId === "string" ? body.loginId : "";
-  const serviceId = typeof body?.serviceId === "string" ? body.serviceId : "";
-  const productId = typeof body?.productId === "string" ? body.productId : "";
+  const serviceIdsRaw = body?.serviceIds;
+  const productIdsRaw = body?.productIds;
+  const legacyServiceId = typeof body?.serviceId === "string" ? body.serviceId : "";
+  const legacyProductId = typeof body?.productId === "string" ? body.productId : "";
   const tier = typeof body?.tier === "string" ? body.tier : "";
   const starsRaw = body?.stars;
 
@@ -36,25 +39,61 @@ export async function POST(request: Request) {
     return json({ error: "This business is not ready for reviews yet." }, 404);
   }
 
-  const service = experience.services.find((item) => item.id === serviceId);
-  if (!service) {
-    return json({ error: "That service is not available." }, 400);
+  const serviceIds: string[] = Array.isArray(serviceIdsRaw)
+    ? serviceIdsRaw.filter((item): item is string => typeof item === "string" && item.length > 0)
+    : legacyServiceId
+      ? [legacyServiceId]
+      : [];
+  const productIds: string[] = Array.isArray(productIdsRaw)
+    ? productIdsRaw.filter((item): item is string => typeof item === "string" && item.length > 0)
+    : legacyProductId
+      ? [legacyProductId]
+      : [];
+
+  if (serviceIds.length === 0) {
+    return json({ error: "Pick at least one service." }, 400);
   }
-  const product = service.products.find((item) => item.id === productId);
-  if (!product) {
-    return json({ error: "That product is not available." }, 400);
+  if (productIds.length === 0) {
+    return json({ error: "Pick at least one product." }, 400);
+  }
+
+  const serviceNames: string[] = [];
+  for (const id of serviceIds) {
+    const service = experience.services.find((item) => item.id === id);
+    if (!service) {
+      return json({ error: "One of those services is not available." }, 400);
+    }
+    serviceNames.push(service.name);
+  }
+
+  const productNames: string[] = [];
+  for (const id of productIds) {
+    let found: { name: string } | null = null;
+    for (const service of experience.services) {
+      const product = service.products.find((item) => item.id === id);
+      if (product) {
+        found = product;
+        break;
+      }
+    }
+    if (!found) {
+      return json({ error: "One of those products is not available." }, 400);
+    }
+    productNames.push(found.name);
   }
 
   const businessName = displayTitle(experience.businessName, experience.loginId);
+  const languages = normalizeGuestLanguages(body?.languages ?? body?.language);
 
   try {
     const draft = await generateGuestDraft({
       businessName,
       brief: experience.brief,
-      serviceName: service.name,
-      productName: product.name,
+      serviceNames,
+      productNames,
       tier: tier as "Good" | "Better" | "Best",
       stars,
+      languages,
     });
     return json({ draft });
   } catch {

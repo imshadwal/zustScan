@@ -293,6 +293,22 @@ export async function createBusinessOwner(
   return { loginId: id, password };
 }
 
+export async function deleteBusinessOwner(loginId: string) {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) {
+    throw new OwnerStoreError("That business owner was not found.", 404);
+  }
+  const { data, error } = await database()
+    .from("business_owners")
+    .delete()
+    .eq("login_id", id)
+    .select("login_id")
+    .maybeSingle();
+  if (error) throw mapDbError(error);
+  if (!data) throw new OwnerStoreError("That business owner was not found.", 404);
+  return { loginId: id };
+}
+
 export async function resetBusinessOwnerPassword(loginId: string, password: string) {
   const id = normalizeLoginId(loginId);
   if (!isValidLoginId(id)) {
