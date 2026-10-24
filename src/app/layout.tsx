@@ -17,10 +17,6 @@ export const metadata: Metadata = {
   title: "Zust Scan | One scan. A better review.",
   description:
     "Zust Scan turns a QR code into a review guests can edit and post themselves. Scan to share, review to care.",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
