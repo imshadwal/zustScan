@@ -1,4 +1,5 @@
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
+import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
 import { businessSets, guestDecides } from "@/lib/site";
 
 function Column({
@@ -41,6 +42,7 @@ export function Split({ compactTop = false }: { compactTop?: boolean }) {
         <h2 className="max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
           The business sets the choices. The guest writes the review.
         </h2>
+        <SetupStandeeCallout className="mt-8 max-w-2xl" />
         <div className="mt-12 grid gap-4 lg:grid-cols-2">
           <Column
             eyebrow="The business configures"

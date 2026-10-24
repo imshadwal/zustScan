@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EnquiryButton } from "@/components/home/enquiry";
+import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
 
 export function Hero() {
   return (
@@ -37,7 +38,8 @@ export function Hero() {
               See how it works
             </Link>
           </div>
-          <p className="mt-8 max-w-md text-sm leading-6 text-white/60">
+          <SetupStandeeCallout variant="onDark" className="mt-8 max-w-md" />
+          <p className="mt-6 max-w-md text-sm leading-6 text-white/60">
             The guest owns the stars, the wording, and the final tap on Post.
             Zust Scan never submits the review.
           </p>

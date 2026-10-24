@@ -14,6 +14,8 @@ export const navLinks = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
+export const productBrochurePath = "/brochure";
+
 /** Short guest path shown on the home timeline and footer. */
 export const journeyTimeline = [
   {
@@ -111,7 +113,13 @@ export const guestDecides = [
 export const listPrice = "₹5,499";
 export const price = "₹3,499";
 
+/** Shown on pricing, brochure, and key marketing blocks. */
+export const setupStandeeTitle = "Complete setup, standee delivered";
+export const setupStandeeLine =
+  "We handle the full setup for you — services, products, guest page, and QR — and deliver your standee to your address once setup is done.";
+
 export const planIncludes = [
+  "Complete setup and QR standee delivered to your address",
   "One QR for the business",
   "Services and the products under each service",
   "Guest path from the scan to the stars",

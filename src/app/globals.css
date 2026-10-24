@@ -47,3 +47,32 @@ a[href] {
     scroll-behavior: auto;
   }
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  .brochure-no-print {
+    display: none !important;
+  }
+
+  .brochure-sheet {
+    max-width: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .brochure-section {
+    break-inside: avoid;
+  }
+
+  .brochure-print-only {
+    display: block !important;
+  }
+
+  .brochure-no-print {
+    display: none !important;
+  }
+}

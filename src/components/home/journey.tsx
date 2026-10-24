@@ -6,7 +6,7 @@ export function Journey({ showHeading = true }: { showHeading?: boolean }) {
     <section id="journey" className={homeCardsSection}>
       <div
         className={`mx-auto max-w-6xl px-5 sm:px-6 ${
-          showHeading ? "py-20 lg:py-24" : "pb-20 pt-0 lg:pb-24"
+          showHeading ? "py-20 lg:py-24" : "pb-20 pt-8 sm:pt-10 lg:pb-24"
         }`}
       >
         {showHeading ? (

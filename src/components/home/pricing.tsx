@@ -1,6 +1,9 @@
+import Link from "next/link";
+import { quietButtonClass } from "@/components/admin/styles";
 import { EnquiryButton } from "@/components/home/enquiry";
 import { homeCardsSection } from "@/components/home/styles";
-import { listPrice, planIncludes, price } from "@/lib/site";
+import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
+import { listPrice, planIncludes, price, productBrochurePath } from "@/lib/site";
 
 export function Pricing() {
   return (
@@ -15,6 +18,7 @@ export function Pricing() {
         <p className="mt-4 max-w-xl text-lg leading-8 text-muted">
           The QR, the guest path, and the draft. Setup starts from the enquiry.
         </p>
+        <SetupStandeeCallout className="mt-6 max-w-xl" />
         <div className="mt-12 grid overflow-hidden rounded-[32px] bg-blue text-white shadow-[0_24px_70px_rgba(0,96,240,0.28)] lg:grid-cols-[0.86fr_1.14fr]">
           <div className="border-b border-white/15 p-8 sm:p-10 lg:border-r lg:border-b-0">
             <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
@@ -31,9 +35,17 @@ export function Pricing() {
               For one business. Your details go to WhatsApp so we can set it up
               with you.
             </p>
-            <EnquiryButton className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-blue transition-colors hover:bg-mist">
-              Send an enquiry
-            </EnquiryButton>
+            <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <EnquiryButton className="inline-flex h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-blue transition-colors hover:bg-mist">
+                Send an enquiry
+              </EnquiryButton>
+              <Link
+                href={productBrochurePath}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-white/40 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Product PDF
+              </Link>
+            </div>
           </div>
           <ul className="space-y-4 p-8 sm:p-10">
             {planIncludes.map((item) => (

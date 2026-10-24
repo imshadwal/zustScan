@@ -4,7 +4,7 @@ import { Pricing } from "@/components/home/pricing";
 export const metadata: Metadata = {
   title: "Pricing | Zust Scan",
   description:
-    "One plan for the business: QR, guest path, AI draft, and setup from your enquiry.",
+    "One plan: full setup, QR standee delivered to your address, guest path, and AI draft.",
 };
 
 export default function PricingPage() {

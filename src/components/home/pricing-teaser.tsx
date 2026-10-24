@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EnquiryButton } from "@/components/home/enquiry";
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
+import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
 import { listPrice, price } from "@/lib/site";
 
 export function PricingTeaser() {
@@ -21,6 +22,7 @@ export function PricingTeaser() {
               One QR, the full guest path, and an editable AI draft — setup starts
               from your enquiry.
             </p>
+            <SetupStandeeCallout className="mt-5 max-w-md" />
             <div className="mt-8 flex flex-wrap items-end gap-4">
               <div>
                 <p className="text-sm font-medium text-muted line-through">{listPrice}</p>
