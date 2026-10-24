@@ -196,6 +196,45 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
   }
 }
 
+export type GuestExperience = {
+  loginId: string;
+  businessName: string | null;
+  phone: string | null;
+  mapLink: string;
+  brief: string;
+  services: ServiceRecord[];
+};
+
+/** Public guest page data when setup is complete. */
+export async function loadGuestExperience(loginId: string): Promise<GuestExperience | null> {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) return null;
+  const { data, error } = await database()
+    .from("business_owners")
+    .select("login_id, business_name, phone, map_link, brief, setup_complete")
+    .eq("login_id", id)
+    .maybeSingle();
+  if (error) throw mapDbError(error);
+  if (!data?.setup_complete) return null;
+  const mapLink = data.map_link?.trim();
+  const brief = data.brief?.trim();
+  if (!mapLink || !brief) return null;
+
+  const services = await listServicesForOwner(id);
+  if (services.length === 0) return null;
+  const hasProduct = services.some((service) => service.products.length > 0);
+  if (!hasProduct) return null;
+
+  return {
+    loginId: data.login_id,
+    businessName: data.business_name,
+    phone: data.phone,
+    mapLink,
+    brief,
+    services,
+  };
+}
+
 export async function findBusinessOwnerPublic(
   loginId: string,
 ): Promise<BusinessOwnerPublic | null> {

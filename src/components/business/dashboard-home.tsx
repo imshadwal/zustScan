@@ -91,8 +91,7 @@ export function DashboardHome({
                 Ready for guests
               </p>
               <p className="mt-3 text-xl font-semibold leading-snug">
-                Setup is complete. Your QR is active; guest review steps will appear here in a
-                later update.
+                Setup is complete. Guests can scan your QR and use the review path on your page.
               </p>
               <p className="mt-4 text-sm text-white/85">
                 {serviceCount} service{serviceCount === 1 ? "" : "s"} · {productCount} product

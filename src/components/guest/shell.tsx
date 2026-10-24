@@ -16,8 +16,8 @@ export function GuestShell({ children }: { children: ReactNode }) {
           />
         </Link>
       </header>
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 pb-16">
-        <div className="rounded-3xl bg-white p-8 shadow-[0_12px_40px_rgba(7,20,40,0.08)]">
+      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 py-8 pb-16">
+        <div className="rounded-3xl bg-white p-6 shadow-[0_12px_40px_rgba(7,20,40,0.08)] sm:p-8">
           {children}
         </div>
       </main>

@@ -20,7 +20,7 @@ export function SetupChecklistCard({ checklist }: { checklist: SetupChecklist })
       <section className="rounded-3xl bg-blue p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
         <p className="text-sm font-semibold text-white/90">Ready for guests</p>
         <p className="mt-2 text-lg font-semibold">
-          Setup is complete. Guest review steps will appear here in a later release.
+          Setup is complete. Your guest page is live.
         </p>
       </section>
     );
