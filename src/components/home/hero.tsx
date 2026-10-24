@@ -15,7 +15,7 @@ export function Hero() {
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold tracking-[0.16em] text-white/80 uppercase">
             <span className="h-1.5 w-1.5 rounded-full bg-blue" />
-            QR review assistant
+            AI-powered QR reviews
           </p>
           <h1 className="mt-6 max-w-xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
             One scan. A better review.
@@ -23,8 +23,8 @@ export function Hero() {
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-8 text-white/75">
             Guests scan a code where the moment happens, choose what they used,
-            and get a review draft they can edit. They post it themselves on
-            your Google page.
+            and get an AI-powered review draft they can edit in English, Hindi,
+            or Hinglish. They post it themselves on your Google page.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <EnquiryButton className="inline-flex h-12 items-center justify-center rounded-full bg-blue px-6 text-sm font-semibold text-white transition-colors hover:bg-blue-deep">
