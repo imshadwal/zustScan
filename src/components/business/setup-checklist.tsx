@@ -5,7 +5,7 @@ import { primaryButtonClass } from "@/components/admin/styles";
 const items = [
   { key: "businessName" as const, label: "Business name" },
   { key: "phone" as const, label: "Phone" },
-  { key: "mapLink" as const, label: "Google Maps link" },
+  { key: "mapLink" as const, label: "Google review link" },
   { key: "brief" as const, label: "Brief" },
   { key: "hasService" as const, label: "At least one service" },
   {

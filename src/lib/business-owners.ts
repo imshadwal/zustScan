@@ -361,7 +361,10 @@ export async function updateBusinessOwnerProfile(
   }
   const mapLink = normalizeMapLink(input.mapLink);
   if (!mapLink) {
-    throw new OwnerStoreError("Enter a valid HTTPS Google Maps link.", 400);
+    throw new OwnerStoreError(
+      "Enter a valid Google review link (g.page/…/review) or Maps link.",
+      400,
+    );
   }
   if (!isValidBrief(input.brief)) {
     throw new OwnerStoreError("The brief must be 20 to 2000 characters.", 400);

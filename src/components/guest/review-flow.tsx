@@ -228,8 +228,8 @@ export function GuestReviewFlow({ experience }: Props) {
                 </button>
               </div>
               <p className="mt-3 text-xs leading-5 text-muted">
-                Copy & Continue opens this business on Google. Paste your words, confirm stars, and
-                tap Post yourself.
+                Copy & Continue opens Google’s review page for this business. Paste your words,
+                confirm stars, and tap Post yourself.
               </p>
             </section>
           )}

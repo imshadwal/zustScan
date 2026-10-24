@@ -1,3 +1,17 @@
+function isGoogleGPageReviewUrl(url: URL) {
+  const host = url.hostname.toLowerCase();
+  if (host !== "g.page" && host !== "www.g.page") return false;
+  return /^\/r\/[^/]+(\/review)?\/?$/i.test(url.pathname);
+}
+
+function isGoogleWriteReviewUrl(url: URL) {
+  return (
+    url.hostname.toLowerCase() === "search.google.com" &&
+    url.pathname.includes("writereview") &&
+    url.searchParams.has("placeid")
+  );
+}
+
 function isGoogleMapsUrl(url: URL) {
   const host = url.hostname.toLowerCase();
   if (host === "maps.app.goo.gl") return true;
@@ -5,10 +19,17 @@ function isGoogleMapsUrl(url: URL) {
   if (host === "maps.google.com") return true;
   if (host === "share.google.com" || host === "share.google") return true;
   if (host === "google.com" || host === "www.google.com") {
-    return url.pathname.startsWith("/maps");
+    if (url.pathname.startsWith("/maps")) return true;
+    if (url.searchParams.has("cid")) return true;
   }
   if (host.endsWith(".google.com") && url.pathname.startsWith("/maps")) return true;
   return false;
+}
+
+function normalizeGPageReviewUrl(url: URL) {
+  const match = url.pathname.match(/^\/r\/([^/]+)/i);
+  if (!match?.[1]) return null;
+  return `https://g.page/r/${match[1]}/review`;
 }
 
 export function normalizeBusinessName(value: string) {
@@ -45,6 +66,12 @@ export function normalizeMapLink(value: string) {
   try {
     const url = new URL(trimmed);
     if (url.protocol !== "https:") return null;
+    if (isGoogleGPageReviewUrl(url)) {
+      return normalizeGPageReviewUrl(url);
+    }
+    if (isGoogleWriteReviewUrl(url)) {
+      return url.toString();
+    }
     if (!isGoogleMapsUrl(url)) return null;
     return url.toString();
   } catch {
@@ -108,7 +135,7 @@ export function evaluateSetup(input: {
   const missingLabels: string[] = [];
   if (!businessName) missingLabels.push("Business name");
   if (!phone) missingLabels.push("Phone");
-  if (!mapLink) missingLabels.push("Google Maps link");
+  if (!mapLink) missingLabels.push("Google review link");
   if (!brief) missingLabels.push("Brief");
   if (!hasService) missingLabels.push("At least one service");
   if (hasService && !everyServiceHasProduct) {

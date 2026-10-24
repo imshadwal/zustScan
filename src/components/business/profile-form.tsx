@@ -82,17 +82,21 @@ export function ProfileForm({ initial }: { initial: Profile }) {
         </div>
         <div>
           <label className="block text-sm font-semibold text-ink" htmlFor="business-map">
-            Google Maps link <span className="text-red-600">*</span>
+            Google review link <span className="text-red-600">*</span>
           </label>
           <input
             id="business-map"
             type="url"
             value={mapLink}
             onChange={(e) => setMapLink(e.target.value)}
-            placeholder="https://maps.app.goo.gl/..."
+            placeholder="https://g.page/r/…/review"
             className={`${fieldClass} mt-2`}
             required
           />
+          <p className="mt-1.5 text-xs text-muted">
+            From Google Business Profile → Get more reviews. Maps or share links also work, but
+            g.page … /review opens Write a review directly.
+          </p>
         </div>
         <div>
           <label className="block text-sm font-semibold text-ink" htmlFor="business-brief">

@@ -8,7 +8,7 @@ import { displayTitle } from "@/lib/initials";
 const checklistItems = [
   { key: "businessName" as const, label: "Business name", href: "/business/profile" },
   { key: "phone" as const, label: "Phone", href: "/business/profile" },
-  { key: "mapLink" as const, label: "Google Maps link", href: "/business/profile" },
+  { key: "mapLink" as const, label: "Google review link", href: "/business/profile" },
   { key: "brief" as const, label: "Brief about your business", href: "/business/profile" },
   { key: "hasService" as const, label: "At least one service", href: "/business/services" },
   {
