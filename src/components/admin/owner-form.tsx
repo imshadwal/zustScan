@@ -7,6 +7,7 @@ import {
   primaryButtonClass,
   quietButtonClass,
 } from "@/components/admin/styles";
+import { PasswordInput, RevealableSecret } from "@/components/password-input";
 import { isValidLoginId, normalizeLoginId, parseSoldPrice, formatRupees } from "@/lib/login-id";
 
 type Created = { loginId: string; password: string; soldPriceLabel: string };
@@ -91,7 +92,7 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
           <p className="mt-5 text-sm font-semibold text-muted">Sold for</p>
           <p className="mt-1 text-lg">{created.soldPriceLabel}</p>
           <p className="mt-5 text-sm font-semibold text-muted">Password</p>
-          <p className="mt-1 font-mono text-lg break-all">{created.password}</p>
+          <RevealableSecret value={created.password} />
           <button type="button" onClick={copyPassword} className={`${quietButtonClass} mt-4`}>
             {copied ? "Copied" : "Copy password"}
           </button>
@@ -170,15 +171,15 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
             <label className="block text-sm font-semibold text-ink" htmlFor="owner-password">
               Password
             </label>
-            <input
+            <PasswordInput
               id="owner-password"
               name="password"
-              type="password"
               autoComplete="new-password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={setPassword}
               placeholder="At least 8 characters"
-              className={`${fieldClass} mt-2`}
+              inputClassName={fieldClass}
+              wrapperClassName="mt-2"
               required
             />
             <p className="mt-1.5 text-xs text-muted">Shown once after you save.</p>

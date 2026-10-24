@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { fieldClass, primaryButtonClass } from "@/components/admin/styles";
+import { PasswordInput } from "@/components/password-input";
 
 export function BusinessLoginForm() {
-  const router = useRouter();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +20,7 @@ export function BusinessLoginForm() {
       const response = await fetch("/api/business/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ loginId, password }),
       });
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -29,8 +29,9 @@ export function BusinessLoginForm() {
         setPending(false);
         return;
       }
-      router.push("/business");
-      router.refresh();
+      // Full load shows the dashboard spinner instead of a stuck "Signing in…" button
+      // while /business RSC fetches profile and services from Supabase.
+      window.location.assign("/business");
     } catch {
       setError("The request could not be sent.");
       setPending(false);
@@ -67,14 +68,14 @@ export function BusinessLoginForm() {
             <label className="block text-sm font-semibold text-ink" htmlFor="business-password">
               Password
             </label>
-            <input
+            <PasswordInput
               id="business-password"
               name="password"
-              type="password"
               autoComplete="current-password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className={`${fieldClass} mt-2`}
+              onChange={setPassword}
+              inputClassName={fieldClass}
+              wrapperClassName="mt-2"
               required
             />
           </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, type KeyboardEvent } from "react";
 import { fieldClass, primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
 
@@ -17,7 +16,6 @@ function productPlaceholder(serviceName: string) {
 }
 
 export function ServicesManager({ initialServices }: { initialServices: Service[] }) {
-  const router = useRouter();
   const [services, setServices] = useState(initialServices);
   const [serviceName, setServiceName] = useState("");
   const [productNames, setProductNames] = useState<Record<string, string>>({});
@@ -29,9 +27,8 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
 
   const productTotal = services.reduce((sum, service) => sum + service.products.length, 0);
 
-  async function refresh() {
-    router.refresh();
-    const response = await fetch("/api/business/services");
+  async function reloadFromServer() {
+    const response = await fetch("/api/business/services", { cache: "no-store" });
     const body = (await response.json().catch(() => null)) as { services?: Service[] } | null;
     if (body?.services) setServices(body.services);
   }
@@ -44,20 +41,24 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
       const response = await fetch("/api/business/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ name: serviceName }),
       });
       const body = (await response.json().catch(() => null)) as
-        | { service?: { id: string }; error?: string }
+        | { service?: { id: string; name: string }; error?: string }
         | null;
-      if (!response.ok) {
+      if (!response.ok || !body?.service) {
         setError(body?.error ?? "The service could not be added.");
         setPending(false);
         return;
       }
       setServiceName("");
+      setServices((prev) => [
+        ...prev,
+        { id: body.service!.id, name: body.service!.name, products: [] },
+      ]);
       setNotice("Service added. Tap Add products on the new card.");
-      await refresh();
-      if (body?.service?.id) setAddingToServiceId(body.service.id);
+      setAddingToServiceId(body.service.id);
       setPending(false);
     } catch {
       setError("The request could not be sent.");
@@ -70,7 +71,7 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
     setPending(true);
     if (addingToServiceId === serviceId) setAddingToServiceId(null);
     await fetch(`/api/business/services/${serviceId}`, { method: "DELETE" });
-    await refresh();
+    setServices((prev) => prev.filter((service) => service.id !== serviceId));
     setPending(false);
   }
 
@@ -107,24 +108,32 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
     setNotice(null);
     setPending(true);
     try {
-      for (const name of names) {
-        const response = await fetch(`/api/business/services/${serviceId}/products`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name }),
-        });
-        const body = (await response.json().catch(() => null)) as { error?: string } | null;
-        if (!response.ok) {
-          setError(body?.error ?? "A product could not be added.");
-          setPending(false);
-          await refresh();
-          return;
-        }
+      const response = await fetch(`/api/business/services/${serviceId}/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ names }),
+      });
+      const body = (await response.json().catch(() => null)) as
+        | { products?: Product[]; error?: string }
+        | null;
+      if (!response.ok || !body?.products) {
+        setError(body?.error ?? "Products could not be saved.");
+        await reloadFromServer();
+        setPending(false);
+        return;
       }
+      const saved = body.products.map((product) => ({ id: product.id, name: product.name }));
+      setServices((prev) =>
+        prev.map((service) =>
+          service.id === serviceId
+            ? { ...service, products: [...service.products, ...saved] }
+            : service,
+        ),
+      );
       setDraftProducts((prev) => ({ ...prev, [serviceId]: [] }));
       setAddingToServiceId(null);
-      setNotice(`Saved ${names.length} product${names.length === 1 ? "" : "s"}.`);
-      await refresh();
+      setNotice(`Saved ${saved.length} product${saved.length === 1 ? "" : "s"}.`);
       setPending(false);
     } catch {
       setError("The request could not be sent.");
@@ -132,10 +141,19 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
     }
   }
 
-  async function removeProduct(productId: string) {
+  async function removeProduct(serviceId: string, productId: string) {
     setPending(true);
     await fetch(`/api/business/products/${productId}`, { method: "DELETE" });
-    await refresh();
+    setServices((prev) =>
+      prev.map((service) =>
+        service.id === serviceId
+          ? {
+              ...service,
+              products: service.products.filter((product) => product.id !== productId),
+            }
+          : service,
+      ),
+    );
     setPending(false);
   }
 
@@ -235,7 +253,7 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
                           <span className="truncate">{product.name}</span>
                           <button
                             type="button"
-                            onClick={() => removeProduct(product.id)}
+                            onClick={() => removeProduct(service.id, product.id)}
                             disabled={pending}
                             className="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-white hover:text-red-700"
                             aria-label={`Remove ${product.name}`}

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { OwnerIdentity } from "@/components/initials-badge";
 
@@ -13,14 +12,16 @@ export function BusinessHeader({
   businessName: string | null;
   loginId: string;
 }) {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function signOut() {
     setPending(true);
-    await fetch("/api/business/logout", { method: "POST" }).catch(() => null);
-    router.push("/business/login");
-    router.refresh();
+    try {
+      await fetch("/api/business/logout", { method: "POST", cache: "no-store" });
+    } catch {
+      /* still leave */
+    }
+    window.location.assign("/business/login");
   }
 
   return (

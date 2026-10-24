@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { fieldClass, primaryButtonClass } from "@/components/admin/styles";
+import { PasswordInput } from "@/components/password-input";
 
 export function LoginForm() {
-  const router = useRouter();
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +20,7 @@ export function LoginForm() {
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ login, password }),
       });
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -29,8 +29,7 @@ export function LoginForm() {
         setPending(false);
         return;
       }
-      router.push("/admin");
-      router.refresh();
+      window.location.assign("/admin");
     } catch {
       setError("The request could not be sent.");
       setPending(false);
@@ -78,14 +77,14 @@ export function LoginForm() {
           <label className="mt-4 block text-sm font-semibold" htmlFor="admin-password">
             Password
           </label>
-          <input
+          <PasswordInput
             id="admin-password"
             name="password"
-            type="password"
             autoComplete="current-password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={`${fieldClass} mt-2`}
+            onChange={setPassword}
+            inputClassName={fieldClass}
+            wrapperClassName="mt-2"
             required
           />
           {error ? (

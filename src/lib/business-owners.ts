@@ -539,6 +539,82 @@ export async function createProduct(loginId: string, serviceId: string, nameInpu
   };
 }
 
+export async function createProductsBatch(
+  loginId: string,
+  serviceId: string,
+  nameInputs: string[],
+) {
+  const ownerId = await ownerIdByLogin(loginId);
+  if (!ownerId) throw new OwnerStoreError("That business owner was not found.", 404);
+
+  const { data: service, error: serviceError } = await database()
+    .from("business_services")
+    .select("id")
+    .eq("id", serviceId)
+    .eq("business_owner_id", ownerId)
+    .maybeSingle();
+  if (serviceError) throw mapDbError(serviceError);
+  if (!service) throw new OwnerStoreError("That service was not found.", 404);
+
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of nameInputs) {
+    const name = normalizeCatalogName(raw);
+    if (!isValidCatalogName(name)) {
+      throw new OwnerStoreError("Use a product name of 1 to 80 characters.", 400);
+    }
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    names.push(name);
+  }
+  if (names.length === 0) {
+    throw new OwnerStoreError("Add at least one product name.", 400);
+  }
+
+  const { count, error: countError } = await database()
+    .from("business_products")
+    .select("id", { count: "exact", head: true })
+    .eq("service_id", serviceId);
+  if (countError) throw mapDbError(countError);
+  const existing = count ?? 0;
+  if (existing + names.length > MAX_PRODUCTS_PER_SERVICE) {
+    throw new OwnerStoreError(
+      `You can add up to ${MAX_PRODUCTS_PER_SERVICE} products per service.`,
+      400,
+    );
+  }
+
+  const { data: last } = await database()
+    .from("business_products")
+    .select("sort_order")
+    .eq("service_id", serviceId)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  let sortOrder = typeof last?.sort_order === "number" ? last.sort_order + 1 : 0;
+
+  const rows = names.map((name) => ({
+    service_id: serviceId,
+    name,
+    sort_order: sortOrder++,
+  }));
+
+  const { data, error } = await database()
+    .from("business_products")
+    .insert(rows)
+    .select("id, name, sort_order");
+  if (error) throw mapDbError(error);
+
+  await touchOwnerSetup(ownerId);
+
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    name: row.name as string,
+    sortOrder: row.sort_order as number,
+  }));
+}
+
 export async function renameProduct(loginId: string, productId: string, nameInput: string) {
   const ownerId = await ownerIdByLogin(loginId);
   if (!ownerId) throw new OwnerStoreError("That business owner was not found.", 404);

@@ -8,6 +8,7 @@ import {
   primaryButtonClass,
   quietButtonClass,
 } from "@/components/admin/styles";
+import { PasswordInput, RevealableSecret } from "@/components/password-input";
 
 type OwnerCardData = {
   loginId: string;
@@ -91,7 +92,7 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
           {shown ? (
             <div className="mt-5 rounded-2xl bg-mist p-4" role="status">
               <p className="text-sm font-semibold">New password</p>
-              <p className="mt-1 font-mono break-all">{shown}</p>
+              <RevealableSecret value={shown} className="mt-1 font-mono break-all" />
               <p className="mt-2 text-sm text-muted">Shown once. It will not be displayed again.</p>
               <button type="button" onClick={copyPassword} className={`${quietButtonClass} mt-3`}>
                 {copied ? "Copied" : "Copy password"}
@@ -103,13 +104,12 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
                 New password
               </label>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <input
+                <PasswordInput
                   id={`reset-${owner.loginId}`}
-                  type="password"
                   autoComplete="new-password"
                   value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className={fieldClass}
+                  onChange={setPassword}
+                  wrapperClassName="min-w-0 flex-1"
                   required
                 />
                 <button type="submit" className={primaryButtonClass} disabled={pending}>

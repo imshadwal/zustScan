@@ -2,19 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { primaryButtonClass } from "@/components/admin/styles";
 
 export function AdminHeader() {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function signOut() {
     setPending(true);
-    await fetch("/api/admin/logout", { method: "POST" }).catch(() => null);
-    router.push("/admin/login");
-    router.refresh();
+    try {
+      await fetch("/api/admin/logout", { method: "POST", cache: "no-store" });
+    } catch {
+      /* still leave — cookie may already be cleared */
+    }
+    // Full navigation avoids re-running the heavy /admin server page via router.refresh().
+    window.location.assign("/admin/login");
   }
 
   return (
