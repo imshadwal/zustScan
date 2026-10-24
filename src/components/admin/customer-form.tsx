@@ -82,7 +82,10 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
         <p className="mt-2 text-sm text-white/70">
           Copy the password now. A later visit can only set a new one.
         </p>
-        <div className="mt-6 rounded-3xl bg-white p-6 shadow-[0_12px_40px_rgba(7,20,40,0.08)]" role="status">
+        <div
+          className="mt-6 rounded-3xl bg-white p-6 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
+          role="status"
+        >
           <p className="text-sm font-semibold text-muted">Customer id</p>
           <p className="mt-1 font-mono text-lg">{created.loginId}</p>
           <p className="mt-5 text-sm font-semibold text-muted">Sold for</p>
@@ -142,54 +145,63 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
       </p>
       <form
         onSubmit={submit}
-        className="mt-6 rounded-3xl bg-white p-6 shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
+        className="mt-6 rounded-3xl bg-white p-6 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
       >
-        <label className="block text-sm font-semibold" htmlFor="customer-id">
-          Customer id
-        </label>
-        <input
-          id="customer-id"
-          name="loginId"
-          autoComplete="off"
-          spellCheck={false}
-          value={loginId}
-          onChange={(event) => setLoginId(event.target.value)}
-          placeholder="lakeview-hotel"
-          className={`${fieldClass} mt-2`}
-          required
-        />
-        <p className="mt-2 text-sm text-muted">
-          {preview ? `QR opens ${preview}` : "Letters, numbers, and hyphens. Example: lakeview-hotel."}
-        </p>
-        <label className="mt-5 block text-sm font-semibold" htmlFor="customer-password">
-          Password
-        </label>
-        <input
-          id="customer-password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className={`${fieldClass} mt-2`}
-          required
-        />
-        <p className="mt-2 text-sm text-muted">At least 8 characters. Shown once after you save.</p>
-        <label className="mt-5 block text-sm font-semibold" htmlFor="customer-price">
-          Price sold
-        </label>
-        <input
-          id="customer-price"
-          name="soldPrice"
-          inputMode="numeric"
-          autoComplete="off"
-          value={soldPrice}
-          onChange={(event) => setSoldPrice(event.target.value)}
-          placeholder="3499"
-          className={`${fieldClass} mt-2`}
-          required
-        />
-        <p className="mt-2 text-sm text-muted">Whole rupees. This is the amount this customer paid.</p>
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-ink" htmlFor="customer-id">
+              Customer id
+            </label>
+            <input
+              id="customer-id"
+              name="loginId"
+              autoComplete="off"
+              spellCheck={false}
+              value={loginId}
+              onChange={(event) => setLoginId(event.target.value)}
+              placeholder="lakeview-hotel"
+              className={`${fieldClass} mt-2`}
+              required
+            />
+            <p className="mt-1.5 text-xs text-muted">
+              {preview ? `QR opens ${preview}` : "Letters, numbers, and hyphens."}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-ink" htmlFor="customer-password">
+              Password
+            </label>
+            <input
+              id="customer-password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="At least 8 characters"
+              className={`${fieldClass} mt-2`}
+              required
+            />
+            <p className="mt-1.5 text-xs text-muted">Shown once after you save.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-ink" htmlFor="customer-price">
+              Price sold
+            </label>
+            <input
+              id="customer-price"
+              name="soldPrice"
+              inputMode="numeric"
+              autoComplete="off"
+              value={soldPrice}
+              onChange={(event) => setSoldPrice(event.target.value)}
+              placeholder="3499"
+              className={`${fieldClass} mt-2`}
+              required
+            />
+            <p className="mt-1.5 text-xs text-muted">Whole rupees this customer paid.</p>
+          </div>
+        </div>
         {error ? (
           <p className="mt-4 text-sm text-red-700" role="alert">
             {error}

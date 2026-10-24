@@ -67,7 +67,7 @@ function CustomerCard({
   }
 
   return (
-    <article className="rounded-3xl bg-white p-5 shadow-[0_12px_40px_rgba(7,20,40,0.08)]">
+    <article className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
       <div className="flex flex-col gap-5 sm:flex-row">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
