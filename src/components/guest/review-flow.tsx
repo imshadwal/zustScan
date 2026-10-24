@@ -12,6 +12,7 @@ import {
   GUEST_VOICE_OPTIONS,
   type GuestVoice,
 } from "@/lib/guest-voice";
+import { GoogleReviewHandoff } from "@/components/guest/google-handoff";
 import { displayTitle } from "@/lib/initials";
 
 type Props = {
@@ -61,6 +62,7 @@ export function GuestReviewFlow({ experience }: Props) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [googleHandoffOpen, setGoogleHandoffOpen] = useState(false);
 
   const selectedServices = useMemo(
     () => experience.services.filter((item) => serviceIds.includes(item.id)),
@@ -185,14 +187,15 @@ export function GuestReviewFlow({ experience }: Props) {
 
   async function copyAndContinue() {
     if (!draft.trim()) return;
+    setError(null);
+    window.open(experience.mapLink, "_blank", "noopener,noreferrer");
     try {
       await navigator.clipboard.writeText(draft.trim());
       setCopied(true);
+      setGoogleHandoffOpen(true);
     } catch {
-      setError("Copy failed. Select the text and copy it yourself.");
-      return;
+      setError("Copy failed. Select the text in the box above, copy it, then open Google.");
     }
-    window.open(experience.mapLink, "_blank", "noopener,noreferrer");
   }
 
   const productHint =
@@ -205,6 +208,12 @@ export function GuestReviewFlow({ experience }: Props) {
 
   return (
     <div className="flex min-h-0 flex-col">
+      <GoogleReviewHandoff
+        open={googleHandoffOpen}
+        stars={stars}
+        mapLink={experience.mapLink}
+        onClose={() => setGoogleHandoffOpen(false)}
+      />
       <div className="bg-navy px-5 py-6 text-white sm:px-6">
         <p className="text-[11px] font-semibold tracking-[0.16em] text-blue-200 uppercase">
           Your visit
@@ -437,6 +446,11 @@ export function GuestReviewFlow({ experience }: Props) {
         {step === 3 && draft ? (
           <Panel className="border-blue/20 bg-gradient-to-b from-blue/[0.06] to-white">
             <StepHeader title="Your draft" hint="Edit anything before you post on Google." />
+            <div className="mb-4 rounded-xl border-2 border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-950">
+              Google opens empty on purpose — it does not accept pre-filled reviews. Copy &
+              Continue puts your words on the clipboard; you choose the same stars and paste on
+              Google.
+            </div>
             <p className="mb-2 text-center text-lg tracking-wide text-[#e5a100]" aria-hidden="true">
               {"★".repeat(stars)}
               <span className="text-slate-200">{"★".repeat(5 - stars)}</span>
@@ -465,7 +479,7 @@ export function GuestReviewFlow({ experience }: Props) {
               </button>
             </div>
             <p className="mt-3 text-center text-xs leading-5 text-muted">
-              Paste on Google, match the stars, and tap Post yourself.
+              Tap {stars} star{stars === 1 ? "" : "s"} on Google, paste this text, then Post.
             </p>
           </Panel>
         ) : null}
