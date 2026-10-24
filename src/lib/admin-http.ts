@@ -1,7 +1,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { CustomerStoreError } from "@/lib/customer-error";
+import { OwnerStoreError } from "@/lib/store-error";
 
 export function json(body: unknown, status = 200) {
   return NextResponse.json(body, {
@@ -11,7 +11,7 @@ export function json(body: unknown, status = 200) {
 }
 
 export function failure(error: unknown) {
-  if (error instanceof CustomerStoreError) {
+  if (error instanceof OwnerStoreError) {
     return json({ error: error.message }, error.status);
   }
   console.error(error);

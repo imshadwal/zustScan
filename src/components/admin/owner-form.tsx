@@ -7,11 +7,11 @@ import {
   primaryButtonClass,
   quietButtonClass,
 } from "@/components/admin/styles";
-import { isValidLoginId, normalizeLoginId, parseSoldPrice, formatRupees } from "@/lib/customer-id";
+import { isValidLoginId, normalizeLoginId, parseSoldPrice, formatRupees } from "@/lib/login-id";
 
 type Created = { loginId: string; password: string; soldPriceLabel: string };
 
-export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
+export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
@@ -41,7 +41,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
     }
     setPending(true);
     try {
-      const response = await fetch("/api/admin/customers", {
+      const response = await fetch("/api/admin/business-owners", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ loginId: normalized, password, soldPrice: String(price) }),
@@ -50,7 +50,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
         | { loginId?: string; password?: string; error?: string }
         | null;
       if (!response.ok || !body?.loginId || !body.password) {
-        setError(body?.error ?? "The customer could not be created.");
+        setError(body?.error ?? "The business owner could not be created.");
         setPending(false);
         return;
       }
@@ -78,7 +78,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
     const pageUrl = `${siteOrigin}/c/${created.loginId}`;
     return (
       <div>
-        <h1 className="text-2xl font-semibold text-white">Customer created</h1>
+        <h1 className="text-2xl font-semibold text-white">Business owner created</h1>
         <p className="mt-2 text-sm text-white/70">
           Copy the password now. A later visit can only set a new one.
         </p>
@@ -86,7 +86,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
           className="mt-6 rounded-3xl bg-white p-6 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
           role="status"
         >
-          <p className="text-sm font-semibold text-muted">Customer id</p>
+          <p className="text-sm font-semibold text-muted">Login id</p>
           <p className="mt-1 font-mono text-lg">{created.loginId}</p>
           <p className="mt-5 text-sm font-semibold text-muted">Sold for</p>
           <p className="mt-1 text-lg">{created.soldPriceLabel}</p>
@@ -96,10 +96,9 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
             {copied ? "Copied" : "Copy password"}
           </button>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-            {/* The QR is a session-protected PNG. next/image would fetch it without the cookie. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/admin/customers/${created.loginId}/qr`}
+              src={`/api/admin/business-owners/${created.loginId}/qr`}
               alt={`QR code linking to ${pageUrl}`}
               width={160}
               height={160}
@@ -108,7 +107,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
             <div>
               <p className="text-sm break-all text-muted">{pageUrl}</p>
               <a
-                href={`/api/admin/customers/${created.loginId}/qr?download=1`}
+                href={`/api/admin/business-owners/${created.loginId}/qr?download=1`}
                 className={`${primaryButtonClass} mt-3`}
               >
                 Download QR
@@ -118,7 +117,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
         </div>
         <div className="mt-4 flex gap-4 text-sm font-semibold">
           <Link href="/admin" className="text-white hover:text-white/80">
-            All customers
+            All business owners
           </Link>
           <button
             type="button"
@@ -139,9 +138,9 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-white">New customer</h1>
+      <h1 className="text-2xl font-semibold text-white">New business owner</h1>
       <p className="mt-2 text-sm text-white/70">
-        The id becomes the login and the address inside the QR.
+        The login id becomes sign-in and the address inside the QR.
       </p>
       <form
         onSubmit={submit}
@@ -149,17 +148,17 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
       >
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-ink" htmlFor="customer-id">
-              Customer id
+            <label className="block text-sm font-semibold text-ink" htmlFor="owner-login-id">
+              Login id
             </label>
             <input
-              id="customer-id"
+              id="owner-login-id"
               name="loginId"
               autoComplete="off"
               spellCheck={false}
               value={loginId}
               onChange={(event) => setLoginId(event.target.value)}
-              placeholder="lakeview-hotel"
+              placeholder="natkhat-media"
               className={`${fieldClass} mt-2`}
               required
             />
@@ -168,11 +167,11 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
             </p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-ink" htmlFor="customer-password">
+            <label className="block text-sm font-semibold text-ink" htmlFor="owner-password">
               Password
             </label>
             <input
-              id="customer-password"
+              id="owner-password"
               name="password"
               type="password"
               autoComplete="new-password"
@@ -185,11 +184,11 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
             <p className="mt-1.5 text-xs text-muted">Shown once after you save.</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-ink" htmlFor="customer-price">
+            <label className="block text-sm font-semibold text-ink" htmlFor="owner-price">
               Price sold
             </label>
             <input
-              id="customer-price"
+              id="owner-price"
               name="soldPrice"
               inputMode="numeric"
               autoComplete="off"
@@ -199,7 +198,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
               className={`${fieldClass} mt-2`}
               required
             />
-            <p className="mt-1.5 text-xs text-muted">Whole rupees this customer paid.</p>
+            <p className="mt-1.5 text-xs text-muted">Whole rupees this business owner paid.</p>
           </div>
         </div>
         {error ? (
@@ -208,7 +207,7 @@ export function CustomerForm({ siteOrigin }: { siteOrigin: string }) {
           </p>
         ) : null}
         <button type="submit" className={`${primaryButtonClass} mt-6`} disabled={pending}>
-          {pending ? "Saving…" : "Create customer"}
+          {pending ? "Saving…" : "Create business owner"}
         </button>
       </form>
     </div>

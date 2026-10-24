@@ -6,5 +6,6 @@ Each plan is a numbered file in this folder. New work is added as the next numbe
 | --- | --- |
 | [01 — Admin](01-admin.md) | Built |
 | [02 — Sold price](02-sold-price.md) | Built |
+| [03 — Business owner dashboard](03-business-owner-dashboard.md) | Built |
 
 The public homepage is already built. These plans cover the product behind it.

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import { hasAdminSession } from "@/lib/admin-session";
 import { json } from "@/lib/admin-http";
-import { CustomerStoreError } from "@/lib/customer-error";
-import { customerPageUrl, isValidLoginId, normalizeLoginId } from "@/lib/customer-id";
-import { findCustomer } from "@/lib/customers";
+import { findBusinessOwnerPublic } from "@/lib/business-owners";
+import { guestPageUrl, isValidLoginId, normalizeLoginId } from "@/lib/login-id";
+import { OwnerStoreError } from "@/lib/store-error";
 
 export async function GET(
   request: Request,
@@ -21,9 +21,9 @@ export async function GET(
   }
 
   try {
-    const customer = await findCustomer(id);
-    if (!customer) return new NextResponse("Not found", { status: 404 });
-    const png = await QRCode.toBuffer(customerPageUrl(id), {
+    const owner = await findBusinessOwnerPublic(id);
+    if (!owner) return new NextResponse("Not found", { status: 404 });
+    const png = await QRCode.toBuffer(guestPageUrl(id), {
       type: "png",
       width: 640,
       margin: 2,
@@ -40,7 +40,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    if (error instanceof CustomerStoreError) {
+    if (error instanceof OwnerStoreError) {
       return json({ error: error.message }, error.status);
     }
     console.error(error);

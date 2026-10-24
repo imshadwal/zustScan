@@ -1,4 +1,7 @@
--- Zust Scan customers.
+-- Deprecated: use supabase/migrate-customers-to-business-owners.sql if this table exists,
+-- or supabase/business-owners.sql for a fresh project.
+--
+-- Zust Scan customers (legacy).
 -- Run once in the Supabase SQL editor for the zustscan project.
 -- Next.js uses the service role key, which bypasses row level security.
 -- The public Data API roles have no access to this table.

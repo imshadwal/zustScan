@@ -1,6 +1,6 @@
 import { hasAdminSession } from "@/lib/admin-session";
 import { failure, json } from "@/lib/admin-http";
-import { resetCustomerPassword } from "@/lib/customers";
+import { resetBusinessOwnerPassword } from "@/lib/business-owners";
 
 export async function POST(
   request: Request,
@@ -13,7 +13,7 @@ export async function POST(
   const body = await request.json().catch(() => null);
   const password = typeof body?.password === "string" ? body.password : "";
   try {
-    const reset = await resetCustomerPassword(loginId, password);
+    const reset = await resetBusinessOwnerPassword(loginId, password);
     return json(reset);
   } catch (error) {
     return failure(error);

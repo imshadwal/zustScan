@@ -2,55 +2,60 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AdminHeader } from "@/components/admin/header";
-import { CustomerList } from "@/components/admin/customer-list";
+import { OwnerList } from "@/components/admin/owner-list";
+import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
 import { hasAdminSession } from "@/lib/admin-session";
-import { CustomerStoreError } from "@/lib/customer-error";
-import { formatCreatedAt, formatRupees, siteOrigin } from "@/lib/customer-id";
-import { listCustomers } from "@/lib/customers";
+import { listBusinessOwners } from "@/lib/business-owners";
+import { formatCreatedAt, formatRupees, siteOrigin } from "@/lib/login-id";
+import { OwnerStoreError } from "@/lib/store-error";
 
-export const metadata: Metadata = { title: "Customers" };
+export const metadata: Metadata = { title: "Business owners" };
 
 export default function AdminPage() {
   return (
     <Suspense
-      fallback={
-        <div className="flex min-h-dvh items-center justify-center px-4">
-          <p className="text-white/70">Loading customers…</p>
-        </div>
-      }
+      fallback={<LogoSpinnerPage theme="dark" />}
     >
-      <CustomersGate />
+      <OwnersGate />
     </Suspense>
   );
 }
 
-async function CustomersGate() {
+async function OwnersGate() {
   if (!(await hasAdminSession())) redirect("/admin/login");
 
-  let customers: { loginId: string; createdAtLabel: string; soldPriceLabel: string }[] = [];
+  let owners: {
+    loginId: string;
+    businessName: string | null;
+    createdAtLabel: string;
+    soldPriceLabel: string;
+    setupComplete: boolean;
+  }[] = [];
   let totalLabel = formatRupees(0);
   let message: string | null = null;
   try {
-    const rows = await listCustomers();
-    customers = rows.map((customer) => ({
-      loginId: customer.loginId,
-      createdAtLabel: formatCreatedAt(customer.createdAt),
-      soldPriceLabel: formatRupees(customer.soldPrice),
+    const rows = await listBusinessOwners();
+    owners = rows.map((owner) => ({
+      loginId: owner.loginId,
+      businessName: owner.businessName,
+      createdAtLabel: formatCreatedAt(owner.createdAt),
+      soldPriceLabel: formatRupees(owner.soldPrice),
+      setupComplete: owner.setupComplete,
     }));
-    totalLabel = formatRupees(rows.reduce((sum, customer) => sum + customer.soldPrice, 0));
+    totalLabel = formatRupees(rows.reduce((sum, owner) => sum + owner.soldPrice, 0));
   } catch (error) {
     message =
-      error instanceof CustomerStoreError
+      error instanceof OwnerStoreError
         ? error.message
-        : "Customers could not be loaded.";
+        : "Business owners could not be loaded.";
   }
 
   return (
     <>
       <AdminHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <CustomerList
-          customers={customers}
+        <OwnerList
+          owners={owners}
           siteOrigin={siteOrigin()}
           totalLabel={totalLabel}
           notice={message}

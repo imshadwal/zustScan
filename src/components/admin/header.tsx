@@ -30,8 +30,8 @@ export function AdminHeader() {
           />
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/admin/customers/new" className={`${primaryButtonClass} h-10 px-4`}>
-            New customer
+          <Link href="/admin/owners/new" className={`${primaryButtonClass} h-10 px-4`}>
+            New business owner
           </Link>
           <button
             type="button"

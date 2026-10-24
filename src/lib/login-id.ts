@@ -39,7 +39,7 @@ export function siteOrigin() {
   );
 }
 
-export function customerPageUrl(loginId: string) {
+export function guestPageUrl(loginId: string) {
   return `${siteOrigin()}/c/${loginId}`;
 }
 

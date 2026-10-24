@@ -2,25 +2,23 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { GuestShell } from "@/components/guest/shell";
-import { findCustomer } from "@/lib/customers";
+import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { displayTitle } from "@/lib/initials";
+import { findBusinessOwnerPublic } from "@/lib/business-owners";
 
 export const metadata: Metadata = {
   title: "Guest page | Zust Scan",
   robots: { index: false, follow: false },
 };
 
-export default function CustomerPage({
+export default function GuestPageRoute({
   params,
 }: {
   params: Promise<{ loginId: string }>;
 }) {
   return (
     <Suspense
-      fallback={
-        <GuestShell>
-          <p className="text-muted">Loading…</p>
-        </GuestShell>
-      }
+      fallback={<LogoSpinnerPage theme="light" />}
     >
       <GuestPage params={params} />
     </Suspense>
@@ -29,10 +27,10 @@ export default function CustomerPage({
 
 async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
   const { loginId } = await params;
-  let customer: { loginId: string } | null = null;
+  let owner: Awaited<ReturnType<typeof findBusinessOwnerPublic>> = null;
   let unavailable = false;
   try {
-    customer = await findCustomer(loginId);
+    owner = await findBusinessOwnerPublic(loginId);
   } catch {
     unavailable = true;
   }
@@ -41,18 +39,32 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
     return (
       <GuestShell>
         <h1 className="text-2xl font-semibold">This page is not available right now.</h1>
-        <p className="mt-3 text-muted">The guest steps for this business are not ready.</p>
+        <p className="mt-3 text-muted">Please try again later.</p>
       </GuestShell>
     );
   }
 
-  if (!customer) notFound();
+  if (!owner) notFound();
+
+  const title = displayTitle(owner.businessName, owner.loginId);
+
+  if (!owner.setupComplete) {
+    return (
+      <GuestShell>
+        <p className="text-sm font-semibold tracking-wide text-blue uppercase">Business</p>
+        <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
+        <p className="mt-4 text-muted">
+          This business is still finishing setup. Scan again once they are ready for reviews.
+        </p>
+      </GuestShell>
+    );
+  }
 
   return (
     <GuestShell>
       <p className="text-sm font-semibold tracking-wide text-blue uppercase">Business</p>
-      <h1 className="mt-2 text-3xl font-semibold">{customer.loginId}</h1>
-      <p className="mt-4 text-muted">Guest steps for this business come next.</p>
+      <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
+      <p className="mt-4 text-muted">Guest review steps for this business come next.</p>
     </GuestShell>
   );
 }

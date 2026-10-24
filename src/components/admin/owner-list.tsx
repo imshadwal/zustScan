@@ -2,31 +2,28 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { OwnerIdentity } from "@/components/initials-badge";
 import {
   fieldClass,
   primaryButtonClass,
   quietButtonClass,
 } from "@/components/admin/styles";
 
-type CustomerCardData = {
+type OwnerCardData = {
   loginId: string;
+  businessName: string | null;
   createdAtLabel: string;
   soldPriceLabel: string;
+  setupComplete: boolean;
 };
 
-function CustomerCard({
-  customer,
-  siteOrigin,
-}: {
-  customer: CustomerCardData;
-  siteOrigin: string;
-}) {
+function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: string }) {
   const [password, setPassword] = useState("");
   const [shown, setShown] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [copied, setCopied] = useState(false);
-  const pageUrl = `${siteOrigin}/c/${customer.loginId}`;
+  const pageUrl = `${siteOrigin}/c/${owner.loginId}`;
 
   async function reset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +35,7 @@ function CustomerCard({
     }
     setPending(true);
     try {
-      const response = await fetch(`/api/admin/customers/${customer.loginId}/reset`, {
+      const response = await fetch(`/api/admin/business-owners/${owner.loginId}/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
@@ -71,20 +68,22 @@ function CustomerCard({
       <div className="flex flex-col gap-5 sm:flex-row">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`/api/admin/customers/${customer.loginId}/qr`}
+          src={`/api/admin/business-owners/${owner.loginId}/qr`}
           alt={`QR code linking to ${pageUrl}`}
           width={144}
           height={144}
           className="h-36 w-36 rounded-2xl border border-slate-200"
         />
         <div className="min-w-0 flex-1">
-          <h2 className="font-mono text-lg">{customer.loginId}</h2>
+          <OwnerIdentity businessName={owner.businessName} loginId={owner.loginId} />
+          <p className="mt-2 font-mono text-sm text-muted">{owner.loginId}</p>
           <p className="mt-1 text-sm text-muted">
-            Sold for {customer.soldPriceLabel} · Created {customer.createdAtLabel}
+            Sold for {owner.soldPriceLabel} · Created {owner.createdAtLabel}
+            {owner.setupComplete ? " · Ready for guests" : " · Setup incomplete"}
           </p>
           <p className="mt-1 text-sm break-all text-muted">{pageUrl}</p>
           <a
-            href={`/api/admin/customers/${customer.loginId}/qr?download=1`}
+            href={`/api/admin/business-owners/${owner.loginId}/qr?download=1`}
             className={`${quietButtonClass} mt-4`}
           >
             Download QR
@@ -100,12 +99,12 @@ function CustomerCard({
             </div>
           ) : (
             <form onSubmit={reset} className="mt-5">
-              <label className="block text-sm font-semibold" htmlFor={`reset-${customer.loginId}`}>
+              <label className="block text-sm font-semibold text-ink" htmlFor={`reset-${owner.loginId}`}>
                 New password
               </label>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                 <input
-                  id={`reset-${customer.loginId}`}
+                  id={`reset-${owner.loginId}`}
                   type="password"
                   autoComplete="new-password"
                   value={password}
@@ -130,13 +129,13 @@ function CustomerCard({
   );
 }
 
-export function CustomerList({
-  customers,
+export function OwnerList({
+  owners,
   siteOrigin,
   totalLabel,
   notice,
 }: {
-  customers: CustomerCardData[];
+  owners: OwnerCardData[];
   siteOrigin: string;
   totalLabel: string;
   notice?: string | null;
@@ -146,8 +145,8 @@ export function CustomerList({
       <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-          <p className="text-sm font-semibold text-muted">Customers</p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight">{customers.length}</p>
+          <p className="text-sm font-semibold text-muted">Business owners</p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight">{owners.length}</p>
         </section>
         <section className="rounded-3xl bg-blue p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
           <p className="text-sm font-semibold text-white/80">Made till now</p>
@@ -159,17 +158,19 @@ export function CustomerList({
           {notice}
         </p>
       ) : null}
-      {customers.length === 0 ? (
+      {owners.length === 0 ? (
         <div className="mt-6 rounded-3xl bg-white p-8 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-          <p className="text-sm text-muted">No customers yet. Create one to get a login and a QR.</p>
-          <Link href="/admin/customers/new" className={`${primaryButtonClass} mt-6`}>
-            New customer
+          <p className="text-sm text-muted">
+            No business owners yet. Create one to get a login and a QR.
+          </p>
+          <Link href="/admin/owners/new" className={`${primaryButtonClass} mt-6`}>
+            New business owner
           </Link>
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-4">
-          {customers.map((customer) => (
-            <CustomerCard key={customer.loginId} customer={customer} siteOrigin={siteOrigin} />
+          {owners.map((owner) => (
+            <OwnerCard key={owner.loginId} owner={owner} siteOrigin={siteOrigin} />
           ))}
         </div>
       )}
