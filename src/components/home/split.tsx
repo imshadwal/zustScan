@@ -1,3 +1,4 @@
+import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 import { businessSets, guestDecides } from "@/lib/site";
 
 function Column({
@@ -10,7 +11,7 @@ function Column({
   items: readonly string[];
 }) {
   return (
-    <div className="rounded-[28px] bg-white p-6 sm:p-8">
+    <div className={`p-6 sm:p-8 ${homeCardClass}`}>
       <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
         {eyebrow}
       </p>
@@ -29,10 +30,14 @@ function Column({
   );
 }
 
-export function Split() {
+export function Split({ compactTop = false }: { compactTop?: boolean }) {
   return (
-    <section className="bg-mist">
-      <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
+    <section className={homeCardsSection}>
+      <div
+        className={`mx-auto max-w-6xl px-5 sm:px-6 lg:pb-24 ${
+          compactTop ? "pb-20 pt-8 lg:pt-10" : "py-20 lg:py-24"
+        }`}
+      >
         <h2 className="max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
           The business sets the choices. The guest writes the review.
         </h2>

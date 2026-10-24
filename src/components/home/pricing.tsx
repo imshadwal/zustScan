@@ -1,9 +1,10 @@
 import { EnquiryButton } from "@/components/home/enquiry";
+import { homeCardsSection } from "@/components/home/styles";
 import { listPrice, planIncludes, price } from "@/lib/site";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-white">
+    <section id="pricing" className={homeCardsSection}>
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
         <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
           Pricing

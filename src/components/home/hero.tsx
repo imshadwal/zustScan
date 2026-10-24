@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EnquiryButton } from "@/components/home/enquiry";
 
 export function Hero() {
@@ -29,12 +30,12 @@ export function Hero() {
             <EnquiryButton className="inline-flex h-12 items-center justify-center rounded-full bg-blue px-6 text-sm font-semibold text-white transition-colors hover:bg-blue-deep">
               Send an enquiry
             </EnquiryButton>
-            <a
-              href="#journey"
+            <Link
+              href="/how-it-works"
               className="inline-flex h-12 items-center justify-center rounded-full border border-white/20 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
             >
               See how it works
-            </a>
+            </Link>
           </div>
           <p className="mt-8 max-w-md text-sm leading-6 text-white/60">
             The guest owns the stars, the wording, and the final tap on Post.

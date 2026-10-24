@@ -7,10 +7,35 @@ export const instagramUrl = "https://instagram.com/zustscan";
 export const instagramHandle = "@zustscan";
 
 export const navLinks = [
-  { href: "#journey", label: "How it works" },
-  { href: "#who", label: "Who it’s for" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#contact", label: "Contact" },
+  { href: "/", label: "Home" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/who-its-for", label: "Who it’s for" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+/** Short guest path shown on the home timeline and footer. */
+export const journeyTimeline = [
+  {
+    step: "01",
+    title: "Scan",
+    body: "The guest opens your page from the QR where the visit happens.",
+  },
+  {
+    step: "02",
+    title: "Choose",
+    body: "Service, product, Good or Better or Best, and the stars.",
+  },
+  {
+    step: "03",
+    title: "Draft",
+    body: "An editable review built from what they picked.",
+  },
+  {
+    step: "04",
+    title: "Post",
+    body: "Copy, open Google, paste, and tap Post themselves.",
+  },
 ] as const;
 
 export const journey = [

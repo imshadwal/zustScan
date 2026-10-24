@@ -1,18 +1,27 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { EnquiryButton, useEnquiry } from "@/components/home/enquiry";
 import { navLinks } from "@/lib/site";
 
+function navLinkClass(active: boolean) {
+  return active
+    ? "font-semibold text-blue"
+    : "font-medium text-ink transition-colors hover:text-blue";
+}
+
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const { openEnquiry } = useEnquiry();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-white py-2 pr-2 pl-3 shadow-[0_12px_40px_rgba(7,20,40,0.14)] sm:pr-2.5 sm:pl-4">
-        <a href="#top" className="shrink-0" onClick={() => setOpen(false)}>
+        <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Image
             src="/logo.png"
             alt="Zust Scan"
@@ -21,17 +30,19 @@ export function Navbar() {
             preload
             className="h-11 w-auto sm:h-12"
           />
-        </a>
-        <nav className="hidden items-center gap-7 text-sm font-medium text-ink md:flex">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="transition-colors hover:text-blue"
-            >
-              {link.label}
-            </a>
-          ))}
+        </Link>
+        <nav className="hidden items-center gap-5 text-sm lg:gap-6 xl:gap-7 md:flex">
+          {navLinks.map((link) => {
+            const active =
+              link.href === "/"
+                ? pathname === "/"
+                : pathname === link.href || pathname.startsWith(`${link.href}/`);
+            return (
+              <Link key={link.href} href={link.href} className={navLinkClass(active)}>
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
         <EnquiryButton className="hidden h-11 items-center rounded-full bg-blue px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-deep md:inline-flex">
           Enquire
@@ -71,16 +82,22 @@ export function Navbar() {
           id="mobile-menu"
           className="mx-auto mt-2 flex max-w-6xl flex-col gap-1 rounded-3xl bg-white p-3 shadow-[0_12px_40px_rgba(7,20,40,0.14)] md:hidden"
         >
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="rounded-2xl px-4 py-3 text-base font-medium text-ink hover:bg-mist"
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const active =
+              link.href === "/"
+                ? pathname === "/"
+                : pathname === link.href || pathname.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-2xl px-4 py-3 text-base hover:bg-mist ${navLinkClass(active)}`}
+                onClick={() => setOpen(false)}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
           <button
             type="button"
             className="mt-1 inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-blue text-sm font-semibold text-white"

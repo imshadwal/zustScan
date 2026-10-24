@@ -1,3 +1,4 @@
+import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 import { audiences } from "@/lib/site";
 
 const icons = [
@@ -37,27 +38,35 @@ const icons = [
   />,
 ];
 
-export function Audiences() {
+export function Audiences({ showHeading = true }: { showHeading?: boolean }) {
   return (
-    <section id="who" className="bg-white">
-      <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
-          Who it’s for
-        </p>
-        <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
-            Any business a guest can review.
-          </h2>
-          <p className="max-w-sm text-base leading-7 text-muted lg:pb-1">
-            You name the services and products. The guest only chooses the ones
-            that match their visit.
-          </p>
-        </div>
-        <ul className="mt-12 grid gap-5 sm:grid-cols-2">
+    <section id="who" className={homeCardsSection}>
+      <div
+        className={`mx-auto max-w-6xl px-5 sm:px-6 ${
+          showHeading ? "py-20 lg:py-24" : "pb-20 pt-0 lg:pb-24"
+        }`}
+      >
+        {showHeading ? (
+          <>
+            <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+              Who it’s for
+            </p>
+            <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <h2 className="max-w-xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
+                Any business a guest can review.
+              </h2>
+              <p className="max-w-sm text-base leading-7 text-muted lg:pb-1">
+                You name the services and products. The guest only chooses the ones
+                that match their visit.
+              </p>
+            </div>
+          </>
+        ) : null}
+        <ul className={`grid gap-5 sm:grid-cols-2 ${showHeading ? "mt-12" : ""}`}>
           {audiences.map((item, index) => (
             <li
               key={item.title}
-              className="rounded-[28px] border border-[#e4edf7] bg-gradient-to-b from-[#f7faff] to-white p-6 shadow-[0_16px_40px_rgba(16,32,68,0.05)] sm:p-7"
+              className={`p-6 sm:p-7 ${homeCardClass}`}
             >
               <div className="flex items-center justify-between">
                 <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue text-white shadow-[0_10px_24px_rgba(0,96,240,0.28)]">

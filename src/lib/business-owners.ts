@@ -1,6 +1,7 @@
 import "server-only";
 
 import { compare, hash } from "bcryptjs";
+import { connection } from "next/server";
 import {
   evaluateSetup,
   isValidBusinessName,
@@ -166,6 +167,33 @@ export async function listBusinessOwners(): Promise<BusinessOwnerListRecord[]> {
     soldPrice: row.sold_price,
     setupComplete: row.setup_complete,
   }));
+}
+
+export type PublicBusinessListing = {
+  loginId: string;
+  businessName: string;
+};
+
+/** Ready businesses for the marketing homepage. Returns [] if the store is unavailable. */
+export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
+  await connection();
+  try {
+    const { data, error } = await database()
+      .from("business_owners")
+      .select("login_id, business_name")
+      .eq("setup_complete", true)
+      .not("business_name", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(24);
+    if (error) return [];
+    return (data ?? []).flatMap((row) => {
+      const businessName = row.business_name?.trim();
+      if (!businessName) return [];
+      return [{ loginId: row.login_id as string, businessName }];
+    });
+  } catch {
+    return [];
+  }
 }
 
 export async function findBusinessOwnerPublic(

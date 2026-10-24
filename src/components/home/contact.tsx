@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   email,
   emailHref,
   instagramHandle,
   instagramUrl,
+  journeyTimeline,
   navLinks,
   phoneDisplay,
   phoneHref,
@@ -11,7 +13,7 @@ import {
 
 export function Contact() {
   return (
-    <footer id="contact" className="bg-navy text-white">
+    <footer id="contact" className="scroll-mt-28 bg-navy text-white">
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
         <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
           Contact
@@ -41,7 +43,7 @@ export function Contact() {
         </div>
 
         <div className="mt-16 grid gap-10 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
-            <a href="#top" className="inline-flex w-fit">
+            <Link href="/" className="inline-flex w-fit">
             <Image
               src="/logo-on-dark.png"
               alt="Zust Scan"
@@ -49,7 +51,7 @@ export function Contact() {
               height={675}
               className="h-16 w-auto sm:h-20"
             />
-          </a>
+          </Link>
           <div>
             <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
               Product
@@ -57,9 +59,9 @@ export function Contact() {
             <ul className="mt-4 space-y-2 text-sm">
               {navLinks.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className="text-white/80 hover:text-white">
+                  <Link href={link.href} className="text-white/80 hover:text-white">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -68,11 +70,17 @@ export function Contact() {
             <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
               Journey
             </p>
-            <ul className="mt-4 space-y-2 text-sm text-white/80">
-              <li>Scan</li>
-              <li>Choose</li>
-              <li>Draft</li>
-              <li>Post</li>
+            <ul className="mt-4 space-y-2 text-sm">
+              {journeyTimeline.map((step) => (
+                <li key={step.title}>
+                  <Link
+                    href="/how-it-works"
+                    className="text-white/80 hover:text-white"
+                  >
+                    {step.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
