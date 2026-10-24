@@ -2,6 +2,8 @@ import "server-only";
 
 import type { GuestLanguage } from "@/lib/guest-languages";
 import { languageInstruction } from "@/lib/guest-languages";
+import type { GuestVoice } from "@/lib/guest-voice";
+import { effectiveVoice, voiceInstruction } from "@/lib/guest-voice";
 import { serverEnv } from "@/lib/server-env";
 
 export type DraftInput = {
@@ -12,6 +14,7 @@ export type DraftInput = {
   tier: "Good" | "Better" | "Best";
   stars: number;
   languages: GuestLanguage[];
+  voice: GuestVoice;
 };
 
 function listPhrase(items: string[]) {
@@ -35,18 +38,53 @@ function templateDraft(input: DraftInput) {
   const products = listPhrase(input.productNames);
   const services = listPhrase(input.serviceNames);
   const langs = new Set(input.languages);
+  const lang = langs.has("hindi") && langs.size === 1
+    ? "hindi"
+    : langs.has("hinglish") || (langs.has("hindi") && langs.has("english"))
+      ? "hinglish"
+      : "english";
+  const voice = effectiveVoice(
+    lang === "hindi" ? "hindi" : lang === "hinglish" ? "hinglish" : "english",
+    input.voice,
+  );
 
   if (langs.has("hindi") && langs.size === 1) {
+    const quality =
+      tone === "exceeded expectations"
+        ? "बहुत अच्छा"
+        : tone === "was a solid experience"
+          ? "अच्छा"
+          : "ठीक";
+    const intro = `मैंने ${name} पर ${products} (${services}) का अनुभव किया — कुल मिलाकर ${quality} रहा।`;
+    if (voice === "female") {
+      return (
+        `${intro} मैं ${starsLabel} दे रही हूँ। अगर ${services} चाहिए हों तो ${name} recommend करूँगी।`
+      );
+    }
+    if (voice === "male") {
+      return (
+        `${intro} मैं ${starsLabel} दे रहा हूँ। अगर ${services} चाहिए हों तो ${name} recommend करूँगा।`
+      );
+    }
     return (
-      `मैंने ${name} पर ${products} (${services}) का अनुभव किया और यह ${tone === "exceeded expectations" ? "बहुत अच्छा" : tone === "was a solid experience" ? "अच्छा" : "ठीक"} रहा। ` +
-      `मैं ${starsLabel} दे रहा/रही हूँ। ${services} की जरूरत हो तो ${name} को देखें।`
+      `${intro} मेरी रेटिंग ${starsLabel} है। ${services} की जरूरत हो तो ${name} देख सकते हैं।`
     );
   }
 
   if (langs.has("hinglish") || (langs.has("hindi") && langs.has("english"))) {
+    const intro = `${name} pe ${products} (${services}) try kiya — experience ${tone} tha overall.`;
+    if (voice === "female") {
+      return (
+        `${intro} Main ${starsLabel} de rahi hoon. Agar ${services.toLowerCase()} chahiye ho to recommend karungi.`
+      );
+    }
+    if (voice === "male") {
+      return (
+        `${intro} Main ${starsLabel} de raha hoon. Agar ${services.toLowerCase()} chahiye ho to recommend karunga.`
+      );
+    }
     return (
-      `${name} pe ${products} (${services}) try kiya — experience ${tone} tha. ` +
-      `Main ${starsLabel} de raha/rahi hoon. Agar ${services.toLowerCase()} chahiye ho to recommend karunga/karungi.`
+      `${intro} Meri rating ${starsLabel} hai. Agar ${services.toLowerCase()} chahiye ho to ${name} check kar lena.`
     );
   }
 
@@ -67,7 +105,10 @@ async function openAiDraft(input: DraftInput) {
     "Do not invent facts beyond the business brief and the guest choices.",
     "Never say the review was written by AI.",
     languageInstruction(input.languages),
-  ].join(" ");
+    voiceInstruction(input.languages[0] ?? "english", input.voice),
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const user = [
     `Business: ${input.businessName}`,

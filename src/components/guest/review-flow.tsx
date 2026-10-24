@@ -7,9 +7,12 @@ import {
   GUEST_LANGUAGE_OPTIONS,
   type GuestLanguage,
 } from "@/lib/guest-languages";
+import { starsForTier, type GuestTier } from "@/lib/guest-tier";
+import {
+  GUEST_VOICE_OPTIONS,
+  type GuestVoice,
+} from "@/lib/guest-voice";
 import { displayTitle } from "@/lib/initials";
-
-type Tier = "Good" | "Better" | "Best";
 
 type Props = {
   experience: GuestExperience;
@@ -17,16 +20,7 @@ type Props = {
 
 const STEPS = ["Service", "Product", "Rating", "Draft"] as const;
 
-function stepIndex(state: {
-  serviceIds: string[];
-  productIds: string[];
-  draft: string;
-}) {
-  if (state.draft) return 3;
-  if (state.productIds.length > 0) return 2;
-  if (state.serviceIds.length > 0) return 1;
-  return 0;
-}
+type WizardStep = 0 | 1 | 2 | 3;
 
 function StepHeader({ title, hint }: { title: string; hint?: string }) {
   return (
@@ -39,21 +33,30 @@ function StepHeader({ title, hint }: { title: string; hint?: string }) {
 
 function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl border border-slate-200 bg-mist/60 p-4 ${className}`}>
+    <section
+      className={`rounded-2xl border-2 border-slate-300 bg-mist p-4 shadow-[0_2px_8px_rgba(7,20,40,0.06)] ${className}`}
+    >
       {children}
     </section>
   );
 }
 
+const optionIdleClass =
+  "border-2 border-slate-300 bg-white text-ink shadow-[0_1px_3px_rgba(7,20,40,0.08)] hover:border-blue/60";
+
+const backButtonClass =
+  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-slate-300 bg-mist px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-blue hover:text-blue disabled:cursor-not-allowed disabled:opacity-60";
+
 export function GuestReviewFlow({ experience }: Props) {
   const title = displayTitle(experience.businessName, experience.loginId);
+  const [step, setStep] = useState<WizardStep>(0);
   const [serviceIds, setServiceIds] = useState<string[]>(
     experience.services.length === 1 ? [experience.services[0]!.id] : [],
   );
   const [productIds, setProductIds] = useState<string[]>([]);
-  const [tier, setTier] = useState<Tier | null>(null);
-  const [stars, setStars] = useState<number>(4);
+  const [tier, setTier] = useState<GuestTier | null>(null);
   const [language, setLanguage] = useState<GuestLanguage>("english");
+  const [voice, setVoice] = useState<GuestVoice>("neutral");
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,15 +80,12 @@ export function GuestReviewFlow({ experience }: Props) {
     return items;
   }, [experience.services, serviceIds, productIds]);
 
-  const activeStep = stepIndex({ serviceIds, productIds, draft });
+  const stars = tier ? starsForTier(tier) : 0;
 
-  const canDraft =
-    serviceIds.length > 0 &&
-    productIds.length > 0 &&
-    tier &&
-    stars >= 1 &&
-    stars <= 5 &&
-    !pending;
+  const canAdvance =
+    (step === 0 && serviceIds.length > 0) ||
+    (step === 1 && productIds.length > 0) ||
+    (step === 2 && tier !== null);
 
   function clearDraftState() {
     setDraft("");
@@ -119,8 +119,19 @@ export function GuestReviewFlow({ experience }: Props) {
     clearDraftState();
   }
 
+  function goBack() {
+    setError(null);
+    if (step === 3) {
+      clearDraftState();
+      setStep(2);
+      return;
+    }
+    if (step === 2) setStep(1);
+    else if (step === 1) setStep(0);
+  }
+
   async function buildDraft() {
-    if (!canDraft) return;
+    if (!tier || serviceIds.length === 0 || productIds.length === 0) return;
     setPending(true);
     setError(null);
     setCopied(false);
@@ -134,8 +145,8 @@ export function GuestReviewFlow({ experience }: Props) {
           serviceIds,
           productIds,
           tier,
-          stars,
           language,
+          voice,
         }),
       });
       const body = (await response.json().catch(() => null)) as
@@ -144,13 +155,31 @@ export function GuestReviewFlow({ experience }: Props) {
       if (!response.ok || !body?.draft) {
         setError(body?.error ?? "The draft could not be created.");
         setPending(false);
-        return;
+        return false;
       }
       setDraft(body.draft);
       setPending(false);
+      return true;
     } catch {
       setError("The request could not be sent.");
       setPending(false);
+      return false;
+    }
+  }
+
+  async function goNext() {
+    setError(null);
+    if (step === 0 && serviceIds.length > 0) {
+      setStep(1);
+      return;
+    }
+    if (step === 1 && productIds.length > 0) {
+      setStep(2);
+      return;
+    }
+    if (step === 2 && tier) {
+      const ok = await buildDraft();
+      if (ok) setStep(3);
     }
   }
 
@@ -171,8 +200,11 @@ export function GuestReviewFlow({ experience }: Props) {
       ? selectedServices[0]!.name
       : `${selectedServices.length} services`;
 
+  const nextLabel =
+    step === 2 ? (pending ? "Writing draft…" : "Next — get draft") : "Next";
+
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-0 flex-col">
       <div className="bg-navy px-5 py-6 text-white sm:px-6">
         <p className="text-[11px] font-semibold tracking-[0.16em] text-blue-200 uppercase">
           Your visit
@@ -192,13 +224,13 @@ export function GuestReviewFlow({ experience }: Props) {
       <div className="px-4 py-4 sm:px-5">
         <ol className="flex gap-1" aria-label="Progress">
           {STEPS.map((label, index) => {
-            const done = index < activeStep;
-            const current = index === activeStep;
+            const done = index < step;
+            const current = index === step;
             return (
               <li key={label} className="flex-1">
                 <div
                   className={`h-1.5 rounded-full transition-colors ${
-                    done || current ? "bg-blue" : "bg-slate-200"
+                    done || current ? "bg-blue" : "bg-slate-300"
                   } ${current ? "ring-2 ring-blue/25" : ""}`}
                   title={label}
                 />
@@ -215,43 +247,45 @@ export function GuestReviewFlow({ experience }: Props) {
         </ol>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 px-4 pb-5 sm:px-5 sm:pb-6">
-        <Panel>
-          <StepHeader
-            title="Choose services"
-            hint="Pick one or more — tap again to turn off."
-          />
-          <ul className="space-y-2">
-            {experience.services.map((item) => {
-              const selected = serviceIds.includes(item.id);
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => toggleService(item.id)}
-                    className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all ${
-                      selected
-                        ? "bg-blue text-white shadow-[0_8px_24px_rgba(0,96,240,0.35)] ring-2 ring-white/20"
-                        : "border border-slate-200 bg-white text-ink hover:border-blue/50"
-                    }`}
-                  >
-                    <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
-                        selected ? "bg-white/20 text-white" : "bg-mist text-blue"
+      <div className="flex flex-1 flex-col px-4 pb-5 sm:px-5 sm:pb-6">
+        {step === 0 ? (
+          <Panel>
+            <StepHeader
+              title="Choose services"
+              hint="Pick one or more — tap again to turn off."
+            />
+            <ul className="space-y-2">
+              {experience.services.map((item) => {
+                const selected = serviceIds.includes(item.id);
+                return (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => toggleService(item.id)}
+                      className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all ${
+                        selected
+                          ? "bg-blue text-white shadow-[0_8px_24px_rgba(0,96,240,0.35)] ring-2 ring-white/20"
+                          : optionIdleClass
                       }`}
                     >
-                      {item.products.length}
-                    </span>
-                    {item.name}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                          selected ? "bg-white/20 text-white" : "bg-mist text-blue"
+                        }`}
+                      >
+                        {item.products.length}
+                      </span>
+                      {item.name}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </Panel>
+        ) : null}
 
-        {selectedServices.length > 0 ? (
+        {step === 1 ? (
           <Panel>
             <StepHeader
               title="Choose products"
@@ -261,7 +295,7 @@ export function GuestReviewFlow({ experience }: Props) {
               {selectedServices.map((service) => (
                 <div key={service.id}>
                   {selectedServices.length > 1 ? (
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-600">
                       {service.name}
                     </p>
                   ) : null}
@@ -276,8 +310,8 @@ export function GuestReviewFlow({ experience }: Props) {
                             onClick={() => toggleProduct(item.id)}
                             className={`w-full cursor-pointer rounded-xl px-4 py-3.5 text-left text-sm font-medium transition-all ${
                               selected
-                                ? "bg-white text-blue ring-2 ring-blue shadow-sm"
-                                : "border border-slate-200/80 bg-white text-ink hover:border-blue/40"
+                                ? "border-2 border-blue bg-blue/[0.08] text-blue ring-2 ring-blue/25 shadow-sm"
+                                : optionIdleClass
                             }`}
                           >
                             {item.name}
@@ -292,11 +326,11 @@ export function GuestReviewFlow({ experience }: Props) {
           </Panel>
         ) : null}
 
-        {productIds.length > 0 && selectedProducts.length > 0 ? (
+        {step === 2 ? (
           <Panel>
             <StepHeader
               title="How was it?"
-              hint={`${selectedProducts.map((p) => p.name).join(" · ")} · tap Good, Better, or Best`}
+              hint={`${selectedProducts.map((p) => p.name).join(" · ")} · stars follow your pick`}
             />
             <div className="grid grid-cols-3 gap-2">
               {(["Good", "Better", "Best"] as const).map((label) => (
@@ -310,33 +344,36 @@ export function GuestReviewFlow({ experience }: Props) {
                   className={`cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all ${
                     tier === label
                       ? "bg-blue text-white shadow-md"
-                      : "border border-slate-200 bg-white text-ink"
+                      : optionIdleClass
                   }`}
                 >
                   {label}
                 </button>
               ))}
             </div>
-            <div className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <div className="mt-4 rounded-xl border-2 border-slate-300 bg-white px-4 py-3 shadow-sm">
               <p className="text-xs font-semibold text-muted">Star rating</p>
-              <div className="mt-2 flex justify-center gap-2" role="group" aria-label="Star rating">
+              <p className="mt-0.5 text-xs text-muted">
+                {tier
+                  ? `${tier} · ${stars} star${stars === 1 ? "" : "s"} on Google`
+                  : "Fills when you pick Good, Better, or Best"}
+              </p>
+              <div
+                className="mt-2 flex justify-center gap-2"
+                role="img"
+                aria-label={tier ? `${stars} out of 5 stars` : "Star rating not set yet"}
+              >
                 {[1, 2, 3, 4, 5].map((value) => (
-                  <button
+                  <span
                     key={value}
-                    type="button"
-                    onClick={() => {
-                      setStars(value);
-                      setDraft("");
-                    }}
-                    className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-xl transition-colors ${
-                      value <= stars
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl text-xl ${
+                      tier && value <= stars
                         ? "bg-[#fff8e6] text-[#e5a100]"
-                        : "bg-mist text-slate-300"
+                        : "border border-slate-300 bg-slate-100 text-slate-400"
                     }`}
-                    aria-label={`${value} star${value === 1 ? "" : "s"}`}
                   >
                     ★
-                  </button>
+                  </span>
                 ))}
               </div>
             </div>
@@ -351,34 +388,53 @@ export function GuestReviewFlow({ experience }: Props) {
                     aria-checked={language === option.id}
                     onClick={() => {
                       setLanguage(option.id);
+                      if (option.id === "english") setVoice("neutral");
                       setDraft("");
                     }}
                     className={`cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all ${
                       language === option.id
                         ? "bg-blue text-white shadow-md"
-                        : "border border-slate-200 bg-white text-ink"
+                        : optionIdleClass
                     }`}
                   >
                     {option.label}
                   </button>
                 ))}
               </div>
+              {language === "hindi" || language === "hinglish" ? (
+                <div className="mt-4">
+                  <StepHeader
+                    title="Review voice"
+                    hint="Neutral avoids raha/rahi in the draft."
+                  />
+                  <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Review voice">
+                    {GUEST_VOICE_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={voice === option.id}
+                        onClick={() => {
+                          setVoice(option.id);
+                          setDraft("");
+                        }}
+                        className={`cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all ${
+                          voice === option.id
+                            ? "bg-blue text-white shadow-md"
+                            : optionIdleClass
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </Panel>
         ) : null}
 
-        {!draft && productIds.length > 0 ? (
-          <button
-            type="button"
-            disabled={!canDraft}
-            onClick={buildDraft}
-            className={`${primaryButtonClass} w-full py-3.5 shadow-[0_8px_24px_rgba(0,96,240,0.35)] disabled:shadow-none`}
-          >
-            {pending ? "Writing draft…" : "Get review draft"}
-          </button>
-        ) : null}
-
-        {draft ? (
+        {step === 3 && draft ? (
           <Panel className="border-blue/20 bg-gradient-to-b from-blue/[0.06] to-white">
             <StepHeader title="Your draft" hint="Edit anything before you post on Google." />
             <p className="mb-2 text-center text-lg tracking-wide text-[#e5a100]" aria-hidden="true">
@@ -416,12 +472,36 @@ export function GuestReviewFlow({ experience }: Props) {
 
         {error ? (
           <p
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
             role="alert"
           >
             {error}
           </p>
         ) : null}
+
+        {step < 3 ? (
+          <div className="-mx-4 mt-5 flex items-center gap-2 border-t-2 border-slate-200 bg-mist px-4 py-4 sm:-mx-5 sm:px-5">
+            {step > 0 ? (
+              <button type="button" onClick={goBack} className={backButtonClass} disabled={pending}>
+                Back
+              </button>
+            ) : null}
+            <button
+              type="button"
+              disabled={!canAdvance || pending}
+              onClick={goNext}
+              className={`${primaryButtonClass} min-w-0 flex-1 py-3.5 shadow-[0_8px_24px_rgba(0,96,240,0.35)] disabled:shadow-none`}
+            >
+              {nextLabel}
+            </button>
+          </div>
+        ) : (
+          <div className="-mx-4 mt-5 border-t-2 border-slate-200 bg-mist px-4 py-4 sm:-mx-5 sm:px-5">
+            <button type="button" onClick={goBack} className={backButtonClass} disabled={pending}>
+              Back
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

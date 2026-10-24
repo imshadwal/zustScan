@@ -2,7 +2,7 @@ import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 
 const checklist = [
   "One or more services and products",
-  "Good, Better, or Best plus star rating",
+  "Good, Better, or Best (stars follow automatically)",
   "AI-powered draft they can change",
   "English, Hindi, or Hinglish",
 ] as const;
@@ -117,7 +117,7 @@ function GuestFlowMock() {
           </div>
           <div className="mt-1.5 rounded-md border border-slate-200 bg-white px-1.5 py-1">
             <p className="text-[7px] font-semibold text-muted">Star rating</p>
-            <div className="mt-0.5 flex justify-center gap-px">
+            <div className="mt-0.5 flex justify-center gap-px" aria-hidden="true">
               {[1, 2, 3, 4, 5].map((value) => (
                 <span
                   key={value}

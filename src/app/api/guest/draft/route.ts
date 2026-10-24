@@ -2,10 +2,10 @@ import { json } from "@/lib/admin-http";
 import { loadGuestExperience } from "@/lib/business-owners";
 import { generateGuestDraft } from "@/lib/guest-draft";
 import { normalizeGuestLanguages } from "@/lib/guest-languages";
+import { isGuestTier, starsForTier } from "@/lib/guest-tier";
+import { normalizeGuestVoice } from "@/lib/guest-voice";
 import { displayTitle } from "@/lib/initials";
 import { normalizeLoginId } from "@/lib/login-id";
-
-const TIERS = new Set(["Good", "Better", "Best"]);
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -15,19 +15,14 @@ export async function POST(request: Request) {
   const legacyServiceId = typeof body?.serviceId === "string" ? body.serviceId : "";
   const legacyProductId = typeof body?.productId === "string" ? body.productId : "";
   const tier = typeof body?.tier === "string" ? body.tier : "";
-  const starsRaw = body?.stars;
-
   const loginId = normalizeLoginId(loginRaw);
   if (!loginId) {
     return json({ error: "Invalid request." }, 400);
   }
-  if (!TIERS.has(tier)) {
+  if (!isGuestTier(tier)) {
     return json({ error: "Pick Good, Better, or Best." }, 400);
   }
-  const stars = typeof starsRaw === "number" ? starsRaw : Number(starsRaw);
-  if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
-    return json({ error: "Pick a star rating from 1 to 5." }, 400);
-  }
+  const stars = starsForTier(tier);
 
   let experience: Awaited<ReturnType<typeof loadGuestExperience>> = null;
   try {
@@ -84,6 +79,7 @@ export async function POST(request: Request) {
 
   const businessName = displayTitle(experience.businessName, experience.loginId);
   const languages = normalizeGuestLanguages(body?.languages ?? body?.language);
+  const voice = normalizeGuestVoice(body?.voice);
 
   try {
     const draft = await generateGuestDraft({
@@ -94,6 +90,7 @@ export async function POST(request: Request) {
       tier: tier as "Good" | "Better" | "Best",
       stars,
       languages,
+      voice,
     });
     return json({ draft });
   } catch {
