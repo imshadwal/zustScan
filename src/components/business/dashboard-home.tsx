@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { GuestLinkCopy } from "@/components/business/guest-link-copy";
+import {
+  GuestAnalyticsStats,
+  type GuestAnalyticsDisplay,
+} from "@/components/home/guest-analytics-stats";
 import { InitialsBadge } from "@/components/initials-badge";
 import { primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
 import type { SetupChecklist } from "@/lib/business-validation";
@@ -30,6 +34,7 @@ export function DashboardHome({
   serviceCount,
   productCount,
   guestUrl,
+  guestAnalytics,
 }: {
   businessName: string | null;
   loginId: string;
@@ -37,6 +42,7 @@ export function DashboardHome({
   serviceCount: number;
   productCount: number;
   guestUrl: string;
+  guestAnalytics: GuestAnalyticsDisplay;
 }) {
   const title = displayTitle(businessName, loginId);
   const { done, total } = progress(checklist);
@@ -145,6 +151,16 @@ export function DashboardHome({
         </div>
 
         <aside className="flex flex-col gap-4">
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-5 text-white backdrop-blur-sm">
+            <h2 className="text-sm font-semibold text-white/80">Guest activity</h2>
+            <p className="mt-1 text-xs text-white/60">
+              Anonymous counts — no guest names or review text stored.
+            </p>
+            <div className="mt-4">
+              <GuestAnalyticsStats variant="dark" counts={guestAnalytics} />
+            </div>
+          </section>
+
           <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
             <h2 className="text-sm font-semibold text-muted">Quick actions</h2>
             <div className="mt-4 flex flex-col gap-2">

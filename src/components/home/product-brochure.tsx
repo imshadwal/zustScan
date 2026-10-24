@@ -4,17 +4,29 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
+import { LaunchOfferNote } from "@/components/home/launch-offer-note";
 import { starsForTier, type GuestTier } from "@/lib/guest-tier";
 import {
+  MARKETING_DRAFT_SAMPLES,
+  MARKETING_VOICE_TWEAKS,
+} from "@/lib/marketing-samples";
+import { GUEST_VOICE_OPTIONS, type GuestVoice } from "@/lib/guest-voice";
+import {
+  additionalOutletPrice,
   audiences,
   email,
   emailHref,
   journey,
+  launchOfferSavings,
+  multiLocationSummary,
   phoneDisplay,
   phoneHref,
   planIncludes,
   price,
-  listPrice,
+  pricingFaq,
+  referralDiscountAmount,
+  referralProgramSummary,
+  roiPricingPoints,
   setupStandeeLine,
   setupStandeeTitle,
   whatsappUrl,
@@ -23,19 +35,13 @@ import {
 const SECTIONS = [
   { id: "overview", label: "Overview" },
   { id: "flow", label: "Flow" },
+  { id: "languages", label: "Languages" },
+  { id: "value", label: "Value" },
   { id: "fit", label: "Who fits" },
   { id: "plan", label: "Plan" },
+  { id: "faq", label: "FAQ" },
   { id: "contact", label: "Contact" },
 ] as const;
-
-const DRAFT_SAMPLES: Record<"english" | "hindi" | "hinglish", string> = {
-  english:
-    "I used the biryani (Food) at Lakeview Hotel and it was a solid experience. I am giving 4 stars.",
-  hindi:
-    "मैंने Lakeview Hotel पर biryani (Food) का अनुभव किया — कुल मिलाकर अच्छा रहा। मेरी रेटिंग 4 stars है।",
-  hinglish:
-    "Lakeview pe biryani (Food) try kiya — experience solid tha. Meri rating 4 stars hai.",
-};
 
 type Props = {
   siteUrl: string;
@@ -45,11 +51,17 @@ export function ProductBrochure({ siteUrl }: Props) {
   const [activeSection, setActiveSection] = useState<string>("overview");
   const [journeyStep, setJourneyStep] = useState(0);
   const [tier, setTier] = useState<GuestTier>("Better");
-  const [language, setLanguage] = useState<"english" | "hindi" | "hinglish">("english");
+  const [language, setLanguage] = useState<"english" | "hindi" | "hinglish">("hinglish");
+  const [voice, setVoice] = useState<GuestVoice>("neutral");
   const [audienceIndex, setAudienceIndex] = useState(0);
   const [checkedPlan, setCheckedPlan] = useState<Set<number>>(new Set());
 
   const stars = starsForTier(tier);
+
+  let draftSample = MARKETING_DRAFT_SAMPLES[language];
+  if (language !== "english" && voice !== "neutral") {
+    draftSample = MARKETING_VOICE_TWEAKS[voice][language];
+  }
 
   const scrollTo = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -121,8 +133,9 @@ export function ProductBrochure({ siteUrl }: Props) {
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
             AI-powered QR reviews for Indian businesses. Guests pick what they used, get an editable
-            draft, and post on Google themselves.
+            draft in English, Hindi, or Hinglish, and post on Google themselves.
           </p>
+          <LaunchOfferNote className="mt-6" />
           <div className="brochure-no-print mt-6 rounded-2xl border-2 border-slate-200 bg-mist p-4">
             <p className="text-xs font-semibold text-muted">Try the feel</p>
             <p className="mt-2 text-sm font-semibold text-ink">How was it?</p>
@@ -157,9 +170,10 @@ export function ProductBrochure({ siteUrl }: Props) {
             <p className="mt-2 text-sm leading-6 text-ink">{setupStandeeLine}</p>
           </div>
           <div className="mt-4 inline-flex flex-col rounded-2xl bg-blue px-5 py-4 text-white">
-            <p className="text-sm text-white/80 line-through">{listPrice}</p>
             <p className="text-3xl font-semibold">{price}</p>
-            <p className="mt-1 text-sm text-white/85">One business · setup via enquiry</p>
+            <p className="mt-1 text-sm text-white/85">
+              One location · save {launchOfferSavings} at launch · setup via enquiry
+            </p>
           </div>
         </header>
 
@@ -206,9 +220,16 @@ export function ProductBrochure({ siteUrl }: Props) {
               </li>
             ))}
           </ol>
-          <div className="brochure-no-print mt-6 rounded-2xl border-2 border-slate-200 bg-mist p-4">
-            <p className="text-xs font-semibold text-muted">Sample AI draft</p>
-            <div className="mt-2 grid grid-cols-3 gap-2">
+        </section>
+
+        <section id="languages" className="brochure-section mt-8 scroll-mt-36">
+          <h2 className="text-lg font-semibold text-ink">English, Hindi, Hinglish — and voice</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Guests choose language on the page. For Hindi and Hinglish they can pick neutral, female,
+            or male voice so verbs sound natural — no raha/rahi slashes.
+          </p>
+          <div className="brochure-no-print mt-4 rounded-2xl border-2 border-slate-200 bg-mist p-4">
+            <div className="grid grid-cols-3 gap-2">
               {(["english", "hindi", "hinglish"] as const).map((lang) => (
                 <button
                   key={lang}
@@ -224,8 +245,37 @@ export function ProductBrochure({ siteUrl }: Props) {
                 </button>
               ))}
             </div>
+            {language !== "english" ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {GUEST_VOICE_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setVoice(option.id)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      voice === option.id
+                        ? "bg-navy text-white"
+                        : "border border-slate-300 bg-white text-ink"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <p className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm leading-6 text-ink">
-              {DRAFT_SAMPLES[language]}
+              {draftSample}
+            </p>
+          </div>
+          <div className="brochure-print-only mt-3 hidden space-y-3 print:block">
+            {(["english", "hindi", "hinglish"] as const).map((lang) => (
+              <div key={lang} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                <p className="text-xs font-semibold uppercase text-blue">{lang}</p>
+                <p className="mt-1 leading-6">{MARKETING_DRAFT_SAMPLES[lang]}</p>
+              </div>
+            ))}
+            <p className="text-xs text-muted">
+              Hindi/Hinglish also support neutral, female, and male voice on the live guest page.
             </p>
           </div>
         </section>
@@ -245,7 +295,35 @@ export function ProductBrochure({ siteUrl }: Props) {
             <li>Services and products to mention</li>
             <li>Language and review voice</li>
             <li>Every word before Copy &amp; Continue</li>
-            <li>Final Post on Google</li>
+            <li>Final Post on Google — Zust Scan never submits a review</li>
+          </ul>
+        </section>
+
+        <section className="brochure-section mt-8">
+          <h2 className="text-lg font-semibold text-ink">Owner dashboard (activity counts)</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            After setup, your portal shows anonymous funnel numbers: guest page scans, AI drafts
+            created, and Copy &amp; Continue taps. No guest names or review text are stored.
+          </p>
+        </section>
+
+        <section id="value" className="brochure-section mt-8 scroll-mt-36">
+          <h2 className="text-lg font-semibold text-ink">Value in rupees</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            {price} once — not another monthly ad bill. We do not promise a review count; we make
+            it easier for happy guests to write one that sounds like them.
+          </p>
+          <ul className="mt-4 space-y-3">
+            {roiPricingPoints.map((point) => (
+              <li
+                key={point.title}
+                className="rounded-xl border border-slate-200 bg-mist/80 px-4 py-3 text-sm"
+              >
+                <p className="text-xs font-semibold uppercase text-blue">{point.title}</p>
+                <p className="mt-1 text-lg font-semibold text-ink">{point.amount}</p>
+                <p className="mt-1 leading-6 text-muted">{point.body}</p>
+              </li>
+            ))}
           </ul>
         </section>
 
@@ -326,17 +404,60 @@ export function ProductBrochure({ siteUrl }: Props) {
               </li>
             ))}
           </ul>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm">
+              <p className="text-xs font-semibold uppercase text-blue">Referral</p>
+              <p className="mt-1 text-lg font-semibold text-ink">{referralDiscountAmount} off each</p>
+              <p className="mt-2 leading-6 text-muted">{referralProgramSummary}</p>
+            </div>
+            <div className="rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm">
+              <p className="text-xs font-semibold uppercase text-blue">Multi-location</p>
+              <p className="mt-1 text-lg font-semibold text-ink">From {additionalOutletPrice}</p>
+              <p className="mt-2 leading-6 text-muted">{multiLocationSummary}</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" className="brochure-section mt-8 scroll-mt-36">
+          <h2 className="text-lg font-semibold text-ink">Common questions</h2>
+          <ul className="brochure-no-print mt-4 space-y-2">
+            {pricingFaq.map((item) => (
+              <li key={item.question}>
+                <details className="rounded-xl border border-slate-200 bg-mist/50 px-4 py-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-ink">
+                    {item.question}
+                  </summary>
+                  <p className="mt-2 text-sm leading-6 text-muted">{item.answer}</p>
+                </details>
+              </li>
+            ))}
+          </ul>
+          <ul className="brochure-print-only mt-4 hidden space-y-4 print:block">
+            {pricingFaq.map((item) => (
+              <li key={item.question} className="text-sm">
+                <p className="font-semibold text-ink">{item.question}</p>
+                <p className="mt-1 leading-6 text-muted">{item.answer}</p>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <footer id="contact" className="brochure-section mt-10 scroll-mt-36 border-t-2 border-slate-200 pt-8">
           <h2 className="text-lg font-semibold text-ink">Get started</h2>
-          <p className="mt-2 text-sm leading-6 text-muted">Scan to share, review to care.</p>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Scan to share, review to care. Mention referrals and outlet count in your enquiry — we
+            confirm pricing on WhatsApp.
+          </p>
           <div className="brochure-no-print mt-4 flex flex-wrap gap-2">
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={primaryButtonClass}>
               WhatsApp us
             </a>
             <Link href="/contact" className={quietButtonClass}>
               Contact page
+            </Link>
+            <Link href="/pricing" className={quietButtonClass}>
+              Full pricing
             </Link>
           </div>
           <dl className="mt-4 space-y-2 text-sm">

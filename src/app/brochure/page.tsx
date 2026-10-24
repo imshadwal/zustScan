@@ -6,7 +6,7 @@ import { siteOrigin } from "@/lib/login-id";
 export const metadata: Metadata = {
   title: "Product brochure",
   description:
-    "Download or print the Zust Scan product overview — QR guest reviews with AI drafts for Google.",
+    "Product PDF: QR guest reviews, Hindi/Hinglish drafts, launch pricing, FAQ, referral, and multi-outlet add-ons.",
 };
 
 export default function BrochurePage() {

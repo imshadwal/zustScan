@@ -6,6 +6,7 @@ import { DashboardHome } from "@/components/business/dashboard-home";
 import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 import { getBusinessOwnerProfile, listServicesForOwner } from "@/lib/business-owners";
+import { getGuestAnalyticsForLogin } from "@/lib/guest-analytics";
 import { guestPageUrl } from "@/lib/login-id";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -30,6 +31,7 @@ async function BusinessHomeGate() {
   const services = await listServicesForOwner(loginId);
   const serviceCount = services.length;
   const productCount = services.reduce((sum, service) => sum + service.products.length, 0);
+  const guestAnalytics = await getGuestAnalyticsForLogin(loginId);
 
   return (
     <>
@@ -42,6 +44,7 @@ async function BusinessHomeGate() {
           serviceCount={serviceCount}
           productCount={productCount}
           guestUrl={guestPageUrl(profile.loginId)}
+          guestAnalytics={guestAnalytics}
         />
       </main>
     </>

@@ -11,6 +11,7 @@ import {
   primaryButtonClass,
   quietButtonClass,
 } from "@/components/admin/styles";
+import { GuestAnalyticsStats } from "@/components/home/guest-analytics-stats";
 import { displayTitle } from "@/lib/initials";
 import { PasswordInput, RevealableSecret } from "@/components/password-input";
 
@@ -20,6 +21,9 @@ type OwnerCardData = {
   createdAtLabel: string;
   soldPriceLabel: string;
   setupComplete: boolean;
+  pageViews: number;
+  draftsGenerated: number;
+  copyContinueTaps: number;
 };
 
 function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: string }) {
@@ -150,6 +154,18 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
             {owner.setupComplete ? " · Ready for guests" : " · Setup incomplete"}
           </p>
           <p className="mt-1 text-sm break-all text-muted">{pageUrl}</p>
+          <div className="mt-4">
+            <p className="text-xs font-semibold text-muted uppercase tracking-wide">Guest funnel</p>
+            <GuestAnalyticsStats
+              variant="admin"
+              compact
+              counts={{
+                pageViews: owner.pageViews,
+                draftsGenerated: owner.draftsGenerated,
+                copyContinueTaps: owner.copyContinueTaps,
+              }}
+            />
+          </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <a
               href={`/api/admin/business-owners/${owner.loginId}/qr?download=1`}
@@ -211,17 +227,23 @@ export function OwnerList({
   owners,
   siteOrigin,
   totalLabel,
+  guestTotals,
   notice,
 }: {
   owners: OwnerCardData[];
   siteOrigin: string;
   totalLabel: string;
+  guestTotals: {
+    pageViews: number;
+    draftsGenerated: number;
+    copyContinueTaps: number;
+  };
   notice?: string | null;
 }) {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
           <p className="text-sm font-semibold text-muted">Business owners</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight">{owners.length}</p>
@@ -229,6 +251,24 @@ export function OwnerList({
         <section className="rounded-3xl bg-blue p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
           <p className="text-sm font-semibold text-white/80">Made till now</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight">{totalLabel}</p>
+        </section>
+        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+          <p className="text-sm font-semibold text-muted">Total scans</p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
+            {guestTotals.pageViews}
+          </p>
+        </section>
+        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+          <p className="text-sm font-semibold text-muted">Total drafts</p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
+            {guestTotals.draftsGenerated}
+          </p>
+        </section>
+        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:col-span-2 lg:col-span-1">
+          <p className="text-sm font-semibold text-muted">Copy & Continue</p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
+            {guestTotals.copyContinueTaps}
+          </p>
         </section>
       </div>
       {notice ? (

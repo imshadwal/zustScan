@@ -25,6 +25,8 @@ const emptyForm = {
   phone: "",
   type: "Hotel",
   city: "",
+  outlets: "1",
+  referral: "",
   message: "",
 };
 
@@ -61,7 +63,11 @@ export function EnquiryProvider({ children }: { children: ReactNode }) {
       `Phone: ${form.phone.trim()}`,
       `Type: ${form.type}`,
       `City: ${form.city.trim()}`,
+      `Outlets: ${form.outlets.trim() || "1"}`,
     ];
+    if (form.referral.trim()) {
+      lines.push(`Referral / referred by: ${form.referral.trim()}`);
+    }
     if (form.message.trim()) {
       lines.push(`Note: ${form.message.trim()}`);
     }
@@ -136,6 +142,28 @@ export function EnquiryProvider({ children }: { children: ReactNode }) {
               </label>
               <Field label="City" value={form.city} onChange={(value) => update("city", value)} autoComplete="address-level2" />
               <label className="block text-sm font-medium text-ink">
+                How many outlets?
+                <select
+                  value={form.outlets}
+                  onChange={(event) => update("outlets", event.target.value)}
+                  className="mt-1.5 h-12 w-full rounded-2xl border border-[#d9e2ef] bg-white px-4 text-base text-ink outline-none focus:border-blue"
+                >
+                  <option value="1">1 location</option>
+                  <option value="2">2 (second outlet add-on)</option>
+                  <option value="3+">3 or more</option>
+                </select>
+              </label>
+              <Field
+                label="Referral (optional)"
+                value={form.referral}
+                onChange={(value) => update("referral", value)}
+                autoComplete="off"
+                required={false}
+              />
+              <p className="-mt-2 text-xs text-muted">
+                Name or phone of who referred you — ₹500 off each when both businesses go live.
+              </p>
+              <label className="block text-sm font-medium text-ink">
                 Anything we should know
                 <textarea
                   value={form.message}
@@ -165,6 +193,7 @@ function Field({
   type = "text",
   autoComplete,
   inputMode,
+  required = true,
 }: {
   label: string;
   value: string;
@@ -172,12 +201,13 @@ function Field({
   type?: string;
   autoComplete?: string;
   inputMode?: "tel" | "text";
+  required?: boolean;
 }) {
   return (
     <label className="block text-sm font-medium text-ink">
       {label}
       <input
-        required
+        required={required}
         type={type}
         value={value}
         autoComplete={autoComplete}

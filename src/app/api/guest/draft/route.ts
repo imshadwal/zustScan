@@ -1,5 +1,6 @@
 import { json } from "@/lib/admin-http";
 import { loadGuestExperience } from "@/lib/business-owners";
+import { recordGuestMetric } from "@/lib/guest-analytics";
 import { generateGuestDraft } from "@/lib/guest-draft";
 import { normalizeGuestLanguages } from "@/lib/guest-languages";
 import { isGuestTier, starsForTier } from "@/lib/guest-tier";
@@ -92,6 +93,7 @@ export async function POST(request: Request) {
       languages,
       voice,
     });
+    void recordGuestMetric(loginId, "draft");
     return json({ draft });
   } catch {
     return json({ error: "The draft could not be created." }, 500);

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { EnquiryButton } from "@/components/home/enquiry";
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
-import { listPrice, price } from "@/lib/site";
+import { LaunchOfferNote } from "@/components/home/launch-offer-note";
+import { price } from "@/lib/site";
 
 export function PricingTeaser() {
   return (
@@ -23,16 +24,9 @@ export function PricingTeaser() {
               from your enquiry.
             </p>
             <SetupStandeeCallout className="mt-5 max-w-md" />
-            <div className="mt-8 flex flex-wrap items-end gap-4">
-              <div>
-                <p className="text-sm font-medium text-muted line-through">{listPrice}</p>
-                <p className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-                  {price}
-                </p>
-              </div>
-              <span className="rounded-full bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">
-                Save ₹2,000
-              </span>
+            <div className="mt-8">
+              <p className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">{price}</p>
+              <LaunchOfferNote className="mt-4" />
             </div>
           </div>
           <div className="flex flex-col justify-center gap-3 border-t border-slate-300 bg-mist p-8 sm:border-t-0 sm:border-l lg:p-10">

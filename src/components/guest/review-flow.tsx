@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { trackGuestMetric } from "@/lib/guest-analytics-client";
 import { fieldClass, primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
 import type { GuestExperience } from "@/lib/business-owners";
 import {
@@ -63,6 +64,13 @@ export function GuestReviewFlow({ experience }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [googleHandoffOpen, setGoogleHandoffOpen] = useState(false);
+  const pageViewSent = useRef(false);
+
+  useEffect(() => {
+    if (pageViewSent.current) return;
+    pageViewSent.current = true;
+    trackGuestMetric(experience.loginId, "page_view");
+  }, [experience.loginId]);
 
   const selectedServices = useMemo(
     () => experience.services.filter((item) => serviceIds.includes(item.id)),
@@ -191,6 +199,7 @@ export function GuestReviewFlow({ experience }: Props) {
     window.open(experience.mapLink, "_blank", "noopener,noreferrer");
     try {
       await navigator.clipboard.writeText(draft.trim());
+      trackGuestMetric(experience.loginId, "copy_continue");
       setCopied(true);
       setGoogleHandoffOpen(true);
     } catch {

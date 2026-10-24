@@ -3,7 +3,9 @@ import { quietButtonClass } from "@/components/admin/styles";
 import { EnquiryButton } from "@/components/home/enquiry";
 import { homeCardsSection } from "@/components/home/styles";
 import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
-import { listPrice, planIncludes, price, productBrochurePath } from "@/lib/site";
+import { LaunchOfferNote } from "@/components/home/launch-offer-note";
+import { PricingAddons } from "@/components/home/pricing-addons";
+import { planIncludes, price, productBrochurePath } from "@/lib/site";
 
 export function Pricing() {
   return (
@@ -21,16 +23,9 @@ export function Pricing() {
         <SetupStandeeCallout className="mt-6 max-w-xl" />
         <div className="mt-12 grid overflow-hidden rounded-[32px] bg-blue text-white shadow-[0_24px_70px_rgba(0,96,240,0.28)] lg:grid-cols-[0.86fr_1.14fr]">
           <div className="border-b border-white/15 p-8 sm:p-10 lg:border-r lg:border-b-0">
-            <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
-              Save ₹2,000
-            </p>
+            <LaunchOfferNote variant="onBlue" />
             <p className="mt-6 text-sm font-semibold text-white/80">Zust Scan</p>
-            <p className="mt-4 text-2xl font-medium text-white/45 line-through">
-              {listPrice}
-            </p>
-            <p className="mt-1 text-5xl font-semibold tracking-tight sm:text-6xl">
-              {price}
-            </p>
+            <p className="mt-2 text-5xl font-semibold tracking-tight sm:text-6xl">{price}</p>
             <p className="mt-4 max-w-sm text-base leading-7 text-white/80">
               For one business. Your details go to WhatsApp so we can set it up
               with you.
@@ -58,6 +53,7 @@ export function Pricing() {
             ))}
           </ul>
         </div>
+        <PricingAddons />
       </div>
     </section>
   );

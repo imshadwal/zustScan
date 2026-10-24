@@ -112,6 +112,67 @@ export const guestDecides = [
 
 export const listPrice = "₹5,499";
 export const price = "₹3,499";
+export const launchOfferSavings = "₹2,000";
+export const launchOfferHeadline = "Launch offer — save ₹2,000";
+export const launchOfferEndsLabel = "31 December 2026";
+export const launchOfferFinePrint =
+  "Intro price for new businesses while launch slots last in your city. Standard price returns to ₹5,499 after the offer ends.";
+
+export const additionalOutletPrice = "₹2,499";
+export const referralDiscountAmount = "₹500";
+export const referralProgramSummary =
+  "Refer another business: when their setup goes live, you both get ₹500 off your next invoice or add-on.";
+export const multiLocationSummary = `Second outlet (same brand): ${additionalOutletPrice} add-on — separate QR and guest page, one shared setup call.`;
+
+export const roiPricingPoints = [
+  {
+    title: "One-time setup",
+    amount: price,
+    body: "Includes standee delivery, guest page, services/products, and AI drafts in English, Hindi, or Hinglish.",
+  },
+  {
+    title: "Compare to ads",
+    amount: "₹3,000–₹8,000/mo",
+    body: "Many local businesses spend this much on Meta or Google ads without a single new Google review.",
+  },
+  {
+    title: "One strong review",
+    amount: "Priceless locally",
+    body: "A specific 4★ review about your biryani or room helps the next guest choose you — Zust Scan makes that easier at the table.",
+  },
+] as const;
+
+export const pricingFaq = [
+  {
+    question: "Do you post Google reviews for us?",
+    answer:
+      "No. The guest picks stars and words, edits the draft, and taps Post themselves on Google. Zust Scan never submits a review.",
+  },
+  {
+    question: "Is this allowed by Google?",
+    answer:
+      "Yes when it stays honest: guests write their own review. We only help with a draft they can change or ignore.",
+  },
+  {
+    question: "Google opened blank — what now?",
+    answer:
+      "That is normal. After Copy & Continue, paste the text and set the same star rating on Google’s form. Our guest screen walks them through it.",
+  },
+  {
+    question: "How long until we are live?",
+    answer:
+      "Usually a few days after we have your Google review link, services/products list, and standee delivery address.",
+  },
+  {
+    question: "What do you need from us?",
+    answer:
+      "Business name, phone, Google review link (g.page), a short brief, and what guests should pick (Food, Room, products, etc.). We do the rest.",
+  },
+  {
+    question: "Hidden fees or monthly rent?",
+    answer: `One plan at ${price} for the first location includes setup and standee delivery. Optional second outlet: ${additionalOutletPrice}. Referral credit: ${referralDiscountAmount} each when both businesses activate.`,
+  },
+] as const;
 
 /** Shown on pricing, brochure, and key marketing blocks. */
 export const setupStandeeTitle = "Complete setup, standee delivered";
