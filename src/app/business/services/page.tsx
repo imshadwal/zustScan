@@ -30,7 +30,11 @@ async function ServicesGate() {
 
   return (
     <>
-      <BusinessHeader businessName={profile.businessName} loginId={profile.loginId} />
+      <BusinessHeader
+        businessName={profile.businessName}
+        loginId={profile.loginId}
+        logoUrl={profile.logoUrl}
+      />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-2xl font-semibold text-white">Services & products</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">

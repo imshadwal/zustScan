@@ -5,19 +5,21 @@ import { connection } from "next/server";
 import {
   evaluateSetup,
   isValidBusinessName,
-  isValidBrief,
+  isValidAddress,
   isValidCatalogName,
   isValidCity,
   isValidPhoneInput,
   isValidMapLinkInput,
+  isValidWhyTrustUs,
   MAX_PRODUCTS_PER_SERVICE,
   MAX_SERVICES,
-  normalizeBrief,
+  normalizeAddress,
   normalizeBusinessName,
   normalizeCatalogName,
   normalizeCity,
   normalizeMapLink,
   normalizePhone,
+  normalizeWhyTrustUs,
   type SetupChecklist,
 } from "@/lib/business-validation";
 import {
@@ -26,6 +28,15 @@ import {
   normalizeLoginId,
   parseSoldPrice,
 } from "@/lib/login-id";
+import {
+  isBusinessCategoryId,
+  isValidCategoryOther,
+  normalizeCategoryOther,
+  type BusinessCategoryOption,
+} from "@/lib/business-categories";
+import { listBusinessCategoryOptions } from "@/lib/business-category-options";
+import { businessLogoPublicUrl } from "@/lib/business-logos";
+import { isGuestThemeId } from "@/lib/guest-themes";
 import { OwnerStoreError } from "@/lib/store-error";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -50,15 +61,27 @@ export type BusinessOwnerProfile = {
   loginId: string;
   businessName: string | null;
   city: string | null;
+  businessCategory: string | null;
+  businessCategoryOther: string | null;
   phone: string | null;
   mapLink: string | null;
-  brief: string | null;
+  address: string | null;
+  whyTrustUs: string | null;
+  guestThemeId: string;
+  logoUrl: string | null;
   setupComplete: boolean;
   checklist: SetupChecklist;
 };
 
-const notReady =
-  "The business_owners table is not ready. Run supabase/migrate-customers-to-business-owners.sql or supabase/business-owners.sql in the Supabase SQL editor.";
+function notReadyMessage(error: { code?: string; message?: string }) {
+  if (error.code === "42703" || error.code === "PGRST204") {
+    const detail = error.message?.trim();
+    return detail
+      ? `Database schema is out of date (${detail}). Run supabase/business-owners-upgrade.sql in the Supabase SQL editor, then reload the API schema.`
+      : "Database schema is out of date. Run supabase/business-owners-upgrade.sql in the Supabase SQL editor, then reload the API schema.";
+  }
+  return "The business_owners table is not ready. Run supabase/migrate-customers-to-business-owners.sql or supabase/business-owners.sql in the Supabase SQL editor.";
+}
 const notConnected =
   "Supabase is not connected. Add the project URL and service role key, then run the business owner SQL.";
 
@@ -84,7 +107,7 @@ function mapDbError(error: { code?: string; message?: string }) {
     error.code === "PGRST205" ||
     /does not exist|schema cache/i.test(error.message ?? "")
   ) {
-    return new OwnerStoreError(notReady, 503);
+    return new OwnerStoreError(notReadyMessage(error), 503);
   }
   return new OwnerStoreError("The business owner could not be saved.", 500);
 }
@@ -96,13 +119,33 @@ type OwnerRow = {
   sold_price: number;
   business_name: string | null;
   city: string | null;
+  business_category: string | null;
+  business_category_other: string | null;
+  address: string | null;
+  why_trust_us: string | null;
   phone: string | null;
   map_link: string | null;
   brief: string | null;
   setup_complete: boolean;
   qr_active: boolean;
+  guest_theme_id: string;
+  logo_path: string | null;
   created_at: string;
 };
+
+function mapBrandingFields(row: {
+  guest_theme_id?: string | null;
+  logo_path?: string | null;
+}) {
+  const guestThemeId =
+    row.guest_theme_id && isGuestThemeId(row.guest_theme_id)
+      ? row.guest_theme_id
+      : "zust-default";
+  return {
+    guestThemeId,
+    logoUrl: businessLogoPublicUrl(row.logo_path ?? null),
+  };
+}
 
 async function ownerIdByLogin(loginId: string) {
   const id = normalizeLoginId(loginId);
@@ -140,15 +183,33 @@ async function productCountsForOwner(ownerId: string) {
   return serviceIds.map((sid) => ({ productCount: counts.get(sid) ?? 0 }));
 }
 
+/** Context string for AI review drafts (from Why trust us, not a separate brief field). */
+function guestDraftContext(row: OwnerRow): string | null {
+  const trust = row.why_trust_us?.trim() ?? "";
+  if (trust.length >= 20) return trust.slice(0, 2000);
+  if (trust && isValidWhyTrustUs(trust)) {
+    return `${trust} Guests share honest reviews on Google.`.slice(0, 2000);
+  }
+  const name = row.business_name?.trim();
+  if (name) {
+    return `${name}. Honest Google reviews from guests who visited.`;
+  }
+  return null;
+}
+
 async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
   const services = await productCountsForOwner(ownerId);
+  const categoryOptions = await listBusinessCategoryOptions();
   const checklist = evaluateSetup({
     businessName: row.business_name,
     city: row.city ?? null,
+    businessCategory: row.business_category ?? null,
+    businessCategoryOther: row.business_category_other ?? null,
     phone: row.phone,
     mapLink: row.map_link,
-    brief: row.brief,
     services,
+    isBusinessCategoryId: (value) => isBusinessCategoryId(value, categoryOptions),
+    isValidCategoryOther,
   });
   if (checklist.complete !== row.setup_complete) {
     const { error } = await database()
@@ -211,9 +272,13 @@ export type GuestExperience = {
   loginId: string;
   businessName: string | null;
   city: string | null;
+  address: string | null;
+  whyTrustUs: string | null;
   phone: string | null;
   mapLink: string;
   brief: string;
+  guestThemeId: string;
+  logoUrl: string | null;
   services: ServiceRecord[];
 };
 
@@ -224,7 +289,7 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, qr_active, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, logo_path, password_hash, sold_price, created_at",
     )
     .eq("login_id", id)
     .maybeSingle();
@@ -237,21 +302,27 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
   if (!checklist.complete) return null;
 
   const mapLink = data.map_link?.trim();
-  const brief = data.brief?.trim();
-  if (!mapLink || !brief) return null;
+  const draftContext = guestDraftContext(data as OwnerRow);
+  if (!mapLink || !draftContext) return null;
 
   const services = await listServicesForOwner(id);
   if (services.length === 0) return null;
   const hasProduct = services.some((service) => service.products.length > 0);
   if (!hasProduct) return null;
 
+  const branding = mapBrandingFields(data);
+
   return {
     loginId: data.login_id,
     businessName: data.business_name,
     city: data.city?.trim() || null,
+    address: data.address?.trim() || null,
+    whyTrustUs: data.why_trust_us?.trim() || null,
     phone: data.phone,
     mapLink,
-    brief,
+    brief: draftContext,
+    guestThemeId: branding.guestThemeId,
+    logoUrl: branding.logoUrl,
     services,
   };
 }
@@ -264,7 +335,7 @@ export async function findBusinessOwnerPublic(
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, qr_active, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, password_hash, sold_price, created_at",
     )
     .eq("login_id", id)
     .maybeSingle();
@@ -382,7 +453,7 @@ export async function getBusinessOwnerProfile(
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, guest_theme_id, logo_path, password_hash",
     )
     .eq("login_id", id)
     .maybeSingle();
@@ -391,13 +462,26 @@ export async function getBusinessOwnerProfile(
   const ownerId = data.id as string;
   const row = data as OwnerRow;
   const checklist = await recomputeSetupComplete(ownerId, row);
+  const branding = mapBrandingFields(row);
+  const categoryOptions = await listBusinessCategoryOptions();
+  const categoryRaw = row.business_category?.trim();
+  const businessCategory =
+    categoryRaw && isBusinessCategoryId(categoryRaw, categoryOptions)
+      ? categoryRaw
+      : null;
+
   return {
     loginId: row.login_id,
     businessName: row.business_name,
     city: row.city,
+    businessCategory,
+    businessCategoryOther: row.business_category_other?.trim() || null,
     phone: row.phone,
     mapLink: row.map_link,
-    brief: row.brief,
+    address: row.address,
+    whyTrustUs: row.why_trust_us,
+    guestThemeId: branding.guestThemeId,
+    logoUrl: branding.logoUrl,
     setupComplete: checklist.complete,
     checklist,
   };
@@ -408,9 +492,13 @@ export async function updateBusinessOwnerProfile(
   input: {
     businessName: string;
     city: string;
+    businessCategory: string;
+    businessCategoryOther: string;
+    address: string;
+    whyTrustUs: string;
     phone: string;
     mapLink: string;
-    brief: string;
+    guestThemeId?: string;
   },
 ) {
   const id = normalizeLoginId(loginId);
@@ -426,6 +514,12 @@ export async function updateBusinessOwnerProfile(
       400,
     );
   }
+  if (!isValidAddress(input.address)) {
+    throw new OwnerStoreError("Enter an address (5 to 200 characters) for the guest page.", 400);
+  }
+  if (!isValidWhyTrustUs(input.whyTrustUs)) {
+    throw new OwnerStoreError("Why trust us must be 10 to 300 characters.", 400);
+  }
   if (!isValidPhoneInput(input.phone)) {
     throw new OwnerStoreError("Enter a valid 10-digit Indian mobile number.", 400);
   }
@@ -436,28 +530,50 @@ export async function updateBusinessOwnerProfile(
       400,
     );
   }
-  if (!isValidBrief(input.brief)) {
-    throw new OwnerStoreError("The brief must be 20 to 2000 characters.", 400);
+  const categoryOptions = await listBusinessCategoryOptions();
+  const categoryRaw = input.businessCategory.trim();
+  if (!isBusinessCategoryId(categoryRaw, categoryOptions)) {
+    throw new OwnerStoreError("Pick a category from the list.", 400);
+  }
+  let businessCategoryOther: string | null = null;
+  if (categoryRaw === "others") {
+    if (!isValidCategoryOther(input.businessCategoryOther)) {
+      throw new OwnerStoreError("Describe your business type (2 to 80 characters).", 400);
+    }
+    businessCategoryOther = normalizeCategoryOther(input.businessCategoryOther);
   }
 
   const businessName = normalizeBusinessName(input.businessName);
   const city = normalizeCity(input.city);
+  const address = normalizeAddress(input.address);
+  const whyTrustUs = normalizeWhyTrustUs(input.whyTrustUs);
   const phone = normalizePhone(input.phone)!;
-  const brief = normalizeBrief(input.brief);
+
+  const patch: Record<string, string | null> = {
+    business_name: businessName,
+    city,
+    business_category: categoryRaw,
+    business_category_other: categoryRaw === "others" ? businessCategoryOther : null,
+    address,
+    why_trust_us: whyTrustUs,
+    phone,
+    map_link: mapLink,
+    brief: null,
+    updated_at: new Date().toISOString(),
+  };
+  if (input.guestThemeId !== undefined) {
+    if (!isGuestThemeId(input.guestThemeId)) {
+      throw new OwnerStoreError("Pick a guest page theme from the list.", 400);
+    }
+    patch.guest_theme_id = input.guestThemeId;
+  }
 
   const { data, error } = await database()
     .from("business_owners")
-    .update({
-      business_name: businessName,
-      city,
-      phone,
-      map_link: mapLink,
-      brief,
-      updated_at: new Date().toISOString(),
-    })
+    .update(patch)
     .eq("id", ownerId)
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, guest_theme_id, logo_path, password_hash, sold_price, created_at",
     )
     .maybeSingle();
   if (error) throw mapDbError(error);
@@ -517,7 +633,7 @@ async function touchOwnerSetup(ownerId: string) {
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
     )
     .eq("id", ownerId)
     .maybeSingle();

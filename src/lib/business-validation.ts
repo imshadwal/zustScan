@@ -50,6 +50,24 @@ export function isValidCity(value: string) {
   return city.length >= 2 && city.length <= 80;
 }
 
+export function normalizeAddress(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+export function isValidAddress(value: string) {
+  const address = normalizeAddress(value);
+  return address.length >= 5 && address.length <= 200;
+}
+
+export function normalizeWhyTrustUs(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+export function isValidWhyTrustUs(value: string) {
+  const text = normalizeWhyTrustUs(value);
+  return text.length >= 10 && text.length <= 300;
+}
+
 export function normalizePhone(value: string) {
   const digits = value.replace(/[^\d+]/g, "");
   if (digits.startsWith("+91")) {
@@ -116,9 +134,9 @@ export const MAX_PRODUCTS_PER_SERVICE = 50;
 export type SetupChecklist = {
   businessName: boolean;
   city: boolean;
+  category: boolean;
   phone: boolean;
   mapLink: boolean;
-  brief: boolean;
   hasService: boolean;
   everyServiceHasProduct: boolean;
   complete: boolean;
@@ -128,19 +146,34 @@ export type SetupChecklist = {
 export function evaluateSetup(input: {
   businessName: string | null;
   city: string | null;
+  businessCategory: string | null;
+  businessCategoryOther: string | null;
   phone: string | null;
   mapLink: string | null;
-  brief: string | null;
   services: { productCount: number }[];
+  isBusinessCategoryId: (value: string) => boolean;
+  isValidCategoryOther: (value: string) => boolean;
 }): SetupChecklist {
   const businessName = Boolean(
     input.businessName && isValidBusinessName(input.businessName),
   );
   const cityFilled = Boolean(input.city?.trim() && isValidCity(input.city));
   const city = !input.city?.trim() || cityFilled;
+
+  const catRaw = input.businessCategory?.trim() ?? "";
+  const categoryKnown = catRaw.length > 0 && input.isBusinessCategoryId(catRaw);
+  const othersOk =
+    catRaw === "others"
+      ? Boolean(
+          input.businessCategoryOther?.trim() &&
+            input.isValidCategoryOther(input.businessCategoryOther),
+        )
+      : true;
+  const category = categoryKnown && othersOk;
+
   const phone = Boolean(input.phone && normalizePhone(input.phone));
   const mapLink = Boolean(input.mapLink && normalizeMapLink(input.mapLink));
-  const brief = Boolean(input.brief && isValidBrief(input.brief));
+
   const hasService = input.services.length >= 1;
   const everyServiceHasProduct =
     hasService && input.services.every((service) => service.productCount >= 1);
@@ -148,23 +181,23 @@ export function evaluateSetup(input: {
   const missingLabels: string[] = [];
   if (!businessName) missingLabels.push("Business name");
   if (input.city?.trim() && !city) missingLabels.push("City");
+  if (!category) missingLabels.push("Category");
   if (!phone) missingLabels.push("Phone");
   if (!mapLink) missingLabels.push("Google review link");
-  if (!brief) missingLabels.push("Brief");
   if (!hasService) missingLabels.push("At least one service");
   if (hasService && !everyServiceHasProduct) {
     missingLabels.push("At least one product on every service");
   }
 
   const complete =
-    businessName && phone && mapLink && brief && hasService && everyServiceHasProduct;
+    businessName && category && phone && mapLink && hasService && everyServiceHasProduct;
 
   return {
     businessName,
     city,
+    category,
     phone,
     mapLink,
-    brief,
     hasService,
     everyServiceHasProduct,
     complete,

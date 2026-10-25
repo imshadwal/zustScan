@@ -6,10 +6,17 @@ alter table if exists public.customers rename to business_owners;
 alter table public.business_owners
   add column if not exists business_name text,
   add column if not exists city text,
+  add column if not exists address text,
+  add column if not exists why_trust_us text,
+  add column if not exists business_category text,
+  add column if not exists business_category_other text,
   add column if not exists phone text,
   add column if not exists map_link text,
   add column if not exists brief text,
   add column if not exists setup_complete boolean not null default false,
+  add column if not exists qr_active boolean not null default true,
+  add column if not exists guest_theme_id text not null default 'zust-default',
+  add column if not exists logo_path text,
   add column if not exists updated_at timestamptz not null default now();
 
 -- Rename legacy constraints when present (ignore errors on fresh names).

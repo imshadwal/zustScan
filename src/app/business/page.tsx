@@ -35,11 +35,16 @@ async function BusinessHomeGate() {
 
   return (
     <>
-      <BusinessHeader businessName={profile.businessName} loginId={profile.loginId} />
+      <BusinessHeader
+        businessName={profile.businessName}
+        loginId={profile.loginId}
+        logoUrl={profile.logoUrl}
+      />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <DashboardHome
           businessName={profile.businessName}
           loginId={profile.loginId}
+          logoUrl={profile.logoUrl}
           checklist={profile.checklist}
           serviceCount={serviceCount}
           productCount={productCount}

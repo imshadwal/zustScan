@@ -20,16 +20,27 @@ export async function PATCH(request: Request) {
   const body = await request.json().catch(() => null);
   const businessName = typeof body?.businessName === "string" ? body.businessName : "";
   const city = typeof body?.city === "string" ? body.city : "";
+  const address = typeof body?.address === "string" ? body.address : "";
+  const whyTrustUs = typeof body?.whyTrustUs === "string" ? body.whyTrustUs : "";
   const phone = typeof body?.phone === "string" ? body.phone : "";
   const mapLink = typeof body?.mapLink === "string" ? body.mapLink : "";
-  const brief = typeof body?.brief === "string" ? body.brief : "";
+  const businessCategory =
+    typeof body?.businessCategory === "string" ? body.businessCategory : "";
+  const businessCategoryOther =
+    typeof body?.businessCategoryOther === "string" ? body.businessCategoryOther : "";
+  const guestThemeId =
+    typeof body?.guestThemeId === "string" ? body.guestThemeId : undefined;
   try {
     const result = await updateBusinessOwnerProfile(session.loginId, {
       businessName,
       city,
+      businessCategory,
+      businessCategoryOther,
+      address,
+      whyTrustUs,
       phone,
       mapLink,
-      brief,
+      guestThemeId,
     });
     const profile = await getBusinessOwnerProfile(session.loginId);
     return json({ profile, checklist: result.checklist });

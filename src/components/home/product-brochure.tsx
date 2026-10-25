@@ -288,7 +288,10 @@ export function ProductBrochure({ siteUrl }: Props) {
           <h2 className="text-lg font-semibold text-ink">What you configure</h2>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-muted">
             <li>Services and products (e.g. Food → Biryani)</li>
-            <li>Business name, phone, brief, Google review link (g.page … /review)</li>
+            <li>
+              Category, business name, city, address, phone, Why trust us (AI Generate), Google
+              review link (g.page … /review), logo, and guest theme
+            </li>
             <li>QR for your guest page</li>
           </ul>
         </section>

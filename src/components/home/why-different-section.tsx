@@ -2,11 +2,18 @@ import { GuestAnalyticsStats } from "@/components/home/guest-analytics-stats";
 import { homeCardClass } from "@/components/home/styles";
 import { marketingAnalyticsDemo, whyDifferent } from "@/lib/site";
 
+type WhyItem = (typeof whyDifferent)[number];
+
 const languagesItem = whyDifferent[0];
 const voiceItem = whyDifferent[1];
 const analyticsItem = whyDifferent[2];
 const speedItem = whyDifferent[3];
 const noAppItem = whyDifferent[4];
+const extraItems = whyDifferent.filter(
+  (item): item is WhyItem & { chips: readonly string[] } =>
+    "chips" in item &&
+    (item.id === "branding" || item.id === "category" || item.id === "qr-pause"),
+);
 
 function CardShell({
   children,
@@ -33,6 +40,40 @@ function CardShell({
 function StepBadge({ step }: { step: string }) {
   return (
     <span className="text-sm font-bold tracking-wider text-blue lg:text-base">{step}</span>
+  );
+}
+
+function ChipsCard({
+  item,
+  primaryChip = false,
+  className = "",
+}: {
+  item: WhyItem & { chips: readonly string[] };
+  primaryChip?: boolean;
+  className?: string;
+}) {
+  return (
+    <CardShell className={className}>
+      <StepBadge step={item.step} />
+      <h3 className="mt-5 text-2xl font-semibold text-ink sm:text-3xl lg:text-[2rem] lg:leading-tight">
+        {item.title}
+      </h3>
+      <p className="mt-3 text-base leading-7 text-muted sm:text-lg sm:leading-8">{item.body}</p>
+      <div className="mt-auto flex flex-wrap gap-3 pt-10">
+        {item.chips.map((chip, index) => (
+          <span
+            key={chip}
+            className={`rounded-full px-4 py-2 text-sm font-semibold sm:text-base ${
+              primaryChip && index === 0
+                ? "bg-blue text-white shadow-sm"
+                : "border border-slate-200 bg-white text-ink"
+            }`}
+          >
+            {chip}
+          </span>
+        ))}
+      </div>
+    </CardShell>
   );
 }
 
@@ -70,29 +111,6 @@ function LanguagesCard() {
   );
 }
 
-function VoiceCard() {
-  const item = voiceItem;
-  return (
-    <CardShell className="lg:min-h-[18rem]">
-      <StepBadge step={item.step} />
-      <h3 className="mt-5 text-2xl font-semibold text-ink sm:text-3xl lg:text-[2rem] lg:leading-tight">
-        {item.title}
-      </h3>
-      <p className="mt-3 text-base leading-7 text-muted sm:text-lg sm:leading-8">{item.body}</p>
-      <div className="mt-auto flex flex-wrap gap-3 pt-10">
-        {item.chips.map((chip) => (
-          <span
-            key={chip}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-ink sm:text-base"
-          >
-            {chip}
-          </span>
-        ))}
-      </div>
-    </CardShell>
-  );
-}
-
 function AnalyticsCard() {
   const item = analyticsItem;
   return (
@@ -117,23 +135,24 @@ function AnalyticsCard() {
             <GuestAnalyticsStats variant="dark" counts={marketingAnalyticsDemo} />
           </div>
         </div>
-        <ul className="mt-5 flex flex-wrap gap-2.5">
-          {item.chips.map((chip) => (
-            <li
-              key={chip}
-              className="rounded-md border border-blue/40 bg-blue/15 px-2.5 py-1.5 text-xs font-semibold tracking-wide text-blue uppercase"
-            >
-              {chip}
-            </li>
-          ))}
-        </ul>
+        {"chips" in item ? (
+          <ul className="mt-5 flex flex-wrap gap-2.5">
+            {item.chips.map((chip) => (
+              <li
+                key={chip}
+                className="rounded-md border border-blue/40 bg-blue/15 px-2.5 py-1.5 text-xs font-semibold tracking-wide text-blue uppercase"
+              >
+                {chip}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
     </CardShell>
   );
 }
 
-function SpeedCard() {
-  const item = speedItem;
+function HighlightCard({ item }: { item: WhyItem & { highlight: string } }) {
   return (
     <CardShell className="lg:min-h-[14rem]">
       <StepBadge step={item.step} />
@@ -181,26 +200,35 @@ export function WhyDifferentSection() {
             <span className="text-blue">Proof for owners.</span>
           </p>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
-            Language, voice, speed, and privacy — without asking anyone to install an app.
+            Language, voice, branding, category-smart setup, and QR control — without asking anyone
+            to install an app.
           </p>
         </header>
 
-        <ul className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:mt-20 lg:grid-cols-12 lg:grid-rows-[auto_auto_auto] lg:gap-7">
+        <ul className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:mt-20 lg:grid-cols-12 lg:grid-rows-[auto_auto_auto_auto] lg:gap-7">
           <li className="sm:col-span-2 lg:col-span-8 lg:row-start-1">
             <LanguagesCard />
           </li>
           <li className="sm:col-span-2 lg:col-span-8 lg:row-start-2">
-            <VoiceCard />
+            <ChipsCard item={voiceItem} className="lg:min-h-[18rem]" />
           </li>
           <li className="sm:col-span-2 lg:col-span-4 lg:row-span-3 lg:col-start-9 lg:row-start-1">
             <AnalyticsCard />
           </li>
           <li className="lg:col-span-4 lg:row-start-3">
-            <SpeedCard />
+            <HighlightCard item={speedItem} />
           </li>
           <li className="lg:col-span-4 lg:col-start-5 lg:row-start-3">
             <NoAppCard />
           </li>
+          {extraItems.map((item) => (
+            <li
+              key={item.id}
+              className="sm:col-span-1 lg:col-span-4 lg:row-start-4"
+            >
+              <ChipsCard item={item} primaryChip className="lg:min-h-[16rem]" />
+            </li>
+          ))}
         </ul>
       </div>
     </section>

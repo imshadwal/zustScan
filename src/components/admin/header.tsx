@@ -32,6 +32,12 @@ export function AdminHeader() {
           />
         </Link>
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/categories"
+            className="inline-flex h-10 items-center rounded-full border border-white/20 px-4 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10"
+          >
+            Categories
+          </Link>
           <Link href="/admin/owners/new" className={`${primaryButtonClass} h-10 px-4`}>
             New business owner
           </Link>

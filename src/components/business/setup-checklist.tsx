@@ -5,9 +5,9 @@ import { primaryButtonClass } from "@/components/admin/styles";
 const items = [
   { key: "businessName" as const, label: "Business name" },
   { key: "city" as const, label: "City" },
+  { key: "category" as const, label: "Category" },
   { key: "phone" as const, label: "Phone" },
   { key: "mapLink" as const, label: "Google review link" },
-  { key: "brief" as const, label: "Brief" },
   { key: "hasService" as const, label: "At least one service" },
   {
     key: "everyServiceHasProduct" as const,
@@ -16,22 +16,18 @@ const items = [
 ];
 
 export function SetupChecklistCard({ checklist }: { checklist: SetupChecklist }) {
-  if (checklist.complete) {
-    return (
-      <section className="rounded-3xl bg-blue p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-        <p className="text-sm font-semibold text-white/90">Ready for guests</p>
-        <p className="mt-2 text-lg font-semibold">
-          Setup is complete. Your guest page is live.
-        </p>
-      </section>
-    );
-  }
-
   return (
     <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-      <h2 className="text-lg font-semibold">Finish setup</h2>
+      {checklist.complete ? (
+        <p className="mb-4 rounded-2xl bg-blue/10 px-4 py-3 text-sm font-semibold text-blue">
+          Ready for guests — all steps complete.
+        </p>
+      ) : null}
+      <h2 className="text-lg font-semibold">{checklist.complete ? "Setup checklist" : "Finish setup"}</h2>
       <p className="mt-2 text-sm text-muted">
-        Guests cannot use your QR for reviews until every item below is done.
+        {checklist.complete
+          ? "Every item stays listed so you can jump back to profile or services anytime."
+          : "Guests cannot use your QR for reviews until every item below is done."}
       </p>
       <ul className="mt-5 space-y-3">
         {items.map((item) => {
@@ -46,7 +42,9 @@ export function SetupChecklistCard({ checklist }: { checklist: SetupChecklist })
               >
                 {done ? "✓" : "·"}
               </span>
-              <span className={done ? "text-muted line-through" : "font-medium"}>{item.label}</span>
+              <span className={done ? "font-medium text-muted line-through" : "font-medium"}>
+                {item.label}
+              </span>
             </li>
           );
         })}

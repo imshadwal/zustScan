@@ -29,7 +29,7 @@ export const homeValueStrip = {
   lead: "Never leave a customer waiting:",
   product: "AI-powered review draft system.",
   detail:
-    "Guests scan at the table or counter, get an editable draft in English, Hindi, or Hinglish, and post on Google themselves.",
+    "Guests scan at the table or counter, see your branded page (address, contact, Why trust us), get an editable draft in English, Hindi, or Hinglish, and post on Google themselves.",
 } as const;
 
 /** Short guest path shown on the home timeline and footer. */
@@ -113,9 +113,9 @@ export const whyDifferent = [
   {
     id: "analytics",
     step: "03",
-    title: "Analytics for business owners",
-    body: "Anonymous funnel counts in your portal — no guest names or review text stored.",
-    chips: ["Scans", "Drafts", "Copy & Continue"],
+    title: "Analytics & setup checklist",
+    body: "Your portal tracks setup progress plus anonymous funnel counts — scans, drafts, and Copy & Continue. No guest names or review text stored.",
+    chips: ["Setup checklist", "Scans", "Copy & Continue"],
   },
   {
     id: "speed",
@@ -131,37 +131,58 @@ export const whyDifferent = [
     body: "Mobile browser only. No store download, no guest login — scan and go.",
     highlight: "0 apps",
   },
+  {
+    id: "branding",
+    step: "06",
+    title: "Your brand on the guest page",
+    body: "Logo upload, six colour themes, and a proper first screen — business name, city, address, contact, and Why trust us before guests pick services.",
+    chips: ["Logo", "6 themes", "Trust line"],
+  },
+  {
+    id: "category",
+    step: "07",
+    title: "Category-smart profile",
+    body: "Hotels, Cafe, Hospitality, Digital Marketing, Others, and more. AI Generate writes a Why trust us line from your category — it also feeds review drafts.",
+    chips: ["Categories", "AI Generate", "Others OK"],
+  },
+  {
+    id: "qr-pause",
+    step: "08",
+    title: "Pause reviews, same QR",
+    body: "Turn guest reviews off when you need to — same printed QR, clear paused message. Turn them back on without reprinting the standee.",
+    chips: ["Same QR", "Pause / resume", "No reprint"],
+  },
 ] as const;
 
 export const audiences = [
   {
-    title: "Restaurant",
-    body: "A table card, menu, or takeaway bag. Guests pick what they ordered and how the visit felt.",
+    title: "Restaurant & cafe",
+    body: "Table card, menu, or counter QR. Guests pick what they ordered and how the visit felt.",
     tags: ["Food", "Service", "Ambience"],
   },
   {
-    title: "Hotel",
-    body: "The stay is broken into the services you set up. Food, Room, and Amenities are the usual start.",
-    tags: ["Food", "Room", "Amenities"],
+    title: "Hotels & hospitality",
+    body: "Lobby or room card. Break the stay into Food, Room, Amenities — or your own services.",
+    tags: ["Stay", "Food", "Service"],
   },
   {
-    title: "Retail",
-    body: "A counter card, receipt, or shelf display. Guests review the product and the checkout.",
-    tags: ["Product", "Staff", "Checkout"],
+    title: "Retail & salon",
+    body: "Receipt, checkout, or appointment follow-up. Reviews mention the product or service they got.",
+    tags: ["Product", "Staff", "Visit"],
   },
   {
-    title: "Service",
-    body: "A receipt, follow-up, or job sheet after the work. Guests describe that visit in their own words.",
-    tags: ["Visit", "Work", "Follow-up"],
+    title: "Digital & professional",
+    body: "Agencies, clinics, education, real estate — pick a category and AI-generate a Why trust us line on your profile.",
+    tags: ["Projects", "Clients", "Visits"],
   },
 ] as const;
 
 export const businessSets = [
   "Services, and the products inside each one",
-  "Business name and city (shown on the guest page)",
-  "Contact number",
-  "Google review link",
-  "A short brief of the business",
+  "Category (Hotels, Cafe, Hospitality, and more — or Others with your own type)",
+  "Business name, city, address, phone, and Google review link",
+  "Why trust us — AI Generate from your category, then edit (also used for review drafts)",
+  "Guest page look: logo upload and one of six colour themes",
 ] as const;
 
 export const guestDecides = [
@@ -194,13 +215,13 @@ export const marketingAnalyticsDemo = {
 
 export const ownerAnalyticsTitle = "See the funnel in your portal";
 export const ownerAnalyticsBody =
-  "Your business dashboard shows anonymous counts — scans, drafts, and Copy & Continue — so you know guests are using the QR without storing names or review text.";
+  "Your business dashboard tracks setup progress, plus anonymous counts — scans, drafts, and Copy & Continue — without storing guest names or review text.";
 
 export const roiPricingPoints = [
   {
     title: "One-time setup",
     amount: price,
-    body: "Includes standee delivery, guest page, services/products, and AI drafts in English, Hindi, or Hinglish.",
+    body: "Includes standee delivery, branded guest page (category, trust line, theme), services/products, and AI drafts in English, Hindi, or Hinglish.",
   },
   {
     title: "Compare to ads",
@@ -238,7 +259,7 @@ export const pricingFaq = [
   {
     question: "What do you need from us?",
     answer:
-      "Business name, phone, Google review link (g.page), a short brief, and what guests should pick (Food, Room, products, etc.). We do the rest.",
+      "Business name, category, phone, Google review link (g.page), address, a Why trust us line (AI Generate in your portal), and services/products for guests to pick. Logo and guest page theme are optional extras.",
   },
   {
     question: "Hidden fees or monthly rent?",
@@ -253,10 +274,10 @@ export const setupStandeeLine =
 
 export const planIncludes = [
   "Complete setup and QR standee delivered to your address",
-  "One QR for the business",
+  "One QR for the business (pause guest reviews anytime without reprinting)",
   "Services and the products under each service",
-  "Guest path from the scan to the stars",
-  "An AI draft with Copy and Continue",
-  "Phone, map link, and a short brief on the page",
+  "Branded guest page: city, address, contact, Why trust us, logo, theme",
+  "Category-aware profile with optional Others and generated trust copy",
+  "Guest path from scan to stars, language, and AI draft with Copy & Continue",
   "Owner dashboard with scan, draft, and Copy & Continue counts",
 ] as const;

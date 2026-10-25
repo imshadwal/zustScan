@@ -203,7 +203,7 @@ function buildDraftMessages(input: DraftInput) {
     "First person, no hashtags or emojis, 2 to 4 sentences.",
     "Include every selected product and service name verbatim at least once — do not substitute generic terms like 'digital marketing' for listed services.",
     "Spread names across sentences — not one long parenthetical list.",
-    "Do not invent facts beyond the business brief and the guest choices.",
+    "Do not invent facts beyond the business context and the guest choices.",
     "Never say the review was written by AI.",
     "Each request has a unique variation token — write a fresh review unlike typical prior drafts (new opening, new rhythm, new closing).",
     "Avoid clichés and filler: couldn't be happier, highly recommend, top-notch, smooth and effective, attentive and knowledgeable, enhance your online presence, I recently worked with.",
@@ -211,7 +211,7 @@ function buildDraftMessages(input: DraftInput) {
     "Never use the words Good, Better, or Best; those are internal labels only. Express feeling in natural language.",
     hindiOnly
       ? "CRITICAL: Every Hindi word must be in Devanagari script. Never write Hindi in Roman letters (no mujhe, maine, karungi, bahut in Latin). English product/service titles and brand names may stay in Latin."
-      : "Prefer active first-person over passive unless the brief mentions that.",
+      : "Prefer active first-person over passive unless the business context suggests otherwise.",
     hindiOnly
       ? "Do not use English words such as recommend — use Hindi in Devanagari (e.g. सिफ़ारिश करूँगी)."
       : "Do not use future tense about sharing feedback on Google.",
@@ -223,7 +223,7 @@ function buildDraftMessages(input: DraftInput) {
 
   const user = [
     `Business: ${input.businessName}`,
-    `Brief: ${input.brief.slice(0, 800)}`,
+    `Business context (Why trust us): ${input.brief.slice(0, 800)}`,
     `Services: ${input.serviceNames.join(", ") || "—"}`,
     `Products: ${input.productNames.join(", ") || "—"}`,
     `How it felt (tone only — do not quote these labels): ${input.tier}`,

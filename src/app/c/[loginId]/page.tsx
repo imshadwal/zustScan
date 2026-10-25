@@ -72,7 +72,7 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
 
   if (experience) {
     return (
-      <GuestShell>
+      <GuestShell themeId={experience.guestThemeId}>
         <GuestReviewFlow experience={experience} />
       </GuestShell>
     );

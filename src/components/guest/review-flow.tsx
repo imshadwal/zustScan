@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { BusinessOwnerMark } from "@/components/initials-badge";
 import { trackGuestMetric } from "@/lib/guest-analytics-client";
-import { fieldClass, primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
+import {
+  guestAccentTextClass,
+  guestChipClass,
+  guestFlowFooterClass,
+  guestPanelClass,
+  guestPrimaryButtonClass,
+  guestSelectedChipClass,
+} from "@/components/guest/styles";
+import { fieldClass, quietButtonClass } from "@/components/admin/styles";
 import type { GuestExperience } from "@/lib/business-owners";
+import { guestThemeCssVars, resolveGuestTheme } from "@/lib/guest-themes";
 import {
   GUEST_LANGUAGE_OPTIONS,
   type GuestLanguage,
@@ -13,7 +23,8 @@ import {
   GUEST_VOICE_OPTIONS,
   type GuestVoice,
 } from "@/lib/guest-voice";
-import { displayGuestBusinessTitle } from "@/lib/initials";
+import { formatGuestContactPhone, guestAddressLine } from "@/lib/guest-display";
+import { displayTitle } from "@/lib/initials";
 
 type Props = {
   experience: GuestExperience;
@@ -33,20 +44,13 @@ function StepHeader({ title, hint }: { title: string; hint?: string }) {
 }
 
 function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <section
-      className={`rounded-2xl border-2 border-slate-300 bg-mist p-4 shadow-[0_2px_8px_rgba(7,20,40,0.06)] ${className}`}
-    >
-      {children}
-    </section>
-  );
+  return <section className={`${guestPanelClass} ${className}`}>{children}</section>;
 }
 
-const optionIdleClass =
-  "border-2 border-slate-300 bg-white text-ink shadow-[0_1px_3px_rgba(7,20,40,0.08)] hover:border-blue/60";
+const optionIdleClass = guestChipClass;
 
 const backButtonClass =
-  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-slate-300 bg-mist px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-blue hover:text-blue disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-[var(--guest-border,#cbd5e1)] bg-[var(--guest-panel,#f4f7fb)] px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-[var(--guest-accent)] hover:text-[var(--guest-accent)] disabled:cursor-not-allowed disabled:opacity-60";
 
 async function copyDraftToClipboard(text: string, textarea: HTMLTextAreaElement | null) {
   const value = text.trim();
@@ -75,11 +79,10 @@ async function copyDraftToClipboard(text: string, textarea: HTMLTextAreaElement 
 }
 
 export function GuestReviewFlow({ experience }: Props) {
-  const title = displayGuestBusinessTitle(
-    experience.businessName,
-    experience.loginId,
-    experience.city,
-  );
+  const theme = resolveGuestTheme(experience.guestThemeId);
+  const title = displayTitle(experience.businessName, experience.loginId);
+  const addressLine = guestAddressLine(experience.address, experience.city);
+  const contactPhone = formatGuestContactPhone(experience.phone);
   const [step, setStep] = useState<WizardStep>(0);
   const [serviceIds, setServiceIds] = useState<string[]>(
     experience.services.length === 1 ? [experience.services[0]!.id] : [],
@@ -245,24 +248,46 @@ export function GuestReviewFlow({ experience }: Props) {
     step === 2 ? (pending ? "Writing draft…" : "Next — get draft") : "Next";
 
   return (
-    <div className="flex min-h-0 flex-col" data-guest-flow>
-      <div className="bg-navy px-5 py-6 text-white sm:px-6">
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-blue-200 uppercase">
-          Your visit
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h1>
-        {experience.phone ? (
-          <a
-            href={`tel:${experience.phone}`}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90"
-          >
-            <span className="text-white/60">Questions</span>
-            {experience.phone}
-          </a>
-        ) : null}
+    <div
+      className="flex min-h-0 flex-col"
+      data-guest-flow
+      style={guestThemeCssVars(theme)}
+    >
+      <div
+        className="px-5 py-7 text-white sm:px-6 sm:py-8"
+        style={{ backgroundColor: theme.header }}
+      >
+        <div className="flex items-start gap-4 sm:gap-5">
+          <BusinessOwnerMark
+            businessName={experience.businessName}
+            loginId={experience.loginId}
+            logoUrl={experience.logoUrl}
+            size="xl"
+          />
+          <div className="min-w-0 flex-1 pt-0.5">
+            <p
+              className="text-[11px] font-semibold tracking-[0.16em] uppercase sm:text-xs"
+              style={{ color: theme.headerEyebrow }}
+            >
+              Share your experience
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
+            {addressLine ? (
+              <p className="mt-2 text-sm leading-5 text-white/70">{addressLine}</p>
+            ) : null}
+            {contactPhone ? (
+              <a
+                href={`tel:${experience.phone}`}
+                className="mt-1.5 block text-sm font-medium text-white/90 hover:underline"
+              >
+                {contactPhone}
+              </a>
+            ) : null}
+          </div>
+        </div>
       </div>
 
-      <div className="px-4 py-4 sm:px-5">
+      <div className="bg-[var(--guest-surface,white)] px-4 py-4 sm:px-5">
         <ol className="flex gap-1" aria-label="Progress">
           {STEPS.map((label, index) => {
             const done = index < step;
@@ -271,13 +296,13 @@ export function GuestReviewFlow({ experience }: Props) {
               <li key={label} className="flex-1">
                 <div
                   className={`h-1.5 rounded-full transition-colors ${
-                    done || current ? "bg-blue" : "bg-slate-300"
-                  } ${current ? "ring-2 ring-blue/25" : ""}`}
+                    done || current ? "bg-[var(--guest-accent)]" : "bg-slate-300"
+                  } ${current ? "ring-2 ring-[var(--guest-accent)]/25" : ""}`}
                   title={label}
                 />
                 <p
                   className={`mt-1.5 truncate text-center text-[10px] font-semibold uppercase tracking-wide ${
-                    current ? "text-blue" : "text-muted"
+                    current ? guestAccentTextClass : "text-muted"
                   }`}
                 >
                   {label}
@@ -306,13 +331,13 @@ export function GuestReviewFlow({ experience }: Props) {
                       onClick={() => toggleService(item.id)}
                       className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all ${
                         selected
-                          ? "bg-blue text-white shadow-[0_8px_24px_rgba(0,96,240,0.35)] ring-2 ring-white/20"
+                          ? `${guestSelectedChipClass} shadow-[0_8px_24px_rgba(0,0,0,0.2)] ring-2 ring-white/20`
                           : optionIdleClass
                       }`}
                     >
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
-                          selected ? "bg-white/20 text-white" : "bg-mist text-blue"
+                          selected ? "bg-white/20 text-white" : `bg-[var(--guest-panel,#f4f7fb)] ${guestAccentTextClass}`
                         }`}
                       >
                         {item.products.length}
@@ -351,7 +376,7 @@ export function GuestReviewFlow({ experience }: Props) {
                             onClick={() => toggleProduct(item.id)}
                             className={`w-full cursor-pointer rounded-xl px-4 py-3.5 text-left text-sm font-medium transition-all ${
                               selected
-                                ? "border-2 border-blue bg-blue/[0.08] text-blue ring-2 ring-blue/25 shadow-sm"
+                                ? `border-2 border-[var(--guest-accent)] bg-[color-mix(in_srgb,var(--guest-accent)_8%,white)] ${guestAccentTextClass} ring-2 ring-[var(--guest-accent)]/25 shadow-sm`
                                 : optionIdleClass
                             }`}
                           >
@@ -383,16 +408,14 @@ export function GuestReviewFlow({ experience }: Props) {
                     setDraft("");
                   }}
                   className={`cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all ${
-                    tier === label
-                      ? "bg-blue text-white shadow-md"
-                      : optionIdleClass
+                    tier === label ? guestSelectedChipClass : optionIdleClass
                   }`}
                 >
                   {label}
                 </button>
               ))}
             </div>
-            <div className="mt-4 rounded-xl border-2 border-slate-300 bg-white px-4 py-3 shadow-sm">
+            <div className="mt-4 rounded-xl border-2 border-[var(--guest-border,#cbd5e1)] bg-[var(--guest-panel,#fff)] px-4 py-3 shadow-sm">
               <p className="text-xs font-semibold text-muted">Star rating</p>
               <p className="mt-0.5 text-xs text-muted">
                 {tier
@@ -433,9 +456,7 @@ export function GuestReviewFlow({ experience }: Props) {
                       setDraft("");
                     }}
                     className={`cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all ${
-                      language === option.id
-                        ? "bg-blue text-white shadow-md"
-                        : optionIdleClass
+                      language === option.id ? guestSelectedChipClass : optionIdleClass
                     }`}
                   >
                     {option.label}
@@ -460,9 +481,7 @@ export function GuestReviewFlow({ experience }: Props) {
                           setDraft("");
                         }}
                         className={`cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all ${
-                          voice === option.id
-                            ? "bg-blue text-white shadow-md"
-                            : optionIdleClass
+                          voice === option.id ? guestSelectedChipClass : optionIdleClass
                         }`}
                       >
                         {option.label}
@@ -476,7 +495,7 @@ export function GuestReviewFlow({ experience }: Props) {
         ) : null}
 
         {step === 3 && draft ? (
-          <Panel className="border-blue/20 bg-gradient-to-b from-blue/[0.06] to-white">
+          <Panel className="border-[color-mix(in_srgb,var(--guest-accent)_35%,var(--guest-border,#cbd5e1))] bg-gradient-to-b from-[color-mix(in_srgb,var(--guest-accent)_14%,var(--guest-surface,white))] to-[var(--guest-surface,white)]">
             <StepHeader title="Your draft" hint="Edit anything before you post on Google." />
             <div className="mb-4 rounded-xl border-2 border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-950">
               Google opens empty on purpose — it does not accept pre-filled reviews. Copy &
@@ -492,13 +511,13 @@ export function GuestReviewFlow({ experience }: Props) {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               rows={6}
-              className={`${fieldClass} resize-y bg-white text-base leading-7`}
+              className={`${fieldClass} resize-y border-[var(--guest-border,#cbd5e1)] bg-[color-mix(in_srgb,var(--guest-accent)_4%,white)] text-base leading-7`}
             />
             <div className="mt-4 flex flex-col gap-2">
               <button
                 type="button"
                 onClick={copyAndContinue}
-                className={`${primaryButtonClass} w-full py-3.5 shadow-[0_8px_24px_rgba(0,96,240,0.35)]`}
+                className={`${guestPrimaryButtonClass} w-full py-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.15)]`}
               >
                 {copied ? "Copied — paste on Google" : "Copy & Continue"}
               </button>
@@ -527,7 +546,7 @@ export function GuestReviewFlow({ experience }: Props) {
         ) : null}
 
         {step < 3 ? (
-          <div className="-mx-4 mt-5 flex items-center gap-2 border-t-2 border-slate-200 bg-mist px-4 py-4 sm:-mx-5 sm:px-5">
+          <div className={`-mx-4 mt-5 flex items-center gap-2 px-4 py-4 sm:-mx-5 sm:px-5 ${guestFlowFooterClass}`}>
             {step > 0 ? (
               <button type="button" onClick={goBack} className={backButtonClass} disabled={pending}>
                 Back
@@ -537,18 +556,25 @@ export function GuestReviewFlow({ experience }: Props) {
               type="button"
               disabled={!canAdvance || pending}
               onClick={goNext}
-              className={`${primaryButtonClass} min-w-0 flex-1 py-3.5 shadow-[0_8px_24px_rgba(0,96,240,0.35)] disabled:shadow-none`}
+              className={`${guestPrimaryButtonClass} min-w-0 flex-1 py-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.15)] disabled:shadow-none`}
             >
               {nextLabel}
             </button>
           </div>
         ) : (
-          <div className="-mx-4 mt-5 border-t-2 border-slate-200 bg-mist px-4 py-4 sm:-mx-5 sm:px-5">
+          <div className={`-mx-4 mt-5 px-4 py-4 sm:-mx-5 sm:px-5 ${guestFlowFooterClass}`}>
             <button type="button" onClick={goBack} className={backButtonClass} disabled={pending}>
               Back
             </button>
           </div>
         )}
+
+        {experience.whyTrustUs ? (
+          <Panel className="mt-4">
+            <p className="text-xs font-semibold tracking-wide text-muted uppercase">Why trust us</p>
+            <p className="mt-2 text-sm leading-6 text-ink">{experience.whyTrustUs}</p>
+          </Panel>
+        ) : null}
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 
 const checklist = [
+  "Your name, address, contact, and Why trust us on the first screen",
   "One or more services and products",
   "Good, Better, or Best (stars follow automatically)",
-  "AI-powered draft they can change",
-  "English, Hindi, or Hinglish",
+  "AI-powered draft they can change — English, Hindi, or Hinglish",
 ] as const;
 
 const STEPS = ["Service", "Product", "Rating", "Draft"] as const;
@@ -38,6 +38,12 @@ function GuestFlowMock() {
           Your visit
         </p>
         <p className="mt-0.5 text-[11px] font-semibold leading-tight">Lakeview Hotel</p>
+        <p className="mt-0.5 text-[7px] leading-snug text-white/70">
+          MG Road, Varanasi
+        </p>
+        <p className="mt-1 text-[7px] leading-snug text-white/80">
+          Why trust us · Real guest reviews — you post on Google yourself.
+        </p>
       </div>
 
       <div className="px-2 py-1.5">

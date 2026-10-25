@@ -5,7 +5,7 @@ import { PageIntro } from "@/components/home/page-intro";
 export const metadata: Metadata = {
   title: "Who it’s for | Zust Scan",
   description:
-    "Restaurants, hotels, retail, and service businesses: set services and products; guests review what they actually used.",
+    "Restaurants, cafes, hotels, hospitality, retail, salons, and professional services — set services and products; guests review what they actually used.",
 };
 
 export default function WhoItsForPage() {
