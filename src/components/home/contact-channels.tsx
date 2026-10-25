@@ -1,6 +1,8 @@
 import {
   email,
   emailHref,
+  facebookLabel,
+  facebookUrl,
   instagramHandle,
   instagramUrl,
   phoneDisplay,
@@ -71,11 +73,25 @@ const channels = [
       />
     ),
   },
+  {
+    key: "facebook",
+    label: "Facebook",
+    value: facebookLabel,
+    href: facebookUrl,
+    hint: "Follow Zust Scan on Facebook",
+    external: true,
+    icon: (
+      <path
+        d="M14 8h2.5V4H14c-2.8 0-4.5 1.7-4.5 4.5V11H7v3.5h2.5V20h3.5v-5.5H16L16.5 11H13V8.8C13 8.1 13.2 8 14 8z"
+        fill="currentColor"
+      />
+    ),
+  },
 ] as const;
 
 export function ContactChannels() {
   return (
-    <ul className="grid gap-4 sm:grid-cols-3">
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {channels.map((channel) => (
         <li key={channel.key}>
           <a
@@ -105,7 +121,9 @@ export function ContactChannels() {
                 ? "Send email"
                 : channel.key === "phone"
                   ? "Call now"
-                  : "Open profile"}
+                  : channel.key === "facebook"
+                    ? "Open page"
+                    : "Open profile"}
               <span
                 className="transition-transform group-hover:translate-x-0.5"
                 aria-hidden="true"

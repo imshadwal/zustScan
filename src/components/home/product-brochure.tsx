@@ -176,7 +176,7 @@ export function ProductBrochure({ siteUrl }: Props) {
           <div className="mt-4 inline-flex flex-col rounded-2xl bg-blue px-5 py-4 text-white">
             <p className="text-3xl font-semibold">{price}</p>
             <p className="mt-1 text-sm text-white/85">
-              One location · save {launchOfferSavings} at launch · setup via enquiry
+              One location · save {launchOfferSavings} · Festive Offer · setup via enquiry
             </p>
           </div>
         </header>

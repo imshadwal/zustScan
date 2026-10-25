@@ -3,6 +3,8 @@ import Link from "next/link";
 import {
   email,
   emailHref,
+  facebookLabel,
+  facebookUrl,
   instagramHandle,
   instagramUrl,
   journeyTimeline,
@@ -38,9 +40,29 @@ export function Contact() {
             href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-12 items-center rounded-full bg-white/10 px-5 text-sm font-semibold hover:bg-white/15"
+            aria-label={`Instagram ${instagramHandle}`}
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/15"
           >
-            Instagram {instagramHandle}
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
+              <path
+                d="M8 4h8a4 4 0 014 4v8a4 4 0 01-4 4H8a4 4 0 01-4-4V8a4 4 0 014-4z"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              />
+              <circle cx="12" cy="12" r="3.25" stroke="currentColor" strokeWidth="1.75" />
+              <circle cx="16.8" cy="7.2" r="0.85" fill="currentColor" />
+            </svg>
+          </a>
+          <a
+            href={facebookUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={facebookLabel}
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/15"
+          >
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true">
+              <path d="M14 8h2.5V4H14c-2.8 0-4.5 1.7-4.5 4.5V11H7v3.5h2.5V20h3.5v-5.5H16L16.5 11H13V8.8C13 8.1 13.2 8 14 8z" />
+            </svg>
           </a>
         </div>
 
@@ -120,6 +142,16 @@ export function Contact() {
                   className="text-white/80 hover:text-white"
                 >
                   {instagramHandle}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-white"
+                >
+                  {facebookLabel}
                 </a>
               </li>
             </ul>

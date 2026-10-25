@@ -13,6 +13,8 @@ export const email = "zustscan@gmail.com";
 export const emailHref = "mailto:zustscan@gmail.com";
 export const instagramUrl = "https://instagram.com/zustscan";
 export const instagramHandle = "@zustscan";
+export const facebookUrl = "https://www.facebook.com/profile.php?id=61595962884025";
+export const facebookLabel = "Facebook";
 
 /** Shown on /c/[loginId] when admin has paused the guest QR. */
 export const guestQrPausedCopy = {
@@ -234,10 +236,10 @@ export const guestDecides = [
 export const listPrice = "₹5,499";
 export const price = "₹3,499";
 export const launchOfferSavings = "₹2,000";
-export const launchOfferHeadline = "Launch offer — save ₹2,000";
+export const launchOfferHeadline = "Festive Offer — save ₹2,000";
 export const launchOfferEndsLabel = "31 December 2026";
 export const launchOfferFinePrint =
-  "Intro price for new businesses while launch slots last in your city. Standard price returns to ₹5,499 after the offer ends.";
+  "Festive price for new businesses while offer slots last in your city. Standard price returns to ₹5,499 after the offer ends.";
 
 export const eventStandeePrice = "₹5,999/-";
 export const eventStandeeImagePath = "/images/event-standee-sign.jpg";
