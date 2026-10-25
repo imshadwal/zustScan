@@ -6,6 +6,14 @@ export const emailHref = "mailto:zustscan@gmail.com";
 export const instagramUrl = "https://instagram.com/zustscan";
 export const instagramHandle = "@zustscan";
 
+/** Shown on /c/[loginId] when admin has paused the guest QR. */
+export const guestQrPausedCopy = {
+  eyebrow: "Account paused",
+  headline: "Your account has been paused.",
+  body: "Guest reviews through this QR are turned off until an administrator reactivates it. Please get in touch with Zust Scan to restore access.",
+  contactLead: "Contact the administrator:",
+} as const;
+
 export const navLinks = [
   { href: "/", label: "Home" },
   { href: "/how-it-works", label: "How it works" },

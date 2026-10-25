@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GuestShell } from "@/components/guest/shell";
 import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
 import { displayGuestBusinessTitle } from "@/lib/initials";
+import { GuestQrPausedCard } from "@/components/guest/qr-paused";
 import { GuestReviewFlow } from "@/components/guest/review-flow";
 import { findBusinessOwnerPublic, loadGuestExperience } from "@/lib/business-owners";
 
@@ -48,6 +49,14 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
   if (!owner) notFound();
 
   const title = displayGuestBusinessTitle(owner.businessName, owner.loginId, owner.city);
+
+  if (!owner.qrActive) {
+    return (
+      <GuestShell center>
+        <GuestQrPausedCard businessTitle={title} loginId={owner.loginId} />
+      </GuestShell>
+    );
+  }
 
   let experience: Awaited<ReturnType<typeof loadGuestExperience>> = null;
   try {

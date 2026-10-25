@@ -35,6 +35,7 @@ export type BusinessOwnerListRecord = {
   createdAt: string;
   soldPrice: number;
   setupComplete: boolean;
+  qrActive: boolean;
 };
 
 export type BusinessOwnerPublic = {
@@ -42,6 +43,7 @@ export type BusinessOwnerPublic = {
   businessName: string | null;
   city: string | null;
   setupComplete: boolean;
+  qrActive: boolean;
 };
 
 export type BusinessOwnerProfile = {
@@ -98,6 +100,7 @@ type OwnerRow = {
   map_link: string | null;
   brief: string | null;
   setup_complete: boolean;
+  qr_active: boolean;
   created_at: string;
 };
 
@@ -163,7 +166,7 @@ async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
 export async function listBusinessOwners(): Promise<BusinessOwnerListRecord[]> {
   const { data, error } = await database()
     .from("business_owners")
-    .select("login_id, business_name, created_at, sold_price, setup_complete")
+    .select("login_id, business_name, created_at, sold_price, setup_complete, qr_active")
     .order("created_at", { ascending: false });
   if (error) throw mapDbError(error);
   return (data ?? []).map((row) => ({
@@ -172,6 +175,7 @@ export async function listBusinessOwners(): Promise<BusinessOwnerListRecord[]> {
     createdAt: row.created_at,
     soldPrice: row.sold_price,
     setupComplete: row.setup_complete,
+    qrActive: row.qr_active !== false,
   }));
 }
 
@@ -188,6 +192,7 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
       .from("business_owners")
       .select("login_id, business_name")
       .eq("setup_complete", true)
+      .eq("qr_active", true)
       .not("business_name", "is", null)
       .order("created_at", { ascending: false })
       .limit(24);
@@ -219,12 +224,13 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, qr_active, password_hash, sold_price, created_at",
     )
     .eq("login_id", id)
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data) return null;
+  if (data.qr_active === false) return null;
 
   const ownerId = data.id as string;
   const checklist = await recomputeSetupComplete(ownerId, data as OwnerRow);
@@ -258,7 +264,7 @@ export async function findBusinessOwnerPublic(
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, qr_active, password_hash, sold_price, created_at",
     )
     .eq("login_id", id)
     .maybeSingle();
@@ -271,7 +277,27 @@ export async function findBusinessOwnerPublic(
     businessName: data.business_name,
     city: data.city,
     setupComplete: checklist.complete,
+    qrActive: (data as OwnerRow).qr_active !== false,
   };
+}
+
+export async function setBusinessOwnerQrActive(loginId: string, qrActive: boolean) {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) {
+    throw new OwnerStoreError("That business owner was not found.", 404);
+  }
+  const { data, error } = await database()
+    .from("business_owners")
+    .update({
+      qr_active: qrActive,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("login_id", id)
+    .select("login_id, qr_active")
+    .maybeSingle();
+  if (error) throw mapDbError(error);
+  if (!data) throw new OwnerStoreError("That business owner was not found.", 404);
+  return { loginId: data.login_id as string, qrActive: data.qr_active !== false };
 }
 
 export async function verifyBusinessOwnerPassword(loginId: string, password: string) {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { OwnerIdentity } from "@/components/initials-badge";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { useToast } from "@/components/toast/toast-provider";
@@ -22,6 +22,7 @@ type OwnerCardData = {
   createdAtLabel: string;
   soldPriceLabel: string;
   setupComplete: boolean;
+  qrActive: boolean;
   pageViews: number;
   draftsGenerated: number;
   copyContinueTaps: number;
@@ -38,8 +39,42 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
   const [deletePending, setDeletePending] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [qrActive, setQrActive] = useState(owner.qrActive);
+  const [qrPending, setQrPending] = useState(false);
+
+  useEffect(() => {
+    setQrActive(owner.qrActive);
+  }, [owner.qrActive]);
+
   const pageUrl = `${siteOrigin}/c/${owner.loginId}`;
   const label = displayTitle(owner.businessName, owner.loginId);
+
+  async function toggleQrActive() {
+    const next = !qrActive;
+    setQrPending(true);
+    try {
+      const response = await fetch(`/api/admin/business-owners/${owner.loginId}/qr-active`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrActive: next }),
+      });
+      const body = (await response.json().catch(() => null)) as
+        | { qrActive?: boolean; error?: string }
+        | null;
+      if (!response.ok || typeof body?.qrActive !== "boolean") {
+        toastError(body?.error ?? "QR status could not be updated.");
+        setQrPending(false);
+        return;
+      }
+      setQrActive(body.qrActive);
+      success(body.qrActive ? "Guest QR is active." : "Guest QR is paused.");
+      router.refresh();
+      setQrPending(false);
+    } catch {
+      toastError("The request could not be sent.");
+      setQrPending(false);
+    }
+  }
 
   async function reset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -145,20 +180,30 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
     />
     <article className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
       <div className="flex flex-col gap-5 sm:flex-row">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/api/admin/business-owners/${owner.loginId}/qr`}
-          alt={`QR code linking to ${pageUrl}`}
-          width={144}
-          height={144}
-          className="h-36 w-36 rounded-2xl border border-slate-200"
-        />
+        <div className="relative shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/admin/business-owners/${owner.loginId}/qr`}
+            alt={`QR code linking to ${pageUrl}`}
+            width={144}
+            height={144}
+            className={`h-36 w-36 rounded-2xl border border-slate-200 ${
+              qrActive ? "" : "opacity-35 grayscale"
+            }`}
+          />
+          {!qrActive ? (
+            <span className="absolute inset-0 flex items-center justify-center rounded-2xl bg-navy/55 px-2 text-center text-xs font-semibold tracking-wide text-white uppercase">
+              QR paused
+            </span>
+          ) : null}
+        </div>
         <div className="min-w-0 flex-1">
           <OwnerIdentity businessName={owner.businessName} loginId={owner.loginId} />
           <p className="mt-2 font-mono text-sm text-muted">{owner.loginId}</p>
           <p className="mt-1 text-sm text-muted">
             Sold for {owner.soldPriceLabel} · Created {owner.createdAtLabel}
             {owner.setupComplete ? " · Ready for guests" : " · Setup incomplete"}
+            {qrActive ? " · QR active" : " · QR paused"}
           </p>
           <p className="mt-1 text-sm break-all text-muted">{pageUrl}</p>
           <div className="mt-4">
@@ -182,8 +227,16 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
             </a>
             <button
               type="button"
+              onClick={toggleQrActive}
+              disabled={qrPending || deletePending || pending}
+              className={qrActive ? quietButtonClass : primaryButtonClass}
+            >
+              {qrPending ? "Saving…" : qrActive ? "Pause guest QR" : "Activate guest QR"}
+            </button>
+            <button
+              type="button"
               onClick={openDeleteDialog}
-              disabled={deletePending || pending}
+              disabled={deletePending || pending || qrPending}
               className={dangerButtonClass}
             >
               Delete business

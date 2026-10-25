@@ -13,6 +13,7 @@ create table if not exists public.business_owners (
   map_link text,
   brief text,
   setup_complete boolean not null default false,
+  qr_active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint business_owners_login_id_key unique (login_id),

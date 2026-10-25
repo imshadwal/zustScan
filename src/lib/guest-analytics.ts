@@ -44,14 +44,16 @@ async function ownerIdForLogin(loginId: string) {
   if (!id) return null;
   const { data, error } = await database()
     .from("business_owners")
-    .select("id")
+    .select("id, qr_active")
     .eq("login_id", id)
     .maybeSingle();
   if (error) {
     if (isMissingTable(error)) return null;
+    if (error.code === "42703") return null;
     throw error;
   }
-  return (data?.id as string | undefined) ?? null;
+  if (!data?.id || data.qr_active === false) return null;
+  return data.id as string;
 }
 
 /** Best-effort increment; never throws to callers. */
