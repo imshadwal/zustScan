@@ -11,7 +11,7 @@ export type DraftInput = {
   brief: string;
   serviceNames: string[];
   productNames: string[];
-  tier: "Good" | "Better" | "Best";
+  tier: "Good" | "Great" | "Exceptional";
   stars: number;
   languages: GuestLanguage[];
   voice: GuestVoice;
@@ -208,7 +208,7 @@ function buildDraftMessages(input: DraftInput) {
     "Each request has a unique variation token — write a fresh review unlike typical prior drafts (new opening, new rhythm, new closing).",
     "Avoid clichés and filler: couldn't be happier, highly recommend, top-notch, smooth and effective, attentive and knowledgeable, enhance your online presence, I recently worked with.",
     "Do not write the star number or 'out of 5' in the text — the guest picks stars separately in Google.",
-    "Never use the words Good, Better, or Best; those are internal labels only. Express feeling in natural language.",
+    "Never use the words Good, Great, or Exceptional; those are internal labels only. Express feeling in natural language.",
     hindiOnly
       ? "CRITICAL: Every Hindi word must be in Devanagari script. Never write Hindi in Roman letters (no mujhe, maine, karungi, bahut in Latin). English product/service titles and brand names may stay in Latin."
       : "Prefer active first-person over passive unless the business context suggests otherwise.",

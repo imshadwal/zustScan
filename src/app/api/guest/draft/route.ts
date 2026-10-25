@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return json({ error: "Invalid request." }, 400);
   }
   if (!isGuestTier(tier)) {
-    return json({ error: "Pick Good, Better, or Best." }, 400);
+    return json({ error: "Pick Good, Great, or Exceptional." }, 400);
   }
   const stars = starsForTier(tier);
 
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
       brief: experience.brief,
       serviceNames,
       productNames,
-      tier: tier as "Good" | "Better" | "Best",
+      tier: tier as "Good" | "Great" | "Exceptional",
       stars,
       languages,
       voice,

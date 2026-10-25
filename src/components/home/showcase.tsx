@@ -3,7 +3,7 @@ import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 const checklist = [
   "Your name, address, contact, and Why trust us on the first screen",
   "One or more services and products",
-  "Good, Better, or Best (stars follow automatically)",
+  "Good, Great, or Exceptional (stars follow automatically)",
   "AI-powered draft they can change — English, Hindi, or Hinglish",
 ] as const;
 
@@ -106,13 +106,13 @@ function GuestFlowMock() {
 
         <MockPanel>
           <p className="text-[10px] font-semibold text-ink">How was it?</p>
-          <p className="text-[8px] text-muted">Biryani · tap Good, Better, or Best</p>
+          <p className="text-[8px] text-muted">Biryani · tap Good, Great, or Exceptional</p>
           <div className="mt-2 grid grid-cols-3 gap-1">
-            {(["Good", "Better", "Best"] as const).map((label) => (
+            {(["Good", "Great", "Exceptional"] as const).map((label) => (
               <span
                 key={label}
                 className={`rounded-md py-1 text-center text-[8px] font-semibold ${
-                  label === "Better"
+                  label === "Great"
                     ? "bg-blue text-white"
                     : "border border-slate-200 bg-white text-ink"
                 }`}

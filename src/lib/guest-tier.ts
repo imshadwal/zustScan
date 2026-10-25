@@ -1,11 +1,11 @@
-export const GUEST_TIERS = ["Good", "Better", "Best"] as const;
+export const GUEST_TIERS = ["Good", "Great", "Exceptional"] as const;
 
 export type GuestTier = (typeof GUEST_TIERS)[number];
 
-/** Stars shown on Google should match how the guest felt (Good / Better / Best). */
+/** Stars shown on Google should match how the guest felt (Good / Great / Exceptional). */
 export function starsForTier(tier: GuestTier): number {
-  if (tier === "Best") return 5;
-  if (tier === "Better") return 4;
+  if (tier === "Exceptional") return 5;
+  if (tier === "Great") return 4;
   return 3;
 }
 

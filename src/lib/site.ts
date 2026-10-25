@@ -42,7 +42,7 @@ export const journeyTimeline = [
   {
     step: "02",
     title: "Choose",
-    body: "Service, product, Good or Better or Best, and the stars.",
+    body: "Service, product, Good or Great or Exceptional, and the stars.",
   },
   {
     step: "03",
@@ -72,8 +72,8 @@ export const journey = [
   {
     step: "03",
     title: "Set how it felt",
-    body: "They pick the product, then Good, Better, or Best, and the star rating they want to give.",
-    tags: ["GOOD · BETTER · BEST", "STARS"],
+    body: "They pick the product, then Good, Great, or Exceptional, and the star rating they want to give.",
+    tags: ["GOOD · GREAT · EXCEPTIONAL", "STARS"],
   },
   {
     step: "04",
@@ -187,7 +187,7 @@ export const businessSets = [
 
 export const guestDecides = [
   "Which service and product to mention",
-  "Good, Better, or Best, and the stars",
+  "Good, Great, or Exceptional, and the stars",
   "The wording, including any edits",
   "The final tap on Post",
 ] as const;

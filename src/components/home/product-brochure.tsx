@@ -54,7 +54,7 @@ type Props = {
 export function ProductBrochure({ siteUrl }: Props) {
   const [activeSection, setActiveSection] = useState<string>("overview");
   const [journeyStep, setJourneyStep] = useState(0);
-  const [tier, setTier] = useState<GuestTier>("Better");
+  const [tier, setTier] = useState<GuestTier>("Great");
   const [language, setLanguage] = useState<"english" | "hindi" | "hinglish">("hinglish");
   const [voice, setVoice] = useState<GuestVoice>("neutral");
   const [audienceIndex, setAudienceIndex] = useState(0);
@@ -144,7 +144,7 @@ export function ProductBrochure({ siteUrl }: Props) {
             <p className="text-xs font-semibold text-muted">Try the feel</p>
             <p className="mt-2 text-sm font-semibold text-ink">How was it?</p>
             <div className="mt-2 grid grid-cols-3 gap-2">
-              {(["Good", "Better", "Best"] as const).map((label) => (
+              {(["Good", "Great", "Exceptional"] as const).map((label) => (
                 <button
                   key={label}
                   type="button"

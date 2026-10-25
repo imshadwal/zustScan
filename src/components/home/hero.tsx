@@ -52,7 +52,7 @@ export function Hero() {
             {[
               ["Service", "Food"],
               ["Product", "Biryani"],
-              ["How it felt", "Better · 4 stars"],
+              ["How it felt", "Great · 4 stars"],
             ].map(([label, value], index) => (
               <li
                 key={label}

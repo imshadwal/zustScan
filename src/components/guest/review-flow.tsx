@@ -18,7 +18,7 @@ import {
   GUEST_LANGUAGE_OPTIONS,
   type GuestLanguage,
 } from "@/lib/guest-languages";
-import { starsForTier, type GuestTier } from "@/lib/guest-tier";
+import { GUEST_TIERS, starsForTier, type GuestTier } from "@/lib/guest-tier";
 import {
   GUEST_VOICE_OPTIONS,
   type GuestVoice,
@@ -399,7 +399,7 @@ export function GuestReviewFlow({ experience }: Props) {
               hint={`${selectedProducts.map((p) => p.name).join(" · ")} · stars follow your pick`}
             />
             <div className="grid grid-cols-3 gap-2">
-              {(["Good", "Better", "Best"] as const).map((label) => (
+              {GUEST_TIERS.map((label) => (
                 <button
                   key={label}
                   type="button"
@@ -420,7 +420,7 @@ export function GuestReviewFlow({ experience }: Props) {
               <p className="mt-0.5 text-xs text-muted">
                 {tier
                   ? `${tier} · ${stars} star${stars === 1 ? "" : "s"} on Google`
-                  : "Fills when you pick Good, Better, or Best"}
+                  : "Fills when you pick Good, Great, or Exceptional"}
               </p>
               <div
                 className="mt-2 flex justify-center gap-2"
@@ -465,10 +465,7 @@ export function GuestReviewFlow({ experience }: Props) {
               </div>
               {language === "hindi" || language === "hinglish" ? (
                 <div className="mt-4">
-                  <StepHeader
-                    title="Review voice"
-                    hint="Neutral avoids raha/rahi in the draft."
-                  />
+                  <StepHeader title="Review voice" />
                   <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Review voice">
                     {GUEST_VOICE_OPTIONS.map((option) => (
                       <button
@@ -569,7 +566,7 @@ export function GuestReviewFlow({ experience }: Props) {
           </div>
         )}
 
-        {experience.whyTrustUs ? (
+        {step === 0 && experience.whyTrustUs ? (
           <Panel className="mt-4">
             <p className="text-xs font-semibold tracking-wide text-muted uppercase">Why trust us</p>
             <p className="mt-2 text-sm leading-6 text-ink">{experience.whyTrustUs}</p>
