@@ -23,7 +23,11 @@ async function BusinessesList() {
           {businesses.map((business) => (
             <li key={business.loginId}>
               <Link
-                href={`/c/${business.loginId}`}
+                href={
+                  business.standeeType === "event"
+                    ? `/e/${business.loginId}`
+                    : `/c/${business.loginId}`
+                }
                 className={`group flex items-center gap-3 p-4 transition-all hover:border-blue/35 hover:shadow-[0_8px_28px_rgba(7,20,40,0.1)] ${homeCardClass}`}
               >
                 <BusinessOwnerMark

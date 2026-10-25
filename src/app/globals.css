@@ -42,9 +42,39 @@ a[href] {
   cursor: pointer;
 }
 
+@keyframes trusted-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.trusted-marquee-track {
+  animation: trusted-marquee 14s linear infinite;
+}
+
+.trusted-marquee-viewport:hover .trusted-marquee-track {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .trusted-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+
+  .trusted-marquee-viewport:hover .trusted-marquee-track {
+    animation-play-state: paused;
   }
 }
 

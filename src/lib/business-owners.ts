@@ -295,6 +295,7 @@ export type PublicBusinessListing = {
   loginId: string;
   businessName: string;
   logoUrl: string | null;
+  standeeType: StandeeType;
 };
 
 /** Ready businesses for the marketing homepage. Returns [] if the store is unavailable. */
@@ -303,7 +304,7 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
   try {
     const { data, error } = await database()
       .from("business_owners")
-      .select("login_id, business_name, logo_path")
+      .select("login_id, business_name, logo_path, standee_type")
       .eq("setup_complete", true)
       .eq("qr_active", true)
       .not("business_name", "is", null)
@@ -319,6 +320,7 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
           loginId: row.login_id as string,
           businessName,
           logoUrl: businessLogoPublicUrl(logoPath ?? null),
+          standeeType: normalizeStandeeType(row.standee_type),
         },
       ];
     });

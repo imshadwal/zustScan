@@ -233,6 +233,10 @@ export const guestDecides = [
   "The final tap on Post",
 ] as const;
 
+export const trustedPartnersHeadline = "Trusted by Leading Brands & Startups";
+export const trustedPartnersSubline =
+  "Powering honest Google reviews for businesses that care about every guest.";
+
 export const listPrice = "₹5,499";
 export const price = "₹3,499";
 export const launchOfferSavings = "₹2,000";

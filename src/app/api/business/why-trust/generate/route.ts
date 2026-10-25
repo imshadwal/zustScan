@@ -1,3 +1,4 @@
+import { enforceWhyTrustRateLimit } from "@/lib/ai-rate-limit";
 import { failure, json } from "@/lib/admin-http";
 import { requireBusinessOwnerSession } from "@/lib/business-api";
 import { isBusinessCategoryId, OTHERS_CATEGORY_ID, isValidCategoryOther } from "@/lib/business-categories";
@@ -9,6 +10,12 @@ import { OwnerStoreError } from "@/lib/store-error";
 export async function POST(request: Request) {
   const session = await requireBusinessOwnerSession();
   if (!session.loginId) return session.response!;
+
+  try {
+    await enforceWhyTrustRateLimit(session.loginId);
+  } catch (error) {
+    return failure(error);
+  }
 
   const body = await request.json().catch(() => null);
   const businessName = typeof body?.businessName === "string" ? body.businessName : "";

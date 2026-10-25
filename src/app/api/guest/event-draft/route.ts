@@ -1,3 +1,4 @@
+import { AiRateLimitError, enforceGuestDraftRateLimits } from "@/lib/ai-rate-limit";
 import { json } from "@/lib/admin-http";
 import { loadEventGuestExperience } from "@/lib/business-events";
 import { recordGuestMetric } from "@/lib/guest-analytics";
@@ -21,6 +22,16 @@ export async function POST(request: Request) {
   if (!loginId) {
     return json({ error: "Invalid request." }, 400);
   }
+
+  try {
+    await enforceGuestDraftRateLimits(request, loginId);
+  } catch (error) {
+    if (error instanceof AiRateLimitError) {
+      return json({ error: error.message }, 429);
+    }
+    throw error;
+  }
+
   if (!isGuestTier(tier)) {
     return json({ error: "Pick Good, Great, or Exceptional." }, 400);
   }
