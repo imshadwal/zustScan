@@ -35,8 +35,8 @@ export function languageInstruction(languages: GuestLanguage[]) {
 
   if (languages.length === 1 && languages[0] === "hindi") {
     return (
-      "Write the entire review in Hindi using Devanagari script. " +
-      "Do not use Roman/Latin Hindi (no Hinglish). " +
+      "Write the entire review in Hindi using Devanagari script (हिंदी देवनागरी). " +
+      "Forbidden: Roman/Latin Hindi (mujhe, maine, karungi, bahut, accha written in Latin). " +
       "Latin letters are allowed only inside proper nouns, brand names, and exact product or service titles from the guest list."
     );
   }
