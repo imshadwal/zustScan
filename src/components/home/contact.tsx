@@ -54,7 +54,7 @@ export function Contact() {
           </Link>
           <div>
             <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
-              Product
+              Site
             </p>
             <ul className="mt-4 space-y-2 text-sm">
               {navLinks.map((link) => (

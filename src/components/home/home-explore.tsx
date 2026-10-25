@@ -1,21 +1,27 @@
 import Link from "next/link";
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
+import {
+  eventStandeePrice,
+  forEventsLabel,
+  otherProductsPagePath,
+  productPagePath,
+} from "@/lib/site";
 
 const pages = [
   {
-    href: "/how-it-works",
+    href: productPagePath,
     step: "01",
     eyebrow: "How it works",
-    title: "Six steps, from the QR to the post.",
-    body: "See the full guest path and what you configure on your side.",
+    title: "From QR scan to Google post.",
+    body: "Six-step guest path, what you configure, and examples for restaurants, hotels, retail, and more.",
     accent: "from-blue/10 to-white",
   },
   {
-    href: "/who-its-for",
+    href: otherProductsPagePath,
     step: "02",
-    eyebrow: "Who it’s for",
-    title: "Any business a guest can review.",
-    body: "Restaurants, hotels, retail, and service businesses with real examples.",
+    eyebrow: forEventsLabel,
+    title: "Custom QR for weddings and functions.",
+    body: `Customised QR and standee ${eventStandeePrice} — reviews that match the event your guests attended.`,
     accent: "from-navy/5 to-white",
   },
 ] as const;

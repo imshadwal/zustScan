@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { homeCardClass } from "@/components/home/styles";
-import { journeyTimeline } from "@/lib/site";
+import { journeyTimeline, productPagePath } from "@/lib/site";
 
 export function JourneyTimeline() {
   return (
@@ -16,7 +16,7 @@ export function JourneyTimeline() {
             </h2>
           </div>
           <Link
-            href="/how-it-works"
+            href={productPagePath}
             className="text-sm font-semibold text-blue hover:underline"
           >
             All six steps →

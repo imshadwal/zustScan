@@ -14,10 +14,18 @@ export const guestQrPausedCopy = {
   contactLead: "Contact the administrator:",
 } as const;
 
+/** Combined product story: guest path, setup, and who it fits. */
+export const productPagePath = "/how-it-works" as const;
+
+export const otherProductsPagePath = "/other-products" as const;
+
+/** Nav / headings for event & function standees (/other-products). */
+export const forEventsLabel = "For events" as const;
+
 export const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/who-its-for", label: "Who it’s for" },
+  { href: productPagePath, label: "How it works" },
+  { href: otherProductsPagePath, label: forEventsLabel },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
 ] as const;
@@ -193,6 +201,24 @@ export const launchOfferEndsLabel = "31 December 2026";
 export const launchOfferFinePrint =
   "Intro price for new businesses while launch slots last in your city. Standard price returns to ₹5,499 after the offer ends.";
 
+export const eventStandeePrice = "₹5,999/-";
+export const eventStandeeImagePath = "/images/event-standee-sign.jpg";
+export const eventStandeeCaption =
+  "Customised QR on a wooden easel standee — floor display and delivery included";
+export const eventStandeeTeaserBody =
+  "A QR and guest page built for your function — guests review the night they had, not a generic blurb.";
+export const eventStandeeEnquiryLead =
+  "Tell us your event, venue, and date — we customise the QR, standee, and guest path, then deliver before the function.";
+export const eventStandeeHeroHighlights = [
+  "Custom QR and standee for weddings, birthdays, and corporate nights",
+  "Guest page tuned to food, hall, staff, and ambience — reviews fit the event",
+  "Drafts in English, Hindi, or Hinglish; guests post on Google themselves",
+] as const;
+export const eventStandeeIncludes = [
+  "Customised QR and standee print",
+  "Branded guest page for the function",
+  "Setup, delivery, and placement guide",
+] as const;
 export const additionalOutletPrice = "₹2,499";
 export const referralDiscountAmount = "₹500";
 export const referralProgramSummary =
@@ -225,6 +251,60 @@ export const roiPricingPoints = [
     title: "One strong review",
     amount: "Priceless locally",
     body: "A specific 4★ review about your biryani or room helps the next guest choose you — Zust Scan makes that easier at the table.",
+  },
+] as const;
+
+/** Standalone offerings beyond the everyday counter/table QR plan. */
+export const otherProductsPage = {
+  eyebrow: forEventsLabel,
+  title: "Customised QR for weddings and banquets.",
+  description:
+    "Your everyday Zust Scan works at the table or counter. For function nights, we tailor the QR, standee art, and guest page to your event — so reviews describe the wedding, birthday, or corporate night guests actually attended.",
+} as const;
+
+export const otherProducts = [
+  {
+    id: "event-standee",
+    title: "Event & function standee",
+    price: eventStandeePrice,
+    badge: "Custom event QR · AI draft",
+    priceNote: "Per standee — customised QR, guest page, print, and delivery for your event.",
+    tagline: "Lawns, hotels, and banquet halls — weddings, birthdays, corporate nights.",
+    body:
+      "We customise the QR and standee for your event — services, theme, and what you want guests to mention. Place it at the exit, near billing, or beside the favours table. Guests scan once, pick what mattered that evening (food, hall, staff, ambience), and get an editable review draft that matches their visit — in English, Hindi, or Hinglish — then post on Google themselves.",
+    idealFor: [
+      "Banquet halls and marriage lawns",
+      "Hotel banquet and rooftop events",
+      "Large birthday and anniversary functions",
+    ],
+    howItWorks: [
+      {
+        title: "Brief your event",
+        detail:
+          "Tell us the function type and what guests should see — e.g. Food, Hall, Staff, Décor.",
+      },
+      {
+        title: "We customise QR & page",
+        detail:
+          "Your standee art, QR, and guest path are built for that night — same honest flow as the main plan.",
+      },
+      {
+        title: "Deliver & place",
+        detail:
+          "We print and ship the easel standee; staff set it where guests pause with their phones.",
+      },
+      {
+        title: "Reviews that match",
+        detail:
+          "Guests scan, pick what mattered, edit the draft, and post on Google. Pause the QR after the event if you like.",
+      },
+    ],
+    placement: [
+      "Exit gate or staircase — natural pause after the function",
+      "Near billing or reception — while waiting for car or invoice",
+      "Favours / gift table — guests already have phones out",
+    ],
+    note: "Reviews should reflect a real visit. Customised QR helps guests write about the event they joined — food, hall, and hospitality they experienced at your venue.",
   },
 ] as const;
 

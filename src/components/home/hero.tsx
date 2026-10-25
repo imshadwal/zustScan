@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { EnquiryButton } from "@/components/home/enquiry";
 import { SetupStandeeCallout } from "@/components/home/setup-standee-callout";
-
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden bg-navy text-white">

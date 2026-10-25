@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { Audiences } from "@/components/home/audiences";
+import { EventStandeeTeaser } from "@/components/home/event-standee-teaser";
 import { Journey } from "@/components/home/journey";
 import { Split } from "@/components/home/split";
 
 export const metadata: Metadata = {
   title: "How it works | Zust Scan",
   description:
-    "Six steps from QR scan to Google review: choose service and product, set how it felt, edit the draft, and post yourself.",
+    "How Zust Scan works — QR to Google review in six steps, what you configure, and who it fits: restaurants, hotels, retail, salons, and services.",
 };
 
 export default function HowItWorksPage() {
@@ -13,6 +15,8 @@ export default function HowItWorksPage() {
     <main>
       <Journey />
       <Split compactTop />
+      <Audiences />
+      <EventStandeeTeaser />
     </main>
   );
 }
