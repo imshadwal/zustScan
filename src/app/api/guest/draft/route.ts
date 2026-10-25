@@ -1,7 +1,11 @@
 import { json } from "@/lib/admin-http";
 import { loadGuestExperience } from "@/lib/business-owners";
 import { recordGuestMetric } from "@/lib/guest-analytics";
-import { generateGuestDraft } from "@/lib/guest-draft";
+import {
+  generateGuestDraft,
+  guestDraftSourceLabel,
+  GuestDraftUnavailableError,
+} from "@/lib/guest-draft";
 import { normalizeGuestLanguages } from "@/lib/guest-languages";
 import { isGuestTier, starsForTier } from "@/lib/guest-tier";
 import { normalizeGuestVoice } from "@/lib/guest-voice";
@@ -81,6 +85,12 @@ export async function POST(request: Request) {
   const businessName = displayTitle(experience.businessName, experience.loginId);
   const languages = normalizeGuestLanguages(body?.languages ?? body?.language);
   const voice = normalizeGuestVoice(body?.voice);
+  const variationRaw =
+    typeof body?.variationSeed === "string" ? body.variationSeed.trim() : "";
+  const variationSeed =
+    variationRaw.length > 0 && variationRaw.length <= 64
+      ? variationRaw
+      : `${loginId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
   try {
     const draft = await generateGuestDraft({
@@ -92,10 +102,14 @@ export async function POST(request: Request) {
       stars,
       languages,
       voice,
+      variationSeed,
     });
     void recordGuestMetric(loginId, "draft");
-    return json({ draft });
-  } catch {
+    return json({ draft, draftSource: guestDraftSourceLabel() });
+  } catch (error) {
+    if (error instanceof GuestDraftUnavailableError) {
+      return json({ error: error.guestMessage }, 503);
+    }
     return json({ error: "The draft could not be created." }, 500);
   }
 }

@@ -3,7 +3,7 @@ import "server-only";
 import type { GuestLanguage } from "@/lib/guest-languages";
 import { languageInstruction } from "@/lib/guest-languages";
 import type { GuestVoice } from "@/lib/guest-voice";
-import { effectiveVoice, voiceInstruction } from "@/lib/guest-voice";
+import { voiceInstruction } from "@/lib/guest-voice";
 import { serverEnv } from "@/lib/server-env";
 
 export type DraftInput = {
@@ -15,95 +15,139 @@ export type DraftInput = {
   stars: number;
   languages: GuestLanguage[];
   voice: GuestVoice;
+  /** Changes wording when the guest picks the same items again or taps Regenerate. */
+  variationSeed: string;
 };
 
-function listPhrase(items: string[]) {
-  const unique = [...new Set(items.map((item) => item.trim()).filter(Boolean))];
-  if (unique.length === 0) return "";
-  if (unique.length === 1) return unique[0]!;
-  if (unique.length === 2) return `${unique[0]} and ${unique[1]}`;
-  return `${unique.slice(0, -1).join(", ")}, and ${unique[unique.length - 1]}`;
+const GUEST_DRAFT_UNAVAILABLE =
+  "We could not create your review draft right now. Please try again in a moment.";
+
+export class GuestDraftUnavailableError extends Error {
+  readonly guestMessage: string;
+
+  constructor(guestMessage: string = GUEST_DRAFT_UNAVAILABLE) {
+    super(guestMessage);
+    this.name = "GuestDraftUnavailableError";
+    this.guestMessage = guestMessage;
+  }
 }
 
-function tonePhrase(tier: DraftInput["tier"]) {
-  if (tier === "Best") return "exceeded expectations";
-  if (tier === "Better") return "was a solid experience";
-  return "was fine overall";
+function hashSeed(seed: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
 
-function templateDraft(input: DraftInput) {
-  const name = input.businessName.trim() || "the business";
-  const tone = tonePhrase(input.tier);
-  const starsLabel = `${input.stars} star${input.stars === 1 ? "" : "s"}`;
-  const products = listPhrase(input.productNames);
-  const services = listPhrase(input.serviceNames);
-  const langs = new Set(input.languages);
-  const lang = langs.has("hindi") && langs.size === 1
-    ? "hindi"
-    : langs.has("hinglish") || (langs.has("hindi") && langs.has("english"))
-      ? "hinglish"
-      : "english";
-  const voice = effectiveVoice(
-    lang === "hindi" ? "hindi" : lang === "hinglish" ? "hinglish" : "english",
-    input.voice,
-  );
+function pickVariant<T>(items: readonly T[], seed: string) {
+  return items[hashSeed(seed) % items.length]!;
+}
 
-  if (langs.has("hindi") && langs.size === 1) {
-    const quality =
-      tone === "exceeded expectations"
-        ? "बहुत अच्छा"
-        : tone === "was a solid experience"
-          ? "अच्छा"
-          : "ठीक";
-    const intro = `मैंने ${name} पर ${products} (${services}) का अनुभव किया — कुल मिलाकर ${quality} रहा।`;
-    if (voice === "female") {
-      return (
-        `${intro} मैं ${starsLabel} दे रही हूँ। अगर ${services} चाहिए हों तो ${name} recommend करूँगी।`
+const DRAFT_ANGLES = [
+  "Open with the business name, then what you used.",
+  "Open with the main product or service, then name the business.",
+  "Open with how the visit felt, then what you used.",
+  "End with the star rating only — no separate recommendation sentence.",
+  "End by recommending the business to a friend in one short line (word it freshly).",
+  "Split offerings: mention products in one sentence and services in the next.",
+  "Keep it conversational, like a WhatsApp message to a friend.",
+  "Use a slightly different tone: warm and brief, not salesy.",
+  "Two short sentences only: what you used, then rating and feeling.",
+  "Three sentences: setup, what went well, stars.",
+  "Lead with the outcome (happy / satisfied), then explain what you bought.",
+  "End with a simple recommendation or thank-you — as if speaking to future customers.",
+  "Sound like Hinglish a young professional would write — simple words, no marketing jargon.",
+  "Put the star count in the middle sentence, not the last word.",
+  "Name the business once in the first sentence; do not repeat the business name.",
+  "Start with 'Recently' or 'Last time' and keep the rest fresh.",
+  "Focus on one product first, add the second product and services in the next sentence.",
+  "Close with thanks or appreciation, not a conditional 'if you need X' line.",
+  "Use em-dash or comma breaks; avoid copying a fill-in-the-blank template.",
+  "Vary verbs (try kiya, liya, handle kiya, deliver hua) — do not reuse the same verb twice.",
+] as const;
+
+function draftAngleInstruction(seed: string) {
+  return pickVariant(DRAFT_ANGLES, `${seed}:angle`);
+}
+
+const PUTER_CHAT_URL =
+  "https://api.puter.com/puterai/openai/v1/chat/completions";
+const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+
+type DraftLlmBackend = {
+  label: "puter" | "openai";
+  url: string;
+  key: string;
+  model: string;
+};
+
+function resolveDraftLlmBackend(): DraftLlmBackend {
+  const provider = serverEnv("AI_DRAFT_PROVIDER")?.trim().toLowerCase();
+  const puterToken = serverEnv("PUTER_AUTH_TOKEN")?.trim();
+  const openaiKey = serverEnv("OPENAI_API_KEY")?.trim();
+  const modelOverride = serverEnv("AI_DRAFT_MODEL")?.trim();
+
+  const usePuter =
+    provider === "puter" ||
+    (provider !== "openai" &&
+      (Boolean(puterToken) ||
+        Boolean(openaiKey && !openaiKey.startsWith("sk-"))));
+
+  if (usePuter) {
+    const key = puterToken || openaiKey;
+    if (!key) {
+      console.error(
+        "[guest-draft] Puter selected but PUTER_AUTH_TOKEN (or OPENAI_API_KEY with Puter token) is missing.",
       );
+      throw new GuestDraftUnavailableError();
     }
-    if (voice === "male") {
-      return (
-        `${intro} मैं ${starsLabel} दे रहा हूँ। अगर ${services} चाहिए हों तो ${name} recommend करूँगा।`
-      );
-    }
-    return (
-      `${intro} मेरी रेटिंग ${starsLabel} है। ${services} की जरूरत हो तो ${name} देख सकते हैं।`
-    );
+    return {
+      label: "puter",
+      url: PUTER_CHAT_URL,
+      key,
+      model: modelOverride || "gpt-5.4-nano",
+    };
   }
 
-  if (langs.has("hinglish") || (langs.has("hindi") && langs.has("english"))) {
-    const intro = `${name} pe ${products} (${services}) try kiya — experience ${tone} tha overall.`;
-    if (voice === "female") {
-      return (
-        `${intro} Main ${starsLabel} de rahi hoon. Agar ${services.toLowerCase()} chahiye ho to recommend karungi.`
-      );
-    }
-    if (voice === "male") {
-      return (
-        `${intro} Main ${starsLabel} de raha hoon. Agar ${services.toLowerCase()} chahiye ho to recommend karunga.`
-      );
-    }
-    return (
-      `${intro} Meri rating ${starsLabel} hai. Agar ${services.toLowerCase()} chahiye ho to ${name} check kar lena.`
+  if (!openaiKey) {
+    console.error(
+      "[guest-draft] Set OPENAI_API_KEY (sk-…) or PUTER_AUTH_TOKEN / AI_DRAFT_PROVIDER=puter.",
     );
+    throw new GuestDraftUnavailableError();
+  }
+  if (!openaiKey.startsWith("sk-")) {
+    console.error(
+      "[guest-draft] OPENAI_API_KEY must start with sk- for direct OpenAI, or use Puter (PUTER_AUTH_TOKEN + AI_DRAFT_PROVIDER=puter).",
+    );
+    throw new GuestDraftUnavailableError();
   }
 
-  return (
-    `I used ${products} (${services}) at ${name} and it ${tone}. ` +
-    `I am giving ${starsLabel}. Would recommend them if you need ${services.toLowerCase()}.`
-  );
+  return {
+    label: "openai",
+    url: OPENAI_CHAT_URL,
+    key: openaiKey,
+    model: modelOverride || "gpt-4o-mini",
+  };
 }
 
-async function openAiDraft(input: DraftInput) {
-  const key = serverEnv("OPENAI_API_KEY");
-  if (!key) return null;
+async function openAiDraft(input: DraftInput): Promise<string> {
+  const backend = resolveDraftLlmBackend();
 
   const system = [
-    "You write short, natural Google review drafts for guests in India.",
+    "You write short, natural review text that a guest will paste directly into Google Reviews.",
+    "Write as if the review is already on Google — never mention Google, posting, uploading, copy-paste, or that you are writing a review.",
     "First person, no hashtags or emojis, 2 to 4 sentences.",
-    "Mention every product and service the guest selected.",
+    "Include every selected product and service name at least once, spread across sentences — not one long parenthetical list.",
     "Do not invent facts beyond the business brief and the guest choices.",
     "Never say the review was written by AI.",
+    "Each draft must read differently: change the opening, middle, and closing from other drafts with the same picks.",
+    "Avoid stock closings like 'Agar X chahiye ho to recommend karungi/karunga' or repeating the full service list at the end.",
+    "Do not use future tense about sharing feedback (avoid lines like 'main review post karungi/karunga on Google'). State the experience and recommendation in the present or past.",
+    "Do not write the star number or 'out of 5' in the text — the guest picks stars separately in Google.",
+    "Never use the words Good, Better, or Best; those are internal labels only. Express feeling in natural language.",
+    "Prefer active first-person (maine unse kaam karwaya) over passive (samjhaya gaya) unless the brief mentions that.",
     languageInstruction(input.languages),
     voiceInstruction(input.languages[0] ?? "english", input.voice),
   ]
@@ -115,36 +159,71 @@ async function openAiDraft(input: DraftInput) {
     `Brief: ${input.brief.slice(0, 800)}`,
     `Services: ${input.serviceNames.join(", ") || "—"}`,
     `Products: ${input.productNames.join(", ") || "—"}`,
-    `How it felt: ${input.tier}`,
-    `Star rating: ${input.stars} out of 5`,
+    `How it felt (tone only — do not quote these labels): ${input.tier}`,
+    `Star rating (for tone only — do not mention stars or numbers in the review text): ${input.stars} out of 5`,
+    `Variation token: ${input.variationSeed}`,
+    `Structure for this draft: ${draftAngleInstruction(input.variationSeed)}`,
     "Write the review draft only.",
   ].join("\n");
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0.7,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(backend.url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${backend.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: backend.model,
+        temperature: 0.95,
+        presence_penalty: 0.35,
+        frequency_penalty: 0.25,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+  } catch (error) {
+    console.error(`[guest-draft] ${backend.label} request failed:`, error);
+    throw new GuestDraftUnavailableError();
+  }
 
-  if (!response.ok) return null;
-  const body = (await response.json()) as {
+  const body = (await response.json().catch(() => null)) as {
+    error?: { message?: string; type?: string; code?: string };
     choices?: { message?: { content?: string } }[];
-  };
-  const text = body.choices?.[0]?.message?.content?.trim();
-  return text || null;
+  } | null;
+
+  if (!response.ok) {
+    const detail = body?.error?.message ?? response.statusText;
+    const code = body?.error?.code ?? "";
+    if (backend.label === "puter" && response.status === 402) {
+      console.error(
+        "[guest-draft] Puter HTTP 402: subscription or credits required for server-side AI. " +
+          "Enable billing at puter.com/dashboard, or set AI_DRAFT_PROVIDER=openai with an sk- OpenAI key.",
+      );
+    } else {
+      console.error(
+        `[guest-draft] ${backend.label} HTTP ${response.status}${code ? ` (${code})` : ""}: ${detail}`,
+      );
+    }
+    throw new GuestDraftUnavailableError();
+  }
+
+  const text = body?.choices?.[0]?.message?.content?.trim();
+  if (!text) {
+    console.error(`[guest-draft] ${backend.label} returned empty content.`);
+    throw new GuestDraftUnavailableError();
+  }
+  return text;
 }
 
-export async function generateGuestDraft(input: DraftInput) {
-  const ai = await openAiDraft(input);
-  return ai ?? templateDraft(input);
+export function guestDraftSourceLabel(): "openai" | "puter" {
+  return resolveDraftLlmBackend().label;
+}
+
+/** AI-only guest drafts (OpenAI direct or Puter OpenAI-compatible API). */
+export async function generateGuestDraft(input: DraftInput): Promise<string> {
+  return openAiDraft(input);
 }

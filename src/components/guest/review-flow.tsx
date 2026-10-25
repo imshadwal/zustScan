@@ -186,6 +186,7 @@ export function GuestReviewFlow({ experience }: Props) {
           tier,
           language,
           voice,
+          variationSeed: crypto.randomUUID(),
         }),
       });
       const body = (await response.json().catch(() => null)) as
