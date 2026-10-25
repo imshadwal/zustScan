@@ -64,7 +64,6 @@ const DRAFT_ANGLES = [
   "Sound like Hinglish a young professional would write — simple words, no marketing jargon.",
   "Put the star count in the middle sentence, not the last word.",
   "Name the business once in the first sentence; do not repeat the business name.",
-  "Start with 'Recently' or 'Last time' and keep the rest fresh.",
   "Focus on one product first, add the second product and services in the next sentence.",
   "Close with thanks or appreciation, not a conditional 'if you need X' line.",
   "Use em-dash or comma breaks; avoid copying a fill-in-the-blank template.",
@@ -73,6 +72,33 @@ const DRAFT_ANGLES = [
 
 function draftAngleInstruction(seed: string) {
   return pickVariant(DRAFT_ANGLES, `${seed}:angle`);
+}
+
+const OPENING_RULES = [
+  "First sentence must start with the business name.",
+  "First sentence must start with one exact product name from the Products list.",
+  "First sentence must start with one exact service name from the Services list.",
+  "For English or Hinglish: do not start with I, We, My, Maine, or Mujhe — open with the business name or an offering name instead.",
+  "For Devanagari Hindi: open naturally in Hindi (business name or offering first is fine); stay fully in Devanagari.",
+  "Open with one specific outcome (visibility, leads, quality, support) in the first clause, then name offerings.",
+  "Open with a short time phrase (e.g. last month, pehli baar) only if the language is Hinglish/Hindi — never use 'I recently worked with'.",
+  "Open with a question you answer in the next sentence (rhetorical, one line).",
+  "Open mid-story: what you needed first, then who helped.",
+] as const;
+
+const LENGTH_RULES = [
+  "Write exactly 2 sentences.",
+  "Write exactly 3 sentences.",
+  "Write 4 sentences maximum; stay under 75 words.",
+  "Write 4 sentences maximum; stay under 90 words.",
+] as const;
+
+function variationInstructions(seed: string) {
+  return [
+    `Structure: ${draftAngleInstruction(seed)}`,
+    `Opening rule: ${pickVariant(OPENING_RULES, `${seed}:open`)}`,
+    `Length: ${pickVariant(LENGTH_RULES, `${seed}:len`)}`,
+  ].join("\n");
 }
 
 function resolveOpenAiConfig() {
@@ -98,10 +124,12 @@ async function openAiDraft(input: DraftInput): Promise<string> {
     "You write short, natural review text that a guest will paste directly into Google Reviews.",
     "Write as if the review is already on Google — never mention Google, posting, uploading, copy-paste, or that you are writing a review.",
     "First person, no hashtags or emojis, 2 to 4 sentences.",
-    "Include every selected product and service name at least once, spread across sentences — not one long parenthetical list.",
+    "Include every selected product and service name verbatim at least once — do not substitute generic terms like 'digital marketing' for listed services.",
+    "Spread names across sentences — not one long parenthetical list.",
     "Do not invent facts beyond the business brief and the guest choices.",
     "Never say the review was written by AI.",
-    "Each draft must read differently: change the opening, middle, and closing from other drafts with the same picks.",
+    "Each request has a unique variation token — write a fresh review unlike typical prior drafts (new opening, new rhythm, new closing).",
+    "Avoid clichés and filler: couldn't be happier, highly recommend, top-notch, smooth and effective, attentive and knowledgeable, enhance your online presence, I recently worked with.",
     "Avoid stock closings like 'Agar X chahiye ho to recommend karungi/karunga' or repeating the full service list at the end.",
     "Do not use future tense about sharing feedback (avoid lines like 'main review post karungi/karunga on Google'). State the experience and recommendation in the present or past.",
     "Do not write the star number or 'out of 5' in the text — the guest picks stars separately in Google.",
@@ -120,8 +148,8 @@ async function openAiDraft(input: DraftInput): Promise<string> {
     `Products: ${input.productNames.join(", ") || "—"}`,
     `How it felt (tone only — do not quote these labels): ${input.tier}`,
     `Star rating (for tone only — do not mention stars or numbers in the review text): ${input.stars} out of 5`,
-    `Variation token: ${input.variationSeed}`,
-    `Structure for this draft: ${draftAngleInstruction(input.variationSeed)}`,
+    `Variation token (must change wording from any other token): ${input.variationSeed}`,
+    variationInstructions(input.variationSeed),
     "Write the review draft only.",
   ].join("\n");
 
@@ -135,9 +163,9 @@ async function openAiDraft(input: DraftInput): Promise<string> {
       },
       body: JSON.stringify({
         model,
-        temperature: 0.95,
-        presence_penalty: 0.35,
-        frequency_penalty: 0.25,
+        temperature: 1,
+        presence_penalty: 0.5,
+        frequency_penalty: 0.35,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },

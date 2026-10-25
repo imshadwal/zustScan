@@ -44,9 +44,21 @@ export function voiceInstruction(language: GuestLanguage, voice: GuestVoice) {
     );
   }
   if (v === "female") {
+    if (language === "hindi") {
+      return (
+        "Use consistent feminine first-person forms in Devanagari Hindi " +
+        "(e.g. दे रही हूँ, करूँगी). No slash alternatives."
+      );
+    }
     return (
       "Use consistent feminine first-person forms in Hindi or Hinglish " +
       "(e.g. de rahi hoon, karungi, try kiya + feminine follow-ups where needed). No slash alternatives."
+    );
+  }
+  if (language === "hindi") {
+    return (
+      "Use consistent masculine first-person forms in Devanagari Hindi " +
+      "(e.g. दे रहा हूँ, करूँगा). No slash alternatives."
     );
   }
   return (

@@ -33,6 +33,13 @@ export function languageInstruction(languages: GuestLanguage[]) {
     return "Hinglish (Roman script, natural Hindi–English mix)";
   });
 
+  if (languages.length === 1 && languages[0] === "hindi") {
+    return (
+      "Write the entire review in Hindi using Devanagari script. " +
+      "Do not use Roman/Latin Hindi (no Hinglish). " +
+      "Latin letters are allowed only inside proper nouns, brand names, and exact product or service titles from the guest list."
+    );
+  }
   if (languages.length === 1) {
     return `Write the entire review in ${labels[0]}.`;
   }
