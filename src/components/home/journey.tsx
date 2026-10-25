@@ -1,16 +1,117 @@
-import type { ReactNode } from "react";
+"use client";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { journey } from "@/lib/site";
+
+/** Warm accent on navy (distinct from headline/link blue). */
+const stepIconClass = "h-7 w-7 text-amber-200";
+const stepBadgeClass =
+  "border-2 border-amber-200/90 bg-navy font-bold text-amber-50 shadow-[0_0_24px_rgba(251,191,36,0.35)]";
+
+function ScrollProgressTimeline({
+  fill,
+  variant,
+}: {
+  fill: number;
+  variant: "center" | "mobile";
+}) {
+  const isCenter = variant === "center";
+  const trackWidthPx = 4;
+  const fillWidthPx = 4 + fill * 2;
+  const glow = 8 + fill * 24;
+  const glowAlpha = 0.2 + fill * 0.5;
+  const barPositionClass = isCenter
+    ? "left-1/2 -translate-x-1/2"
+    : "left-0 -translate-x-1/2";
+
+  return (
+    <div
+      className={
+        isCenter
+          ? "pointer-events-none absolute top-0 bottom-0 left-1/2 hidden -translate-x-1/2 md:block"
+          : "pointer-events-none absolute top-0 bottom-0 left-[1.35rem] md:hidden"
+      }
+      aria-hidden="true"
+    >
+      <div
+        className={`absolute inset-y-0 rounded-full bg-amber-200/12 ${barPositionClass}`}
+        style={{ width: trackWidthPx }}
+      />
+      <div
+        className={`absolute top-0 origin-top rounded-full bg-gradient-to-b from-amber-200/40 via-amber-200 to-amber-100/90 ${barPositionClass}`}
+        style={{
+          height: `${fill * 100}%`,
+          width: fillWidthPx,
+          opacity: 0.35 + fill * 0.65,
+          boxShadow: `0 0 ${glow}px rgba(251, 191, 36, ${glowAlpha})`,
+        }}
+      />
+    </div>
+  );
+}
+
+function useTimelineScrollFill(containerRef: RefObject<HTMLElement | null>) {
+  const [fill, setFill] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const anchor = vh * 0.52;
+      const height = Math.max(rect.height, 1);
+      const next = (anchor - rect.top) / height;
+      setFill(Math.min(1, Math.max(0, next)));
+    };
+
+    const schedule = () => {
+      if (!raf) raf = window.requestAnimationFrame(update);
+    };
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduced.matches) {
+      setFill(1);
+      return;
+    }
+
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    reduced.addEventListener("change", () => {
+      if (reduced.matches) setFill(1);
+      else schedule();
+    });
+
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [containerRef]);
+
+  return fill;
+}
 
 const stepIcons = [
   /* 01 QR */
-  <svg key="1" viewBox="0 0 24 24" className="h-7 w-7 text-blue" aria-hidden="true">
+  <svg key="1" viewBox="0 0 24 24" className={stepIconClass} aria-hidden="true">
     <path
       fill="currentColor"
       d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm8 2h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"
     />
   </svg>,
   /* 02 tap */
-  <svg key="2" viewBox="0 0 24 24" className="h-7 w-7 text-blue" aria-hidden="true">
+  <svg key="2" viewBox="0 0 24 24" className={stepIconClass} aria-hidden="true">
     <path
       fill="none"
       stroke="currentColor"
@@ -20,14 +121,14 @@ const stepIcons = [
     />
   </svg>,
   /* 03 stars */
-  <svg key="3" viewBox="0 0 24 24" className="h-7 w-7 text-blue" aria-hidden="true">
+  <svg key="3" viewBox="0 0 24 24" className={stepIconClass} aria-hidden="true">
     <path
       fill="currentColor"
       d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17.8l-6.2 4.5 2.4-7.4L2 9.4h7.6L12 2z"
     />
   </svg>,
   /* 04 edit */
-  <svg key="4" viewBox="0 0 24 24" className="h-7 w-7 text-blue" aria-hidden="true">
+  <svg key="4" viewBox="0 0 24 24" className={stepIconClass} aria-hidden="true">
     <path
       fill="none"
       stroke="currentColor"
@@ -38,7 +139,7 @@ const stepIcons = [
     />
   </svg>,
   /* 05 copy */
-  <svg key="5" viewBox="0 0 24 24" className="h-7 w-7 text-blue" aria-hidden="true">
+  <svg key="5" viewBox="0 0 24 24" className={stepIconClass} aria-hidden="true">
     <path
       fill="none"
       stroke="currentColor"
@@ -48,7 +149,7 @@ const stepIcons = [
     />
   </svg>,
   /* 06 check */
-  <svg key="6" viewBox="0 0 24 24" className="h-7 w-7 text-blue" aria-hidden="true">
+  <svg key="6" viewBox="0 0 24 24" className={stepIconClass} aria-hidden="true">
     <path
       fill="none"
       stroke="currentColor"
@@ -68,7 +169,9 @@ function JourneyStepCard({
 }) {
   return (
     <article className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:p-8">
-      <div className="mb-4">{icon}</div>
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-200/25 bg-amber-200/10">
+        {icon}
+      </div>
       <h3 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
         {item.title}
       </h3>
@@ -88,6 +191,9 @@ function JourneyStepCard({
 }
 
 export function Journey({ showHeading = true }: { showHeading?: boolean }) {
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const timelineFill = useTimelineScrollFill(timelineRef);
+
   return (
     <section
       id="journey"
@@ -125,12 +231,12 @@ export function Journey({ showHeading = true }: { showHeading?: boolean }) {
           </header>
         ) : null}
 
-        <div className={`relative ${showHeading ? "mt-16 lg:mt-20" : ""}`}>
-          {/* Center spine (tablet+) */}
-          <div
-            className="pointer-events-none absolute top-0 bottom-0 left-1/2 hidden w-px -translate-x-1/2 bg-gradient-to-b from-blue/20 via-blue to-blue/20 md:block"
-            aria-hidden="true"
-          />
+        <div
+          ref={timelineRef}
+          className={`relative ${showHeading ? "mt-16 lg:mt-20" : ""}`}
+        >
+          <ScrollProgressTimeline fill={timelineFill} variant="center" />
+          <ScrollProgressTimeline fill={timelineFill} variant="mobile" />
 
           <ol className="flex flex-col gap-14 md:gap-20 lg:gap-24">
             {journey.map((item, index) => {
@@ -143,15 +249,15 @@ export function Journey({ showHeading = true }: { showHeading?: boolean }) {
                   key={item.step}
                   className="relative md:grid md:min-h-[12rem] md:grid-cols-2 md:items-center md:gap-10 lg:gap-14"
                 >
-                  <div
-                    className="pointer-events-none absolute top-0 bottom-0 left-[1.35rem] w-px bg-blue/35 md:hidden"
-                    aria-hidden="true"
-                  />
-                  <span className="pointer-events-none absolute top-8 left-[1.35rem] z-[2] flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-2 border-blue bg-navy text-xs font-bold text-white shadow-[0_0_28px_rgba(0,102,255,0.45)] md:hidden">
+                  <span
+                    className={`pointer-events-none absolute top-8 left-[1.35rem] z-[2] flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full text-xs ${stepBadgeClass} md:hidden`}
+                  >
                     {item.step}
                   </span>
 
-                  <span className="pointer-events-none absolute top-1/2 left-1/2 z-[2] hidden h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-blue bg-navy text-sm font-bold text-white shadow-[0_0_28px_rgba(0,102,255,0.45)] md:flex">
+                  <span
+                    className={`pointer-events-none absolute top-1/2 left-1/2 z-[2] hidden h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-sm ${stepBadgeClass} md:flex`}
+                  >
                     {item.step}
                   </span>
 
