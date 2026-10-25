@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { fieldClass, primaryButtonClass } from "@/components/admin/styles";
 import { useToast } from "@/components/toast/toast-provider";
@@ -38,7 +37,6 @@ export function ProfileForm({
   standeeType?: StandeeType;
 }) {
   const isEventStandee = standeeType === "event";
-  const router = useRouter();
   const { success, error: toastError } = useToast();
   const [businessName, setBusinessName] = useState(initial.businessName ?? "");
   const [city, setCity] = useState(initial.city ?? "");
@@ -161,7 +159,6 @@ export function ProfileForm({
       }
       success("Profile saved.");
       setPending(false);
-      router.refresh();
     } catch {
       const message = "The request could not be sent.";
       setError(message);

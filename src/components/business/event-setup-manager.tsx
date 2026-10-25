@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { fieldClass, primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
 import { useToast } from "@/components/toast/toast-provider";
@@ -15,7 +14,6 @@ export function EventSetupManager({
   initialEventDate: string | null;
   initialAreas: EventAreaRecord[];
 }) {
-  const router = useRouter();
   const { success, error: toastError } = useToast();
   const [eventName, setEventName] = useState(initialEventName);
   const [eventDate, setEventDate] = useState(initialEventDate ?? "");
@@ -38,7 +36,6 @@ export function EventSetupManager({
         return;
       }
       success("Event details saved.");
-      router.refresh();
       setPending(false);
     } catch {
       toastError("The request could not be sent.");
@@ -67,7 +64,6 @@ export function EventSetupManager({
       setAreas((prev) => [...prev, body.area!]);
       setNewArea("");
       success("Area added.");
-      router.refresh();
       setPending(false);
     } catch {
       toastError("The request could not be sent.");
@@ -80,7 +76,6 @@ export function EventSetupManager({
     await fetch(`/api/business/event/areas/${areaId}`, { method: "DELETE" });
     setAreas((prev) => prev.filter((a) => a.id !== areaId));
     success("Area removed.");
-    router.refresh();
     setPending(false);
   }
 
@@ -132,7 +127,8 @@ export function EventSetupManager({
       <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
         <h2 className="text-sm font-semibold text-muted">Guest areas</h2>
         <p className="mt-1 text-sm text-muted">
-          What guests can tap on the standee QR — Food, Hall, Staff, etc.
+          Add what guests can tap on the standee QR (e.g. Food, Hall, Décor). Start empty — nothing
+          is pre-filled.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2">
           {areas.map((area) => (
@@ -143,7 +139,7 @@ export function EventSetupManager({
               {area.name}
               <button
                 type="button"
-                disabled={pending || areas.length <= 1}
+                disabled={pending}
                 onClick={() => void removeArea(area.id)}
                 className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-white hover:text-red-700 disabled:opacity-40"
                 aria-label={`Remove ${area.name}`}

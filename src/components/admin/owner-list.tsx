@@ -372,8 +372,7 @@ function OwnerManagePanel({
               </button>
             </div>
             <p className="mt-2 text-xs text-muted">
-              Switching to event adds default areas (Food, Hall, Staff, Ambience) if none exist.
-              Owner completes event name and date in their portal.
+              Owner completes profile, event name, date, and guest areas in their portal.
             </p>
           </div>
           <div className="mt-4">

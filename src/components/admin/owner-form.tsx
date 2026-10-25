@@ -12,7 +12,12 @@ import { useToast } from "@/components/toast/toast-provider";
 import { isValidLoginId, normalizeLoginId, parseSoldPrice, formatRupees } from "@/lib/login-id";
 import type { StandeeType } from "@/lib/standee-type";
 
-type Created = { loginId: string; password: string; soldPriceLabel: string };
+type Created = {
+  loginId: string;
+  password: string;
+  soldPriceLabel: string;
+  standeeType: StandeeType;
+};
 
 export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
   const { success, error: toastError } = useToast();
@@ -61,7 +66,7 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
         }),
       });
       const body = (await response.json().catch(() => null)) as
-        | { loginId?: string; password?: string; error?: string }
+        | { loginId?: string; password?: string; standeeType?: StandeeType; error?: string }
         | null;
       if (!response.ok || !body?.loginId || !body.password) {
         const message = body?.error ?? "The business owner could not be created.";
@@ -71,10 +76,12 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
         return;
       }
       success("Business owner saved.");
+      const createdStandeeType = body.standeeType === "event" ? "event" : "table";
       setCreated({
         loginId: body.loginId,
         password: body.password,
         soldPriceLabel: formatRupees(price),
+        standeeType: createdStandeeType,
       });
       setPassword("");
       setSoldPrice("");
@@ -92,7 +99,10 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
   }
 
   if (created) {
-    const pageUrl = `${siteOrigin}/c/${created.loginId}`;
+    const pageUrl =
+      created.standeeType === "event"
+        ? `${siteOrigin}/e/${created.loginId}`
+        : `${siteOrigin}/c/${created.loginId}`;
     return (
       <div>
         <h1 className="text-2xl font-semibold text-white">Business owner created</h1>
@@ -107,6 +117,10 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
           <p className="mt-1 font-mono text-lg">{created.loginId}</p>
           <p className="mt-5 text-sm font-semibold text-muted">Sold for</p>
           <p className="mt-1 text-lg">{created.soldPriceLabel}</p>
+          <p className="mt-5 text-sm font-semibold text-muted">Standee type</p>
+          <p className="mt-1 text-lg">
+            {created.standeeType === "event" ? "Event (/e/…)" : "Table (/c/…)"}
+          </p>
           <p className="mt-5 text-sm font-semibold text-muted">Password</p>
           <RevealableSecret value={created.password} />
           <button type="button" onClick={copyPassword} className={`${quietButtonClass} mt-4`}>
@@ -143,6 +157,7 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
               setCreated(null);
               setLoginId("");
               setSoldPrice("");
+              setStandeeType("table");
               setCopied(false);
             }}
           >

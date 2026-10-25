@@ -38,10 +38,9 @@ import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { businessLogoPublicUrl } from "@/lib/business-logos";
 import { isGuestThemeId } from "@/lib/guest-themes";
 import {
-  countEventAreas,
-  getEventPortalState,
+  getEventPortalStateForOwnerRow,
   recomputeEventSetupComplete,
-  seedDefaultEventAreas,
+  type EventAreaRecord,
 } from "@/lib/business-events";
 import { OwnerStoreError } from "@/lib/store-error";
 import { normalizeStandeeType, type StandeeType } from "@/lib/standee-type";
@@ -83,6 +82,9 @@ export type BusinessOwnerProfile = {
   standeeType: StandeeType;
   checklist: SetupChecklist;
   eventChecklist: EventSetupChecklist | null;
+  eventName: string | null;
+  eventDate: string | null;
+  eventAreas: EventAreaRecord[];
 };
 
 function notReadyMessage(error: { code?: string; message?: string }) {
@@ -210,6 +212,20 @@ function guestDraftContext(row: OwnerRow): string | null {
   return null;
 }
 
+function setupChecklistFromEvent(eventChecklist: EventSetupChecklist): SetupChecklist {
+  return {
+    businessName: eventChecklist.businessName,
+    city: eventChecklist.city,
+    category: eventChecklist.category,
+    phone: eventChecklist.phone,
+    mapLink: eventChecklist.mapLink,
+    hasService: eventChecklist.hasArea,
+    everyServiceHasProduct: eventChecklist.hasArea,
+    complete: eventChecklist.complete,
+    missingLabels: eventChecklist.missingLabels,
+  };
+}
+
 async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
   if (normalizeStandeeType(row.standee_type) === "event") {
     const eventChecklist = await recomputeEventSetupComplete(ownerId, {
@@ -229,17 +245,7 @@ async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
       guest_theme_id: row.guest_theme_id,
       logo_path: row.logo_path,
     });
-    return {
-      businessName: eventChecklist.businessName,
-      city: eventChecklist.city,
-      category: eventChecklist.category,
-      phone: eventChecklist.phone,
-      mapLink: eventChecklist.mapLink,
-      hasService: eventChecklist.hasArea,
-      everyServiceHasProduct: eventChecklist.hasArea,
-      complete: eventChecklist.complete,
-      missingLabels: eventChecklist.missingLabels,
-    };
+    return setupChecklistFromEvent(eventChecklist);
   }
 
   const services = await productCountsForOwner(ownerId);
@@ -497,11 +503,6 @@ export async function updateBusinessOwnerStandeeType(
   if (!data) throw new OwnerStoreError("That business owner was not found.", 404);
 
   const ownerId = data.id as string;
-  if (standeeType === "event") {
-    const areaCount = await countEventAreas(ownerId);
-    if (areaCount === 0) await seedDefaultEventAreas(ownerId);
-  }
-
   await recomputeSetupComplete(ownerId, data as OwnerRow);
   return { loginId: id, standeeType: standeeType as StandeeType };
 }
@@ -549,9 +550,6 @@ export async function createBusinessOwner(
     .select("id")
     .single();
   if (error) throw mapDbError(error);
-  if (standeeType === "event") {
-    await seedDefaultEventAreas(data.id as string);
-  }
   return { loginId: id, password, standeeType };
 }
 
@@ -607,10 +605,52 @@ export async function getBusinessOwnerProfile(
   const ownerId = data.id as string;
   const row = data as OwnerRow;
   const standeeType = normalizeStandeeType(row.standee_type);
-  const checklist = await recomputeSetupComplete(ownerId, row);
   const branding = mapBrandingFields(row);
-  const eventState =
-    standeeType === "event" ? await getEventPortalState(id) : null;
+
+  if (standeeType === "event") {
+    const eventRow = {
+      id: ownerId,
+      login_id: row.login_id,
+      standee_type: row.standee_type,
+      business_name: row.business_name,
+      city: row.city,
+      business_category: row.business_category,
+      business_category_other: row.business_category_other,
+      address: row.address,
+      why_trust_us: row.why_trust_us,
+      phone: row.phone,
+      map_link: row.map_link,
+      setup_complete: row.setup_complete,
+      qr_active: row.qr_active,
+      guest_theme_id: row.guest_theme_id,
+      logo_path: row.logo_path,
+    };
+    const eventState = await getEventPortalStateForOwnerRow(eventRow);
+    if (!eventState) return null;
+    const checklist = setupChecklistFromEvent(eventState.checklist);
+    return {
+      loginId: row.login_id,
+      businessName: row.business_name,
+      city: row.city,
+      businessCategory: null,
+      businessCategoryOther: null,
+      phone: row.phone,
+      mapLink: row.map_link,
+      address: row.address,
+      whyTrustUs: row.why_trust_us,
+      guestThemeId: branding.guestThemeId,
+      logoUrl: branding.logoUrl,
+      setupComplete: checklist.complete,
+      standeeType,
+      checklist,
+      eventChecklist: eventState.checklist,
+      eventName: eventState.eventName,
+      eventDate: eventState.eventDate,
+      eventAreas: eventState.areas,
+    };
+  }
+
+  const checklist = await recomputeSetupComplete(ownerId, row);
   const categoryOptions = await listBusinessCategoryOptions();
   const categoryRaw = row.business_category?.trim();
   const businessCategory =
@@ -633,7 +673,10 @@ export async function getBusinessOwnerProfile(
     setupComplete: checklist.complete,
     standeeType,
     checklist,
-    eventChecklist: eventState?.checklist ?? null,
+    eventChecklist: null,
+    eventName: null,
+    eventDate: null,
+    eventAreas: [],
   };
 }
 
@@ -681,13 +724,13 @@ export async function updateBusinessOwnerProfile(
     );
   }
 
-  const { data: standeeRow, error: standeeError } = await database()
+  const { data: ownerBefore, error: ownerBeforeError } = await database()
     .from("business_owners")
     .select("standee_type")
     .eq("id", ownerId)
     .maybeSingle();
-  if (standeeError) throw mapDbError(standeeError);
-  const isEventStandee = normalizeStandeeType(standeeRow?.standee_type) === "event";
+  if (ownerBeforeError) throw mapDbError(ownerBeforeError);
+  const isEventStandee = normalizeStandeeType(ownerBefore?.standee_type) === "event";
 
   let businessCategoryPatch: string | null = null;
   let businessCategoryOtherPatch: string | null = null;

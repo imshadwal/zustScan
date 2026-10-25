@@ -49,15 +49,11 @@ export function evaluateEventSetup(input: {
   standeeType: StandeeType;
   businessName: string | null;
   city: string | null;
-  businessCategory: string | null;
-  businessCategoryOther: string | null;
   phone: string | null;
   mapLink: string | null;
   eventName: string | null;
   eventDate: string | null;
   areaCount: number;
-  isBusinessCategoryId: (value: string) => boolean;
-  isValidCategoryOther: (value: string) => boolean;
 }): EventSetupChecklist {
   if (input.standeeType !== "event") {
     return {

@@ -13,15 +13,10 @@ import {
   normalizeEventName,
   type EventSetupChecklist,
 } from "@/lib/event-validation";
-import {
-  isBusinessCategoryId,
-  isValidCategoryOther,
-} from "@/lib/business-categories";
-import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { businessLogoPublicUrl } from "@/lib/business-logos";
 import { isGuestThemeId } from "@/lib/guest-themes";
 import { normalizeLoginId, isValidLoginId } from "@/lib/login-id";
-import { DEFAULT_EVENT_AREAS, normalizeStandeeType, type StandeeType } from "@/lib/standee-type";
+import { normalizeStandeeType, type StandeeType } from "@/lib/standee-type";
 import { OwnerStoreError } from "@/lib/store-error";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -112,16 +107,6 @@ function guestDraftContext(whyTrustUs: string | null, businessName: string | nul
   return null;
 }
 
-export async function seedDefaultEventAreas(ownerId: string) {
-  const rows = DEFAULT_EVENT_AREAS.map((name, index) => ({
-    business_owner_id: ownerId,
-    name,
-    sort_order: index,
-  }));
-  const { error } = await database().from("business_event_areas").insert(rows);
-  if (error) throw mapDbError(error);
-}
-
 export async function countEventAreas(ownerId: string) {
   const { count, error } = await database()
     .from("business_event_areas")
@@ -141,13 +126,11 @@ async function fetchEventProfile(ownerId: string) {
   return data as { event_name: string; event_date: string | null } | null;
 }
 
-export async function listEventAreasForOwner(loginId: string): Promise<EventAreaRecord[]> {
-  const row = await ownerRowByLogin(loginId);
-  if (!row) throw new OwnerStoreError("That business owner was not found.", 404);
+export async function listEventAreasForOwnerId(ownerId: string): Promise<EventAreaRecord[]> {
   const { data, error } = await database()
     .from("business_event_areas")
     .select("id, name, sort_order")
-    .eq("business_owner_id", row.id)
+    .eq("business_owner_id", ownerId)
     .order("sort_order", { ascending: true });
   if (error) throw mapDbError(error);
   return (data ?? []).map((item) => ({
@@ -157,9 +140,24 @@ export async function listEventAreasForOwner(loginId: string): Promise<EventArea
   }));
 }
 
+export async function listEventAreasForOwner(loginId: string): Promise<EventAreaRecord[]> {
+  const row = await ownerRowByLogin(loginId);
+  if (!row) throw new OwnerStoreError("That business owner was not found.", 404);
+  return listEventAreasForOwnerId(row.id);
+}
+
+type EventSetupRow = NonNullable<Awaited<ReturnType<typeof ownerRowByLogin>>>;
+
+type EventSetupPrefetch = {
+  eventName?: string | null;
+  eventDate?: string | null;
+  areaCount?: number;
+};
+
 export async function recomputeEventSetupComplete(
   ownerId: string,
-  row: NonNullable<Awaited<ReturnType<typeof ownerRowByLogin>>>,
+  row: EventSetupRow,
+  prefetch?: EventSetupPrefetch,
 ): Promise<EventSetupChecklist> {
   const standeeType = normalizeStandeeType(row.standee_type);
   if (standeeType !== "event") {
@@ -167,34 +165,35 @@ export async function recomputeEventSetupComplete(
       standeeType: "table",
       businessName: null,
       city: null,
-      businessCategory: null,
-      businessCategoryOther: null,
       phone: null,
       mapLink: null,
       eventName: null,
       eventDate: null,
       areaCount: 0,
-      isBusinessCategoryId: () => false,
-      isValidCategoryOther,
     });
   }
 
-  const profile = await fetchEventProfile(ownerId);
-  const areaCount = await countEventAreas(ownerId);
-  const categoryOptions = await listBusinessCategoryOptions();
+  let eventName = prefetch?.eventName;
+  let eventDate = prefetch?.eventDate;
+  let areaCount = prefetch?.areaCount;
+  if (eventName === undefined || eventDate === undefined) {
+    const profile = await fetchEventProfile(ownerId);
+    if (eventName === undefined) eventName = profile?.event_name ?? null;
+    if (eventDate === undefined) eventDate = profile?.event_date ?? null;
+  }
+  if (areaCount === undefined) {
+    areaCount = await countEventAreas(ownerId);
+  }
+
   const checklist = evaluateEventSetup({
     standeeType: "event",
     businessName: row.business_name,
     city: row.city ?? null,
-    businessCategory: row.business_category ?? null,
-    businessCategoryOther: row.business_category_other ?? null,
     phone: row.phone,
     mapLink: row.map_link,
-    eventName: profile?.event_name ?? null,
-    eventDate: profile?.event_date ?? null,
+    eventName,
+    eventDate,
     areaCount,
-    isBusinessCategoryId: (value) => isBusinessCategoryId(value, categoryOptions),
-    isValidCategoryOther,
   });
 
   if (checklist.complete !== row.setup_complete) {
@@ -211,18 +210,37 @@ export async function recomputeEventSetupComplete(
   return checklist;
 }
 
-export async function getEventPortalState(loginId: string): Promise<EventPortalState | null> {
-  const row = await ownerRowByLogin(loginId);
-  if (!row || normalizeStandeeType(row.standee_type) !== "event") return null;
-  const profile = await fetchEventProfile(row.id);
-  const areas = await listEventAreasForOwner(loginId);
-  const checklist = await recomputeEventSetupComplete(row.id, row);
+async function buildEventPortalState(row: EventSetupRow): Promise<EventPortalState> {
+  const [profile, areas] = await Promise.all([
+    fetchEventProfile(row.id),
+    listEventAreasForOwnerId(row.id),
+  ]);
+  const eventName = profile?.event_name ?? null;
+  const eventDate = profile?.event_date ?? null;
+  const checklist = await recomputeEventSetupComplete(row.id, row, {
+    eventName,
+    eventDate,
+    areaCount: areas.length,
+  });
   return {
-    eventName: profile?.event_name ?? "",
-    eventDate: profile?.event_date ?? null,
+    eventName: eventName ?? "",
+    eventDate,
     areas,
     checklist,
   };
+}
+
+export async function getEventPortalState(loginId: string): Promise<EventPortalState | null> {
+  const row = await ownerRowByLogin(loginId);
+  if (!row || normalizeStandeeType(row.standee_type) !== "event") return null;
+  return buildEventPortalState(row);
+}
+
+export async function getEventPortalStateForOwnerRow(
+  row: EventSetupRow,
+): Promise<EventPortalState | null> {
+  if (normalizeStandeeType(row.standee_type) !== "event") return null;
+  return buildEventPortalState(row);
 }
 
 export async function saveEventDetails(
@@ -255,9 +273,11 @@ export async function saveEventDetails(
   );
   if (error) throw mapDbError(error);
 
-  const checklist = await recomputeEventSetupComplete(row.id, {
-    ...row,
-    business_name: row.business_name,
+  const areaCount = await countEventAreas(row.id);
+  const checklist = await recomputeEventSetupComplete(row.id, row, {
+    eventName,
+    eventDate,
+    areaCount,
   });
   return { checklist };
 }
@@ -286,7 +306,7 @@ export async function createEventArea(loginId: string, nameInput: string) {
     .select("id, name, sort_order")
     .single();
   if (error) throw mapDbError(error);
-  await recomputeEventSetupComplete(row.id, row);
+  await recomputeEventSetupComplete(row.id, row, { areaCount: count + 1 });
   return {
     area: {
       id: data.id as string,
@@ -308,7 +328,8 @@ export async function deleteEventArea(loginId: string, areaId: string) {
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data) throw new OwnerStoreError("That area was not found.", 404);
-  await recomputeEventSetupComplete(row.id, row);
+  const remaining = await countEventAreas(row.id);
+  await recomputeEventSetupComplete(row.id, row, { areaCount: remaining });
   return { ok: true as const };
 }
 

@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { BusinessHeader } from "@/components/business/header";
 import { EventSetupManager } from "@/components/business/event-setup-manager";
 import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
-import { getEventPortalState } from "@/lib/business-events";
 import { getBusinessOwnerProfile } from "@/lib/business-owners";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 
@@ -26,9 +25,6 @@ async function EventGate() {
   if (!profile) redirect("/business/login");
   if (profile.standeeType !== "event") redirect("/business/services");
 
-  const state = await getEventPortalState(loginId);
-  if (!state) redirect("/business");
-
   return (
     <>
       <BusinessHeader
@@ -46,9 +42,9 @@ async function EventGate() {
         </p>
         <div className="mt-6">
           <EventSetupManager
-            initialEventName={state.eventName}
-            initialEventDate={state.eventDate}
-            initialAreas={state.areas}
+            initialEventName={profile.eventName ?? ""}
+            initialEventDate={profile.eventDate}
+            initialAreas={profile.eventAreas}
           />
         </div>
       </main>

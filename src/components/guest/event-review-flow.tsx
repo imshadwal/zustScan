@@ -243,7 +243,6 @@ export function EventGuestReviewFlow({ experience }: Props) {
         {step === 0 ? (
           <section className={guestPanelClass}>
             <h2 className="text-sm font-semibold text-ink">What stood out?</h2>
-            <p className="mt-0.5 text-xs text-muted">Pick one or more — Food, Hall, Staff, etc.</p>
             <ul className="mt-3 space-y-2">
               {experience.areas.map((item) => {
                 const selected = areaIds.includes(item.id);
