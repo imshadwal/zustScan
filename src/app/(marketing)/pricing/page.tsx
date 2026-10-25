@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FaqSection } from "@/components/home/faq-section";
+import { OwnerAnalyticsShowcase } from "@/components/home/owner-analytics-showcase";
 import { Pricing } from "@/components/home/pricing";
 import { RoiSection } from "@/components/home/roi-section";
 
@@ -13,6 +14,7 @@ export default function PricingPage() {
   return (
     <main className="pt-24">
       <Pricing />
+      <OwnerAnalyticsShowcase />
       <RoiSection />
       <FaqSection className="!bg-mist-deep" />
     </main>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
 import { LaunchOfferNote } from "@/components/home/launch-offer-note";
+import { OwnerAnalyticsDemoStrip } from "@/components/home/owner-analytics-showcase";
 import { starsForTier, type GuestTier } from "@/lib/guest-tier";
 import {
   MARKETING_DRAFT_SAMPLES,
@@ -19,6 +20,8 @@ import {
   journey,
   launchOfferSavings,
   multiLocationSummary,
+  ownerAnalyticsBody,
+  ownerAnalyticsTitle,
   phoneDisplay,
   phoneHref,
   planIncludes,
@@ -36,6 +39,7 @@ const SECTIONS = [
   { id: "overview", label: "Overview" },
   { id: "flow", label: "Flow" },
   { id: "languages", label: "Languages" },
+  { id: "analytics", label: "Analytics" },
   { id: "value", label: "Value" },
   { id: "fit", label: "Who fits" },
   { id: "plan", label: "Plan" },
@@ -299,12 +303,12 @@ export function ProductBrochure({ siteUrl }: Props) {
           </ul>
         </section>
 
-        <section className="brochure-section mt-8">
-          <h2 className="text-lg font-semibold text-ink">Owner dashboard (activity counts)</h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            After setup, your portal shows anonymous funnel numbers: guest page scans, AI drafts
-            created, and Copy &amp; Continue taps. No guest names or review text are stored.
-          </p>
+        <section id="analytics" className="brochure-section mt-8 scroll-mt-36">
+          <h2 className="text-lg font-semibold text-ink">{ownerAnalyticsTitle}</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">{ownerAnalyticsBody}</p>
+          <div className="mt-5 rounded-2xl border-2 border-slate-200 bg-mist/60 p-5">
+            <OwnerAnalyticsDemoStrip />
+          </div>
         </section>
 
         <section id="value" className="brochure-section mt-8 scroll-mt-36">

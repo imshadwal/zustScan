@@ -124,6 +124,17 @@ export const referralProgramSummary =
   "Refer another business: when their setup goes live, you both get ₹500 off your next invoice or add-on.";
 export const multiLocationSummary = `Second outlet (same brand): ${additionalOutletPrice} add-on — separate QR and guest page, one shared setup call.`;
 
+/** Illustrative funnel numbers for marketing / brochure (not live data). */
+export const marketingAnalyticsDemo = {
+  pageViews: 2,
+  draftsGenerated: 2,
+  copyContinueTaps: 2,
+} as const;
+
+export const ownerAnalyticsTitle = "See the funnel in your portal";
+export const ownerAnalyticsBody =
+  "Your business dashboard shows anonymous counts — scans, drafts, and Copy & Continue — so you know guests are using the QR without storing names or review text.";
+
 export const roiPricingPoints = [
   {
     title: "One-time setup",
@@ -186,4 +197,5 @@ export const planIncludes = [
   "Guest path from the scan to the stars",
   "An AI draft with Copy and Continue",
   "Phone, map link, and a short brief on the page",
+  "Owner dashboard with scan, draft, and Copy & Continue counts",
 ] as const;

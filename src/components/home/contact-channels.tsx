@@ -17,13 +17,23 @@ const channels = [
     hint: "Best for setup details and attachments",
     external: false,
     icon: (
-      <path
-        d="M4 7l8 5 8-5M4 7v10h16V7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
+      <>
+        <path
+          d="M4 7h16v11H4V7z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+        <path
+          d="m4 7 8 5 8-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </>
     ),
   },
   {
@@ -35,10 +45,11 @@ const channels = [
     external: false,
     icon: (
       <path
-        d="M6.5 4h2l1.2 3.5a1 1 0 00.95.68l2.2.4a1 1 0 01.72 1.22l-1 3.2a11 11 0 005.1 5.1l3.2-1a1 1 0 011.22.72l.4 2.2a1 1 0 00.98.8h2.5a1 1 0 001-1V16a12 12 0 00-12-12z"
+        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="1.75"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
     ),
@@ -75,7 +86,12 @@ export function ContactChannels() {
             className={`group flex h-full flex-col p-6 transition-shadow hover:shadow-[0_20px_56px_rgba(7,20,40,0.14)] ${homeCardClass}`}
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue text-white shadow-[0_10px_24px_rgba(0,96,240,0.28)]">
-              <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                aria-hidden="true"
+              >
                 {channel.icon}
               </svg>
             </span>
