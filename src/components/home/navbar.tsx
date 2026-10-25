@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { EnquiryButton, useEnquiry } from "@/components/home/enquiry";
+import { NavOtherMenuDesktop, NavOtherMenuMobile } from "@/components/home/nav-other-menu";
 import { navLinks } from "@/lib/site";
 
 function navLinkClass(active: boolean) {
@@ -43,6 +44,7 @@ export function Navbar() {
               </Link>
             );
           })}
+          <NavOtherMenuDesktop />
         </nav>
         <EnquiryButton className="hidden h-12 items-center rounded-full bg-blue px-6 text-base font-semibold text-white transition-colors hover:bg-blue-deep md:inline-flex">
           Enquire
@@ -98,6 +100,7 @@ export function Navbar() {
               </Link>
             );
           })}
+          <NavOtherMenuMobile onNavigate={() => setOpen(false)} />
           <button
             type="button"
             className="mt-1 inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-blue px-4 text-base font-semibold text-white"

@@ -10,7 +10,7 @@ import {
   otherProducts,
   otherProductsPage,
   productPagePath,
-  whatsappUrl,
+  eventStandeeWhatsappUrl,
 } from "@/lib/site";
 
 const product = otherProducts[0]!;
@@ -71,7 +71,7 @@ export function ForEventsPage() {
                 Send an enquiry
               </EnquiryButton>
               <Link
-                href={whatsappUrl}
+                href={eventStandeeWhatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
@@ -197,7 +197,7 @@ export function ForEventsPage() {
               Send an enquiry
             </EnquiryButton>
             <Link
-              href={whatsappUrl}
+              href={eventStandeeWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"

@@ -243,6 +243,7 @@ export async function listBusinessOwners(): Promise<BusinessOwnerListRecord[]> {
 export type PublicBusinessListing = {
   loginId: string;
   businessName: string;
+  logoUrl: string | null;
 };
 
 /** Ready businesses for the marketing homepage. Returns [] if the store is unavailable. */
@@ -251,7 +252,7 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
   try {
     const { data, error } = await database()
       .from("business_owners")
-      .select("login_id, business_name")
+      .select("login_id, business_name, logo_path")
       .eq("setup_complete", true)
       .eq("qr_active", true)
       .not("business_name", "is", null)
@@ -261,7 +262,14 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
     return (data ?? []).flatMap((row) => {
       const businessName = row.business_name?.trim();
       if (!businessName) return [];
-      return [{ loginId: row.login_id as string, businessName }];
+      const logoPath = row.logo_path as string | null | undefined;
+      return [
+        {
+          loginId: row.login_id as string,
+          businessName,
+          logoUrl: businessLogoPublicUrl(logoPath ?? null),
+        },
+      ];
     });
   } catch {
     return [];

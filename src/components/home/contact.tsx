@@ -7,6 +7,8 @@ import {
   instagramUrl,
   journeyTimeline,
   navLinks,
+  otherNavLabel,
+  otherNavLinks,
   phoneDisplay,
   phoneHref,
 } from "@/lib/site";
@@ -58,6 +60,18 @@ export function Contact() {
             </p>
             <ul className="mt-4 space-y-2 text-sm">
               {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-white/80 hover:text-white">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
+              {otherNavLabel}
+            </p>
+            <ul className="mt-3 space-y-2 text-sm">
+              {otherNavLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-white/80 hover:text-white">
                     {link.label}

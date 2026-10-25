@@ -184,30 +184,40 @@ function NoAppCard() {
   );
 }
 
-export function WhyDifferentSection() {
+export function WhyDifferentSection({ showPageIntro = false }: { showPageIntro?: boolean }) {
   return (
     <section id="why-different" className="relative overflow-hidden bg-white">
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(0,102,255,0.14),transparent)]"
         aria-hidden="true"
       />
-      <div className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32 xl:px-10">
-        <header className="mx-auto max-w-4xl text-center lg:max-w-none lg:text-left">
-          <h2 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl lg:leading-[1.06]">
-            <span className="text-ink">Why we&apos;re </span>
-            <span className="text-blue">different.</span>
-          </h2>
-          <p className="mt-4 text-base font-medium leading-7 text-ink/80 sm:text-lg">
-            Built for real guests.{" "}
-            <span className="text-blue">Proof for owners.</span>
-          </p>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
-            Language, voice, branding, and category-smart setup — without asking anyone to install
-            an app.
-          </p>
-        </header>
+      <div
+        className={`relative mx-auto max-w-7xl px-5 sm:px-8 xl:px-10 ${
+          showPageIntro ? "pb-24 pt-8 lg:pb-32 lg:pt-10" : "py-24 lg:py-32"
+        }`}
+      >
+        {!showPageIntro ? (
+          <header className="mx-auto max-w-4xl text-center lg:max-w-none lg:text-left">
+            <h2 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl lg:leading-[1.06]">
+              <span className="text-ink">Why we&apos;re </span>
+              <span className="text-blue">different.</span>
+            </h2>
+            <p className="mt-4 text-base font-medium leading-7 text-ink/80 sm:text-lg">
+              Built for real guests.{" "}
+              <span className="text-blue">Proof for owners.</span>
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
+              Language, voice, branding, and category-smart setup — without asking anyone to install
+              an app.
+            </p>
+          </header>
+        ) : null}
 
-        <ul className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:mt-20 lg:grid-cols-12 lg:grid-rows-[auto_auto_auto_auto] lg:gap-7">
+        <ul
+          className={`grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-12 lg:grid-rows-[auto_auto_auto_auto] lg:gap-7 ${
+            showPageIntro ? "mt-0" : "mt-14 lg:mt-20"
+          }`}
+        >
           <li className="sm:col-span-2 lg:col-span-8 lg:row-start-1">
             <LanguagesCard />
           </li>

@@ -1,4 +1,12 @@
 export const whatsappUrl = "https://wa.me/917007052267";
+
+export function whatsappUrlWithText(text: string) {
+  return `${whatsappUrl}?text=${encodeURIComponent(text)}`;
+}
+
+/** Pre-filled message when enquiring from the /events page. */
+export const eventStandeeWhatsappMessage = "Hey, I want to order the standee.";
+export const eventStandeeWhatsappUrl = whatsappUrlWithText(eventStandeeWhatsappMessage);
 export const phoneHref = "tel:+917007052267";
 export const phoneDisplay = "+91 7007052267";
 export const email = "zustscan@gmail.com";
@@ -14,31 +22,61 @@ export const guestQrPausedCopy = {
   contactLead: "Contact the administrator:",
 } as const;
 
-/** Combined product story: guest path, setup, and who it fits. */
+/** Guest path — six steps from scan to Google post. */
 export const productPagePath = "/how-it-works" as const;
 
-export const otherProductsPagePath = "/other-products" as const;
+export const whyDifferentPagePath = "/why-different" as const;
 
-/** Nav / headings for event & function standees (/other-products). */
+export const whoItsForPagePath = "/who-its-for" as const;
+
+export const eventsPagePath = "/events" as const;
+
+/** Nav / headings for event & function standees (/events). */
 export const forEventsLabel = "For events" as const;
 
+export const otherNavLabel = "Other" as const;
+
+export const otherNavLinks = [
+  {
+    href: productPagePath,
+    label: "How it works",
+    description: "Six steps from QR scan to Google post, and what you configure.",
+  },
+  {
+    href: whyDifferentPagePath,
+    label: "Why we are different",
+    description: "Languages, voice, speed, branding, and your portal analytics.",
+  },
+  {
+    href: whoItsForPagePath,
+    label: "Who it's for",
+    description: "Restaurants, hotels, retail, salons, and service businesses.",
+  },
+] as const;
+
+/** Top bar — deeper product pages live under Other. */
 export const navLinks = [
   { href: "/", label: "Home" },
-  { href: productPagePath, label: "How it works" },
-  { href: otherProductsPagePath, label: forEventsLabel },
+  { href: eventsPagePath, label: forEventsLabel },
   { href: "/pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export const productBrochurePath = "/brochure";
-
-/** Homepage value strip — colon headline + product line. */
-export const homeValueStrip = {
-  lead: "Never leave a customer waiting:",
-  product: "AI-powered review draft system.",
-  detail:
-    "Guests scan at the table or counter, see your branded page (address, contact, Why trust us), get an editable draft in English, Hindi, or Hinglish, and post on Google themselves.",
+export const whyDifferentPage = {
+  eyebrow: "Why we are different",
+  title: "Built for real guest visits — not generic review spam.",
+  description:
+    "Multilingual drafts, natural Hindi and Hinglish voice, branded guest pages, and honest funnel counts in your portal.",
 } as const;
+
+export const whoItsForPage = {
+  eyebrow: "Who it's for",
+  title: "Any business a guest can review after a real visit.",
+  description:
+    "You name the services and products. The guest only chooses what matches their experience — at the table, counter, room, or function.",
+} as const;
+
+export const productBrochurePath = "/brochure";
 
 /** Short guest path shown on the home timeline and footer. */
 export const journeyTimeline = [

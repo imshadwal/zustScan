@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { InitialsBadge } from "@/components/initials-badge";
+import { BusinessOwnerMark } from "@/components/initials-badge";
+import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 import { listPublicBusinesses } from "@/lib/business-owners";
 
 async function BusinessesList() {
@@ -8,48 +9,50 @@ async function BusinessesList() {
   if (businesses.length === 0) return null;
 
   return (
-    <section id="businesses" className="bg-white">
-      <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
-          On Zust Scan
-        </p>
-        <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
+    <section id="businesses" className={homeCardsSection}>
+      <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 lg:py-16">
+        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">On Zust Scan</p>
+        <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           Businesses ready for guest reviews
         </h2>
-        <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-          These owners finished setup. Their guests can scan and start the review path from their
-          QR page.
+        <p className="mt-2 max-w-xl text-sm leading-6 text-muted sm:text-base">
+          Setup complete — tap a business to preview its guest QR page.
         </p>
 
-        <div className="mt-12 rounded-[32px] border-2 border-slate-200 bg-navy p-6 sm:p-8 lg:p-10">
-          <p className="text-sm font-semibold text-white/75">Live on Zust Scan</p>
-          <ul
-            className={`mt-6 grid gap-4 ${
-              businesses.length === 1 ? "max-w-xl" : "sm:grid-cols-2 lg:grid-cols-3"
-            }`}
-          >
-            {businesses.map((business) => (
-              <li key={business.loginId}>
-                <Link
-                  href={`/c/${business.loginId}`}
-                  className="flex items-center gap-4 rounded-2xl border-2 border-white/15 bg-white p-5 shadow-[0_16px_48px_rgba(0,0,0,0.2)] transition-transform hover:-translate-y-0.5"
+        <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {businesses.map((business) => (
+            <li key={business.loginId}>
+              <Link
+                href={`/c/${business.loginId}`}
+                className={`group flex items-center gap-3 p-4 transition-all hover:border-blue/35 hover:shadow-[0_8px_28px_rgba(7,20,40,0.1)] ${homeCardClass}`}
+              >
+                <BusinessOwnerMark
+                  businessName={business.businessName}
+                  loginId={business.loginId}
+                  logoUrl={business.logoUrl}
+                  size="sm"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#3dde7a]"
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">{business.businessName}</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">Live · guest page</p>
+                </div>
+                <span
+                  className="shrink-0 text-base font-semibold text-blue transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
                 >
-                  <InitialsBadge
-                    businessName={business.businessName}
-                    loginId={business.loginId}
-                    size="sm"
-                  />
-                  <span className="min-w-0 flex-1 font-semibold text-ink">
-                    {business.businessName}
-                  </span>
-                  <span className="hidden shrink-0 text-sm font-semibold text-blue sm:inline">
-                    View →
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+                  →
+                </span>
+                <span className="sr-only">View {business.businessName} guest page</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ import {
   eventStandeeTeaserBody,
   forEventsLabel,
   otherProducts,
-  otherProductsPagePath,
+  eventsPagePath,
 } from "@/lib/site";
 
 const event = otherProducts[0]!;
@@ -27,7 +27,7 @@ export function EventStandeeTeaser() {
               {eventStandeeTeaserBody} Standee from {eventStandeePrice}.
             </p>
             <Link
-              href={otherProductsPagePath}
+              href={eventsPagePath}
               className="mt-5 inline-flex h-12 items-center justify-center rounded-full bg-blue px-6 text-sm font-semibold text-white transition-colors hover:bg-blue-deep"
             >
               {forEventsLabel}

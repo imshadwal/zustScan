@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Customised QR standees for weddings, banquets, and function nights — guest reviews tailored to the event your guests attended.",
 };
 
-export default function OtherProductsPage() {
+export default function EventsPage() {
   return (
     <main>
       <ForEventsPage />
