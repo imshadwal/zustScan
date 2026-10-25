@@ -329,19 +329,12 @@ export function GuestReviewFlow({ experience }: Props) {
                       type="button"
                       aria-pressed={selected}
                       onClick={() => toggleService(item.id)}
-                      className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all ${
+                      className={`flex w-full cursor-pointer items-center rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all ${
                         selected
                           ? `${guestSelectedChipClass} shadow-[0_8px_24px_rgba(0,0,0,0.2)] ring-2 ring-white/20`
                           : optionIdleClass
                       }`}
                     >
-                      <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
-                          selected ? "bg-white/20 text-white" : `bg-[var(--guest-panel,#f4f7fb)] ${guestAccentTextClass}`
-                        }`}
-                      >
-                        {item.products.length}
-                      </span>
                       {item.name}
                     </button>
                   </li>

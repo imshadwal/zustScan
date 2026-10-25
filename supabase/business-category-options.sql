@@ -37,3 +37,10 @@ values
   ('real-estate', 'Real Estate', null, 9, false),
   ('others', 'Others', null, 99, true)
 on conflict (id) do nothing;
+
+-- Same pattern as business_owners: server (service_role) only; no anon/authenticated API access.
+alter table public.business_category_options enable row level security;
+
+revoke all on table public.business_category_options from anon, authenticated;
+
+grant all on table public.business_category_options to service_role;

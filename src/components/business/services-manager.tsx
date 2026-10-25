@@ -23,10 +23,10 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
   const [productNames, setProductNames] = useState<Record<string, string>>({});
   const [draftProducts, setDraftProducts] = useState<Record<string, string[]>>({});
   const [addingToServiceId, setAddingToServiceId] = useState<string | null>(null);
+  const productTotal = services.reduce((sum, service) => sum + service.products.length, 0);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const productTotal = services.reduce((sum, service) => sum + service.products.length, 0);
 
   async function reloadFromServer() {
     const response = await fetch("/api/business/services", { cache: "no-store" });

@@ -76,16 +76,10 @@ function GuestFlowMock() {
           <p className="text-[10px] font-semibold text-ink">Choose services</p>
           <p className="text-[8px] text-muted">Pick one or more</p>
           <ul className="mt-1.5 space-y-1">
-            <li className="flex items-center gap-1.5 rounded-md bg-blue px-1.5 py-1 text-[9px] font-semibold text-white shadow-sm">
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-white/20 text-[7px]">
-                3
-              </span>
+            <li className="rounded-md bg-blue px-1.5 py-1 text-[9px] font-semibold text-white shadow-sm">
               Food
             </li>
-            <li className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-1.5 py-1 text-[9px] font-semibold text-ink">
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-mist text-[7px] text-blue">
-                2
-              </span>
+            <li className="rounded-md border border-slate-200 bg-white px-1.5 py-1 text-[9px] font-semibold text-ink">
               Room
             </li>
           </ul>
