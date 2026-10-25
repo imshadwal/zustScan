@@ -23,12 +23,12 @@ export function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-white py-2 pr-2 pl-3 shadow-[0_12px_40px_rgba(7,20,40,0.14)] sm:pr-2.5 sm:pl-4">
         <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Image
-            src="/logo.png"
+            src="/LOGO ZS.png"
             alt="Zust Scan"
-            width={1493}
-            height={675}
-            preload
-            className="h-11 w-auto sm:h-12"
+            width={2172}
+            height={724}
+            priority
+            className="h-9 w-auto sm:h-10"
           />
         </Link>
         <nav className="hidden items-center gap-5 text-sm lg:gap-6 xl:gap-7 md:flex">

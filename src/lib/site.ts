@@ -45,31 +45,37 @@ export const journey = [
     step: "01",
     title: "Place the QR",
     body: "Put it on a menu, table card, parcel, receipt, or the counter, where the guest already is.",
+    tags: ["MENU", "TABLE CARD", "COUNTER"],
   },
   {
     step: "02",
     title: "Scan and choose",
     body: "The guest scans and picks the service that matches the visit, such as Food, Room, or Amenities.",
+    tags: ["SERVICE", "PRODUCT"],
   },
   {
     step: "03",
     title: "Set how it felt",
     body: "They pick the product, then Good, Better, or Best, and the star rating they want to give.",
+    tags: ["GOOD · BETTER · BEST", "STARS"],
   },
   {
     step: "04",
     title: "Get an editable draft",
     body: "Those choices become a short review they can read, rewrite, or extend before anything is posted.",
+    tags: ["ENGLISH", "HINDI", "HINGLISH"],
   },
   {
     step: "05",
     title: "Copy and Continue",
     body: "One tap copies the draft and opens that business’s Google review page.",
+    tags: ["COPY", "GOOGLE"],
   },
   {
     step: "06",
     title: "Check and post",
     body: "The guest confirms the stars and the words, then taps Post themselves.",
+    tags: ["GUEST POSTS", "REAL REVIEW"],
   },
 ] as const;
 

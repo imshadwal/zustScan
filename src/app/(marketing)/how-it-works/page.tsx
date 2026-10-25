@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Journey } from "@/components/home/journey";
-import { PageIntro } from "@/components/home/page-intro";
 import { Split } from "@/components/home/split";
 
 export const metadata: Metadata = {
@@ -12,13 +11,7 @@ export const metadata: Metadata = {
 export default function HowItWorksPage() {
   return (
     <main>
-      <PageIntro
-        eyebrow="How it works"
-        title="Six steps, from the QR to the post."
-        description="The same path works at a restaurant table, a hotel desk, a shop counter, or after a service visit."
-        className="border-b border-slate-200 bg-white"
-      />
-      <Journey showHeading={false} />
+      <Journey />
       <Split compactTop />
     </main>
   );
