@@ -2,6 +2,7 @@
 
 import { useState, type KeyboardEvent } from "react";
 import { fieldClass, primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
+import { useToast } from "@/components/toast/toast-provider";
 
 type Product = { id: string; name: string };
 type Service = { id: string; name: string; products: Product[] };
@@ -16,13 +17,13 @@ function productPlaceholder(serviceName: string) {
 }
 
 export function ServicesManager({ initialServices }: { initialServices: Service[] }) {
+  const { success, error: toastError } = useToast();
   const [services, setServices] = useState(initialServices);
   const [serviceName, setServiceName] = useState("");
   const [productNames, setProductNames] = useState<Record<string, string>>({});
   const [draftProducts, setDraftProducts] = useState<Record<string, string[]>>({});
   const [addingToServiceId, setAddingToServiceId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   const productTotal = services.reduce((sum, service) => sum + service.products.length, 0);
@@ -35,7 +36,6 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
 
   async function addService() {
     setError(null);
-    setNotice(null);
     setPending(true);
     try {
       const response = await fetch("/api/business/services", {
@@ -48,7 +48,9 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
         | { service?: { id: string; name: string }; error?: string }
         | null;
       if (!response.ok || !body?.service) {
-        setError(body?.error ?? "The service could not be added.");
+        const message = body?.error ?? "The service could not be added.";
+        setError(message);
+        toastError(message);
         setPending(false);
         return;
       }
@@ -57,11 +59,13 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
         ...prev,
         { id: body.service!.id, name: body.service!.name, products: [] },
       ]);
-      setNotice("Service added. Tap Add products on the new card.");
+      success("Service saved.");
       setAddingToServiceId(body.service.id);
       setPending(false);
     } catch {
-      setError("The request could not be sent.");
+      const message = "The request could not be sent.";
+      setError(message);
+      toastError(message);
       setPending(false);
     }
   }
@@ -72,6 +76,7 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
     if (addingToServiceId === serviceId) setAddingToServiceId(null);
     await fetch(`/api/business/services/${serviceId}`, { method: "DELETE" });
     setServices((prev) => prev.filter((service) => service.id !== serviceId));
+    success("Service removed.");
     setPending(false);
   }
 
@@ -105,7 +110,6 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
     const names = draftProducts[serviceId] ?? [];
     if (names.length === 0) return;
     setError(null);
-    setNotice(null);
     setPending(true);
     try {
       const response = await fetch(`/api/business/services/${serviceId}/products`, {
@@ -118,7 +122,9 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
         | { products?: Product[]; error?: string }
         | null;
       if (!response.ok || !body?.products) {
-        setError(body?.error ?? "Products could not be saved.");
+        const message = body?.error ?? "Products could not be saved.";
+        setError(message);
+        toastError(message);
         await reloadFromServer();
         setPending(false);
         return;
@@ -133,10 +139,14 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
       );
       setDraftProducts((prev) => ({ ...prev, [serviceId]: [] }));
       setAddingToServiceId(null);
-      setNotice(`Saved ${saved.length} product${saved.length === 1 ? "" : "s"}.`);
+      success(
+        saved.length === 1 ? "Product saved." : `${saved.length} products saved.`,
+      );
       setPending(false);
     } catch {
-      setError("The request could not be sent.");
+      const message = "The request could not be sent.";
+      setError(message);
+      toastError(message);
       setPending(false);
     }
   }
@@ -154,6 +164,7 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
           : service,
       ),
     );
+    success("Product removed.");
     setPending(false);
   }
 
@@ -171,11 +182,6 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
       {error ? (
         <p className="text-sm text-red-200" role="alert">
           {error}
-        </p>
-      ) : null}
-      {notice ? (
-        <p className="text-sm text-blue-200" role="status">
-          {notice}
         </p>
       ) : null}
 

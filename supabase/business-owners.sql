@@ -8,6 +8,7 @@ create table if not exists public.business_owners (
   password_hash text not null,
   sold_price integer not null,
   business_name text,
+  city text,
   phone text,
   map_link text,
   brief text,

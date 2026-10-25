@@ -36,6 +36,7 @@ async function ProfileGate() {
           <ProfileForm
             initial={{
               businessName: profile.businessName,
+              city: profile.city,
               phone: profile.phone,
               mapLink: profile.mapLink,
               brief: profile.brief,

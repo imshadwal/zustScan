@@ -11,6 +11,7 @@ import { displayTitle } from "@/lib/initials";
 
 const checklistItems = [
   { key: "businessName" as const, label: "Business name", href: "/business/profile" },
+  { key: "city" as const, label: "City", href: "/business/profile" },
   { key: "phone" as const, label: "Phone", href: "/business/profile" },
   { key: "mapLink" as const, label: "Google review link", href: "/business/profile" },
   { key: "brief" as const, label: "Brief about your business", href: "/business/profile" },
@@ -172,7 +173,7 @@ export function DashboardHome({
               </Link>
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted">
-              Profile covers name, phone, Maps link, and brief. Services are what guests choose
+              Profile covers name, city, phone, Maps link, and brief. Services are what guests choose
               after they scan.
             </p>
           </section>

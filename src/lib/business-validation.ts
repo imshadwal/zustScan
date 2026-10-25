@@ -41,6 +41,15 @@ export function isValidBusinessName(value: string) {
   return name.length >= 2 && name.length <= 80;
 }
 
+export function normalizeCity(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+export function isValidCity(value: string) {
+  const city = normalizeCity(value);
+  return city.length >= 2 && city.length <= 80;
+}
+
 export function normalizePhone(value: string) {
   const digits = value.replace(/[^\d+]/g, "");
   if (digits.startsWith("+91")) {
@@ -106,6 +115,7 @@ export const MAX_PRODUCTS_PER_SERVICE = 50;
 
 export type SetupChecklist = {
   businessName: boolean;
+  city: boolean;
   phone: boolean;
   mapLink: boolean;
   brief: boolean;
@@ -117,6 +127,7 @@ export type SetupChecklist = {
 
 export function evaluateSetup(input: {
   businessName: string | null;
+  city: string | null;
   phone: string | null;
   mapLink: string | null;
   brief: string | null;
@@ -125,6 +136,8 @@ export function evaluateSetup(input: {
   const businessName = Boolean(
     input.businessName && isValidBusinessName(input.businessName),
   );
+  const cityFilled = Boolean(input.city?.trim() && isValidCity(input.city));
+  const city = !input.city?.trim() || cityFilled;
   const phone = Boolean(input.phone && normalizePhone(input.phone));
   const mapLink = Boolean(input.mapLink && normalizeMapLink(input.mapLink));
   const brief = Boolean(input.brief && isValidBrief(input.brief));
@@ -134,6 +147,7 @@ export function evaluateSetup(input: {
 
   const missingLabels: string[] = [];
   if (!businessName) missingLabels.push("Business name");
+  if (input.city?.trim() && !city) missingLabels.push("City");
   if (!phone) missingLabels.push("Phone");
   if (!mapLink) missingLabels.push("Google review link");
   if (!brief) missingLabels.push("Brief");
@@ -147,6 +161,7 @@ export function evaluateSetup(input: {
 
   return {
     businessName,
+    city,
     phone,
     mapLink,
     brief,

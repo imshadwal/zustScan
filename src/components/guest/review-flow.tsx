@@ -13,8 +13,7 @@ import {
   GUEST_VOICE_OPTIONS,
   type GuestVoice,
 } from "@/lib/guest-voice";
-import { GoogleReviewHandoff } from "@/components/guest/google-handoff";
-import { displayTitle } from "@/lib/initials";
+import { displayGuestBusinessTitle } from "@/lib/initials";
 
 type Props = {
   experience: GuestExperience;
@@ -49,8 +48,38 @@ const optionIdleClass =
 const backButtonClass =
   "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-slate-300 bg-mist px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-blue hover:text-blue disabled:cursor-not-allowed disabled:opacity-60";
 
+async function copyDraftToClipboard(text: string, textarea: HTMLTextAreaElement | null) {
+  const value = text.trim();
+  if (!value) return false;
+
+  if (textarea) {
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, value.length);
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    /* fallback below */
+  }
+
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  }
+}
+
 export function GuestReviewFlow({ experience }: Props) {
-  const title = displayTitle(experience.businessName, experience.loginId);
+  const title = displayGuestBusinessTitle(
+    experience.businessName,
+    experience.loginId,
+    experience.city,
+  );
   const [step, setStep] = useState<WizardStep>(0);
   const [serviceIds, setServiceIds] = useState<string[]>(
     experience.services.length === 1 ? [experience.services[0]!.id] : [],
@@ -63,8 +92,8 @@ export function GuestReviewFlow({ experience }: Props) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [googleHandoffOpen, setGoogleHandoffOpen] = useState(false);
   const pageViewSent = useRef(false);
+  const draftTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (pageViewSent.current) return;
@@ -196,15 +225,14 @@ export function GuestReviewFlow({ experience }: Props) {
   async function copyAndContinue() {
     if (!draft.trim()) return;
     setError(null);
-    window.open(experience.mapLink, "_blank", "noopener,noreferrer");
-    try {
-      await navigator.clipboard.writeText(draft.trim());
-      trackGuestMetric(experience.loginId, "copy_continue");
-      setCopied(true);
-      setGoogleHandoffOpen(true);
-    } catch {
-      setError("Copy failed. Select the text in the box above, copy it, then open Google.");
+    const ok = await copyDraftToClipboard(draft, draftTextareaRef.current);
+    if (!ok) {
+      setError("Copy failed. Long-press the draft above, choose Copy, then open Google.");
+      return;
     }
+    trackGuestMetric(experience.loginId, "copy_continue");
+    setCopied(true);
+    window.open(experience.mapLink, "_blank", "noopener,noreferrer");
   }
 
   const productHint =
@@ -216,13 +244,7 @@ export function GuestReviewFlow({ experience }: Props) {
     step === 2 ? (pending ? "Writing draft…" : "Next — get draft") : "Next";
 
   return (
-    <div className="flex min-h-0 flex-col">
-      <GoogleReviewHandoff
-        open={googleHandoffOpen}
-        stars={stars}
-        mapLink={experience.mapLink}
-        onClose={() => setGoogleHandoffOpen(false)}
-      />
+    <div className="flex min-h-0 flex-col" data-guest-flow>
       <div className="bg-navy px-5 py-6 text-white sm:px-6">
         <p className="text-[11px] font-semibold tracking-[0.16em] text-blue-200 uppercase">
           Your visit
@@ -465,6 +487,7 @@ export function GuestReviewFlow({ experience }: Props) {
               <span className="text-slate-200">{"★".repeat(5 - stars)}</span>
             </p>
             <textarea
+              ref={draftTextareaRef}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               rows={6}
@@ -476,7 +499,7 @@ export function GuestReviewFlow({ experience }: Props) {
                 onClick={copyAndContinue}
                 className={`${primaryButtonClass} w-full py-3.5 shadow-[0_8px_24px_rgba(0,96,240,0.35)]`}
               >
-                {copied ? "Copied — opening Google…" : "Copy & Continue"}
+                {copied ? "Copied — paste on Google" : "Copy & Continue"}
               </button>
               <button
                 type="button"

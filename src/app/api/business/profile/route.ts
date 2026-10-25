@@ -19,12 +19,14 @@ export async function PATCH(request: Request) {
   if (!session.loginId) return session.response!;
   const body = await request.json().catch(() => null);
   const businessName = typeof body?.businessName === "string" ? body.businessName : "";
+  const city = typeof body?.city === "string" ? body.city : "";
   const phone = typeof body?.phone === "string" ? body.phone : "";
   const mapLink = typeof body?.mapLink === "string" ? body.mapLink : "";
   const brief = typeof body?.brief === "string" ? body.brief : "";
   try {
     const result = await updateBusinessOwnerProfile(session.loginId, {
       businessName,
+      city,
       phone,
       mapLink,
       brief,

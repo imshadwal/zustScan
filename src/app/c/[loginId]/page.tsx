@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { GuestShell } from "@/components/guest/shell";
 import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
-import { displayTitle } from "@/lib/initials";
+import { displayGuestBusinessTitle } from "@/lib/initials";
 import { GuestReviewFlow } from "@/components/guest/review-flow";
 import { findBusinessOwnerPublic, loadGuestExperience } from "@/lib/business-owners";
 
@@ -47,19 +47,7 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
 
   if (!owner) notFound();
 
-  const title = displayTitle(owner.businessName, owner.loginId);
-
-  if (!owner.setupComplete) {
-    return (
-      <GuestShell>
-        <p className="text-sm font-semibold tracking-wide text-blue uppercase">Business</p>
-        <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
-        <p className="mt-4 text-muted">
-          This business is still finishing setup. Scan again once they are ready for reviews.
-        </p>
-      </GuestShell>
-    );
-  }
+  const title = displayGuestBusinessTitle(owner.businessName, owner.loginId, owner.city);
 
   let experience: Awaited<ReturnType<typeof loadGuestExperience>> = null;
   try {
@@ -73,14 +61,21 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
     );
   }
 
-  if (!experience) {
+  if (experience) {
+    return (
+      <GuestShell>
+        <GuestReviewFlow experience={experience} />
+      </GuestShell>
+    );
+  }
+
+  if (!owner.setupComplete) {
     return (
       <GuestShell>
         <p className="text-sm font-semibold tracking-wide text-blue uppercase">Business</p>
         <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
         <p className="mt-4 text-muted">
-          Setup is marked complete but services or products are missing. The owner should open
-          Services in their portal and try again.
+          This business is still finishing setup. Scan again once they are ready for reviews.
         </p>
       </GuestShell>
     );
@@ -88,7 +83,12 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
 
   return (
     <GuestShell>
-      <GuestReviewFlow experience={experience} />
+      <p className="text-sm font-semibold tracking-wide text-blue uppercase">Business</p>
+      <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
+      <p className="mt-4 text-muted">
+        Setup looks complete but the guest page could not load. The owner should open Services in
+        their portal and save profile again.
+      </p>
     </GuestShell>
   );
 }

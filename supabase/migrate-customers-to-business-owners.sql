@@ -5,6 +5,7 @@ alter table if exists public.customers rename to business_owners;
 
 alter table public.business_owners
   add column if not exists business_name text,
+  add column if not exists city text,
   add column if not exists phone text,
   add column if not exists map_link text,
   add column if not exists brief text,

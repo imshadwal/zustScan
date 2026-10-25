@@ -42,3 +42,15 @@ export function displayTitle(businessName: string | null | undefined, loginId: s
   const name = businessName?.trim();
   return name || loginId;
 }
+
+/** Guest page heading: business name and city, comma-separated. */
+export function displayGuestBusinessTitle(
+  businessName: string | null | undefined,
+  loginId: string,
+  city: string | null | undefined,
+) {
+  const base = displayTitle(businessName, loginId);
+  const place = city?.trim();
+  if (!place) return base;
+  return `${base}, ${place}`;
+}

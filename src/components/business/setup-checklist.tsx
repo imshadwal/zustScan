@@ -4,6 +4,7 @@ import { primaryButtonClass } from "@/components/admin/styles";
 
 const items = [
   { key: "businessName" as const, label: "Business name" },
+  { key: "city" as const, label: "City" },
   { key: "phone" as const, label: "Phone" },
   { key: "mapLink" as const, label: "Google review link" },
   { key: "brief" as const, label: "Brief" },

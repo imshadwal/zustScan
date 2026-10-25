@@ -7,6 +7,7 @@ import {
   isValidBusinessName,
   isValidBrief,
   isValidCatalogName,
+  isValidCity,
   isValidPhoneInput,
   isValidMapLinkInput,
   MAX_PRODUCTS_PER_SERVICE,
@@ -14,6 +15,7 @@ import {
   normalizeBrief,
   normalizeBusinessName,
   normalizeCatalogName,
+  normalizeCity,
   normalizeMapLink,
   normalizePhone,
   type SetupChecklist,
@@ -38,12 +40,14 @@ export type BusinessOwnerListRecord = {
 export type BusinessOwnerPublic = {
   loginId: string;
   businessName: string | null;
+  city: string | null;
   setupComplete: boolean;
 };
 
 export type BusinessOwnerProfile = {
   loginId: string;
   businessName: string | null;
+  city: string | null;
   phone: string | null;
   mapLink: string | null;
   brief: string | null;
@@ -89,6 +93,7 @@ type OwnerRow = {
   password_hash: string;
   sold_price: number;
   business_name: string | null;
+  city: string | null;
   phone: string | null;
   map_link: string | null;
   brief: string | null;
@@ -136,6 +141,7 @@ async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
   const services = await productCountsForOwner(ownerId);
   const checklist = evaluateSetup({
     businessName: row.business_name,
+    city: row.city ?? null,
     phone: row.phone,
     mapLink: row.map_link,
     brief: row.brief,
@@ -199,6 +205,7 @@ export async function listPublicBusinesses(): Promise<PublicBusinessListing[]> {
 export type GuestExperience = {
   loginId: string;
   businessName: string | null;
+  city: string | null;
   phone: string | null;
   mapLink: string;
   brief: string;
@@ -211,11 +218,18 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
   if (!isValidLoginId(id)) return null;
   const { data, error } = await database()
     .from("business_owners")
-    .select("login_id, business_name, phone, map_link, brief, setup_complete")
+    .select(
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+    )
     .eq("login_id", id)
     .maybeSingle();
   if (error) throw mapDbError(error);
-  if (!data?.setup_complete) return null;
+  if (!data) return null;
+
+  const ownerId = data.id as string;
+  const checklist = await recomputeSetupComplete(ownerId, data as OwnerRow);
+  if (!checklist.complete) return null;
+
   const mapLink = data.map_link?.trim();
   const brief = data.brief?.trim();
   if (!mapLink || !brief) return null;
@@ -228,6 +242,7 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
   return {
     loginId: data.login_id,
     businessName: data.business_name,
+    city: data.city?.trim() || null,
     phone: data.phone,
     mapLink,
     brief,
@@ -242,15 +257,20 @@ export async function findBusinessOwnerPublic(
   if (!isValidLoginId(id)) return null;
   const { data, error } = await database()
     .from("business_owners")
-    .select("login_id, business_name, setup_complete")
+    .select(
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+    )
     .eq("login_id", id)
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data) return null;
+  const ownerId = data.id as string;
+  const checklist = await recomputeSetupComplete(ownerId, data as OwnerRow);
   return {
     loginId: data.login_id,
     businessName: data.business_name,
-    setupComplete: data.setup_complete,
+    city: data.city,
+    setupComplete: checklist.complete,
   };
 }
 
@@ -336,7 +356,7 @@ export async function getBusinessOwnerProfile(
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, phone, map_link, brief, setup_complete, password_hash",
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash",
     )
     .eq("login_id", id)
     .maybeSingle();
@@ -348,6 +368,7 @@ export async function getBusinessOwnerProfile(
   return {
     loginId: row.login_id,
     businessName: row.business_name,
+    city: row.city,
     phone: row.phone,
     mapLink: row.map_link,
     brief: row.brief,
@@ -360,6 +381,7 @@ export async function updateBusinessOwnerProfile(
   loginId: string,
   input: {
     businessName: string;
+    city: string;
     phone: string;
     mapLink: string;
     brief: string;
@@ -371,6 +393,12 @@ export async function updateBusinessOwnerProfile(
 
   if (!isValidBusinessName(input.businessName)) {
     throw new OwnerStoreError("Use a business name of 2 to 80 characters.", 400);
+  }
+  if (!isValidCity(input.city)) {
+    throw new OwnerStoreError(
+      "Enter a city (2 to 80 characters). Guests see it after your business name.",
+      400,
+    );
   }
   if (!isValidPhoneInput(input.phone)) {
     throw new OwnerStoreError("Enter a valid 10-digit Indian mobile number.", 400);
@@ -387,6 +415,7 @@ export async function updateBusinessOwnerProfile(
   }
 
   const businessName = normalizeBusinessName(input.businessName);
+  const city = normalizeCity(input.city);
   const phone = normalizePhone(input.phone)!;
   const brief = normalizeBrief(input.brief);
 
@@ -394,6 +423,7 @@ export async function updateBusinessOwnerProfile(
     .from("business_owners")
     .update({
       business_name: businessName,
+      city,
       phone,
       map_link: mapLink,
       brief,
@@ -401,7 +431,7 @@ export async function updateBusinessOwnerProfile(
     })
     .eq("id", ownerId)
     .select(
-      "id, login_id, business_name, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
     )
     .maybeSingle();
   if (error) throw mapDbError(error);
@@ -461,7 +491,7 @@ async function touchOwnerSetup(ownerId: string) {
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, phone, map_link, brief, setup_complete, password_hash, sold_price, created_at",
     )
     .eq("id", ownerId)
     .maybeSingle();

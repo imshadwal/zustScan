@@ -18,7 +18,7 @@ export function GuestShell({ children }: { children: ReactNode }) {
         </Link>
       </header>
       <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-8">
-        <div className="overflow-hidden rounded-[28px] border border-slate-300 bg-white shadow-[0_16px_48px_rgba(7,20,40,0.12)]">
+        <div className="overflow-hidden rounded-[28px] border border-slate-300 bg-white shadow-[0_16px_48px_rgba(7,20,40,0.12)] [&>:not([data-guest-flow])]:p-6 [&>:not([data-guest-flow])]:sm:p-8">
           {children}
         </div>
         <p className="mt-6 text-center text-xs text-muted">Scan to share, review to care.</p>

@@ -98,6 +98,7 @@ export const audiences = [
 
 export const businessSets = [
   "Services, and the products inside each one",
+  "Business name and city (shown on the guest page)",
   "Contact number",
   "Google review link",
   "A short brief of the business",

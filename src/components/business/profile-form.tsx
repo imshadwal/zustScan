@@ -3,9 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { fieldClass, primaryButtonClass } from "@/components/admin/styles";
+import { useToast } from "@/components/toast/toast-provider";
+import { displayGuestBusinessTitle } from "@/lib/initials";
 
 type Profile = {
   businessName: string | null;
+  city: string | null;
   phone: string | null;
   mapLink: string | null;
   brief: string | null;
@@ -13,36 +16,45 @@ type Profile = {
 
 export function ProfileForm({ initial }: { initial: Profile }) {
   const router = useRouter();
+  const { success, error: toastError } = useToast();
   const [businessName, setBusinessName] = useState(initial.businessName ?? "");
+  const [city, setCity] = useState(initial.city ?? "");
   const [phone, setPhone] = useState(initial.phone ?? "");
   const [mapLink, setMapLink] = useState(initial.mapLink ?? "");
   const [brief, setBrief] = useState(initial.brief ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [pending, setPending] = useState(false);
+  const guestHeadingPreview = displayGuestBusinessTitle(
+    businessName || null,
+    "your-business",
+    city || null,
+  );
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    setSaved(false);
     setPending(true);
     try {
       const response = await fetch("/api/business/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessName, phone, mapLink, brief }),
+        body: JSON.stringify({ businessName, city, phone, mapLink, brief }),
       });
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) {
-        setError(body?.error ?? "The profile could not be saved.");
+        const message = body?.error ?? "The profile could not be saved.";
+        setError(message);
+        toastError(message);
         setPending(false);
         return;
       }
-      setSaved(true);
+      success("Profile saved.");
       setPending(false);
       router.refresh();
     } catch {
-      setError("The request could not be sent.");
+      const message = "The request could not be sent.";
+      setError(message);
+      toastError(message);
       setPending(false);
     }
   }
@@ -64,6 +76,25 @@ export function ProfileForm({ initial }: { initial: Profile }) {
             className={`${fieldClass} mt-2`}
             required
           />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-ink" htmlFor="business-city">
+            City <span className="text-red-600">*</span>
+          </label>
+          <input
+            id="business-city"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Varanasi"
+            className={`${fieldClass} mt-2`}
+            required
+            minLength={2}
+            maxLength={80}
+          />
+          <p className="mt-1.5 text-xs text-muted">
+            Guest page heading:{" "}
+            <span className="font-semibold text-ink">{guestHeadingPreview}</span>
+          </p>
         </div>
         <div>
           <label className="block text-sm font-semibold text-ink" htmlFor="business-phone">
@@ -116,11 +147,6 @@ export function ProfileForm({ initial }: { initial: Profile }) {
       {error ? (
         <p className="mt-4 text-sm text-red-700" role="alert">
           {error}
-        </p>
-      ) : null}
-      {saved ? (
-        <p className="mt-4 text-sm text-blue" role="status">
-          Profile saved.
         </p>
       ) : null}
       <button type="submit" className={`${primaryButtonClass} mt-6`} disabled={pending}>

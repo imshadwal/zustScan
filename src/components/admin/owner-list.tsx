@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { OwnerIdentity } from "@/components/initials-badge";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { useToast } from "@/components/toast/toast-provider";
 import {
   dangerButtonClass,
   fieldClass,
@@ -28,6 +29,7 @@ type OwnerCardData = {
 
 function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: string }) {
   const router = useRouter();
+  const { success, error: toastError } = useToast();
   const [password, setPassword] = useState("");
   const [shown, setShown] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,12 +60,15 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
         | { password?: string; error?: string }
         | null;
       if (!response.ok || !body?.password) {
-        setError(body?.error ?? "The password could not be reset.");
+        const message = body?.error ?? "The password could not be reset.";
+        setError(message);
+        toastError(message);
         setPending(false);
         return;
       }
       setShown(body.password);
       setPassword("");
+      success("Password saved.");
       setPending(false);
     } catch {
       setError("The request could not be sent.");
@@ -75,6 +80,7 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
     if (!shown) return;
     await navigator.clipboard.writeText(shown);
     setCopied(true);
+    success("Password copied.");
   }
 
   function openDeleteDialog() {
@@ -97,6 +103,7 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
       }
       setDeleteOpen(false);
       setDeletePending(false);
+      success("Business deleted.");
       router.refresh();
     } catch {
       setDeleteError("The request could not be sent.");

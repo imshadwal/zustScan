@@ -8,11 +8,13 @@ import {
   quietButtonClass,
 } from "@/components/admin/styles";
 import { PasswordInput, RevealableSecret } from "@/components/password-input";
+import { useToast } from "@/components/toast/toast-provider";
 import { isValidLoginId, normalizeLoginId, parseSoldPrice, formatRupees } from "@/lib/login-id";
 
 type Created = { loginId: string; password: string; soldPriceLabel: string };
 
 export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
+  const { success, error: toastError } = useToast();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
@@ -51,10 +53,13 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
         | { loginId?: string; password?: string; error?: string }
         | null;
       if (!response.ok || !body?.loginId || !body.password) {
-        setError(body?.error ?? "The business owner could not be created.");
+        const message = body?.error ?? "The business owner could not be created.";
+        setError(message);
+        toastError(message);
         setPending(false);
         return;
       }
+      success("Business owner saved.");
       setCreated({
         loginId: body.loginId,
         password: body.password,

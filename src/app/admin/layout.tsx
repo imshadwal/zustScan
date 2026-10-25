@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PortalProviders } from "@/components/portal-providers";
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +16,9 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
         <div className="absolute -top-24 right-[-10%] h-80 w-80 rounded-full bg-blue/30 blur-3xl" />
         <div className="absolute bottom-0 left-[-12%] h-64 w-64 rounded-full bg-blue/15 blur-3xl" />
       </div>
-      <div className="relative min-h-dvh">{children}</div>
+      <PortalProviders>
+        <div className="relative min-h-dvh">{children}</div>
+      </PortalProviders>
     </div>
   );
 }
