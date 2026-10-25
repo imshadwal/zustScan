@@ -303,6 +303,10 @@ export function OwnerList({
   return (
     <div>
       <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+        Pause or activate guest reviews per owner here — same printed QR, paused message for guests
+        until you turn it back on. Business owners cannot change this in their portal.
+      </p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
           <p className="text-sm font-semibold text-muted">Business owners</p>

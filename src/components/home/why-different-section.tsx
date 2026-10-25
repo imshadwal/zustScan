@@ -12,7 +12,7 @@ const noAppItem = whyDifferent[4];
 const extraItems = whyDifferent.filter(
   (item): item is WhyItem & { chips: readonly string[] } =>
     "chips" in item &&
-    (item.id === "branding" || item.id === "category" || item.id === "qr-pause"),
+    item.id === "branding" || item.id === "category",
 );
 
 function CardShell({
@@ -136,11 +136,13 @@ function AnalyticsCard() {
           </div>
         </div>
         {"chips" in item ? (
-          <ul className="mt-5 flex flex-wrap gap-2.5">
-            {item.chips.map((chip) => (
+          <ul className="mt-5 grid grid-cols-2 gap-2.5">
+            {item.chips.map((chip, index) => (
               <li
                 key={chip}
-                className="rounded-md border border-blue/40 bg-blue/15 px-2.5 py-1.5 text-xs font-semibold tracking-wide text-blue uppercase"
+                className={`rounded-md border border-blue/40 bg-blue/15 px-2.5 py-1.5 text-xs font-semibold tracking-wide text-blue uppercase ${
+                  index === item.chips.length - 1 && item.chips.length % 2 === 1 ? "col-span-2" : ""
+                }`}
               >
                 {chip}
               </li>
@@ -200,8 +202,8 @@ export function WhyDifferentSection() {
             <span className="text-blue">Proof for owners.</span>
           </p>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
-            Language, voice, branding, category-smart setup, and QR control — without asking anyone
-            to install an app.
+            Language, voice, branding, and category-smart setup — without asking anyone to install
+            an app.
           </p>
         </header>
 

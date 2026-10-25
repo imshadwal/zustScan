@@ -145,13 +145,6 @@ export const whyDifferent = [
     body: "Hotels, Cafe, Hospitality, Digital Marketing, Others, and more. AI Generate writes a Why trust us line from your category — it also feeds review drafts.",
     chips: ["Categories", "AI Generate", "Others OK"],
   },
-  {
-    id: "qr-pause",
-    step: "08",
-    title: "Pause reviews, same QR",
-    body: "Turn guest reviews off when you need to — same printed QR, clear paused message. Turn them back on without reprinting the standee.",
-    chips: ["Same QR", "Pause / resume", "No reprint"],
-  },
 ] as const;
 
 export const audiences = [
@@ -274,7 +267,7 @@ export const setupStandeeLine =
 
 export const planIncludes = [
   "Complete setup and QR standee delivered to your address",
-  "One QR for the business (pause guest reviews anytime without reprinting)",
+  "One QR for the business",
   "Services and the products under each service",
   "Branded guest page: city, address, contact, Why trust us, logo, theme",
   "Category-aware profile with optional Others and generated trust copy",

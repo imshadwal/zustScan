@@ -19,14 +19,21 @@ export function GuestAnalyticsStats({
     { label: "Copy & Continue", value: counts.copyContinueTaps, hint: "Clipboard + Google" },
   ] as const;
 
-  const grid = compact ? "grid grid-cols-3 gap-2" : "grid grid-cols-3 gap-3 sm:gap-4";
+  const grid = compact ? "grid grid-cols-3 gap-2" : "grid grid-cols-2 gap-3 sm:gap-4";
+
+  function cellClass(index: number) {
+    return index === 2 && !compact ? "col-span-2" : "";
+  }
 
   if (variant === "dark") {
     return (
       <dl className={grid}>
-        {items.map((item) => (
-          <div key={item.label} className="rounded-2xl bg-white/10 px-3 py-3 text-center">
-            <dt className="text-[10px] font-semibold tracking-wide text-white/65 uppercase">
+        {items.map((item, index) => (
+          <div
+            key={item.label}
+            className={`rounded-2xl bg-white/10 px-3 py-3 text-center ${cellClass(index)}`}
+          >
+            <dt className="text-[10px] font-semibold tracking-wide text-white/65 uppercase sm:text-[11px]">
               {item.label}
             </dt>
             <dd className="mt-1 text-xl font-semibold tabular-nums text-white">{item.value}</dd>
@@ -39,8 +46,8 @@ export function GuestAnalyticsStats({
   if (variant === "admin") {
     return (
       <dl className={`${grid} text-left`}>
-        {items.map((item) => (
-          <div key={item.label} className="rounded-2xl bg-mist px-3 py-2.5">
+        {items.map((item, index) => (
+          <div key={item.label} className={`rounded-2xl bg-mist px-3 py-2.5 ${cellClass(index)}`}>
             <dt className="text-[10px] font-semibold text-muted uppercase">{item.label}</dt>
             <dd className="mt-0.5 text-lg font-semibold tabular-nums text-ink">{item.value}</dd>
             <dd className="text-[10px] text-muted">{item.hint}</dd>
@@ -52,8 +59,11 @@ export function GuestAnalyticsStats({
 
   return (
     <dl className={grid}>
-      {items.map((item) => (
-        <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-3 py-3">
+      {items.map((item, index) => (
+        <div
+          key={item.label}
+          className={`rounded-2xl border border-slate-200 bg-white px-3 py-3 ${cellClass(index)}`}
+        >
           <dt className="text-[10px] font-semibold tracking-wide text-muted uppercase">
             {item.label}
           </dt>
