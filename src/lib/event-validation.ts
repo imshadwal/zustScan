@@ -45,6 +45,29 @@ export function isValidEventDateInput(value: string) {
   return normalizeEventDate(value) !== null;
 }
 
+/** Empty is allowed; if filled, must be 2–120 chars. */
+export function parseOptionalEventName(value: string): string | null {
+  const name = normalizeEventName(value);
+  if (!name) return null;
+  return isValidEventName(name) ? name : null;
+}
+
+/** Empty is allowed; if filled, must be a valid date. */
+export function parseOptionalEventDate(value: string): string | null {
+  if (!value.trim()) return null;
+  return normalizeEventDate(value);
+}
+
+export function optionalEventNameValid(value: string | null | undefined) {
+  if (!value?.trim()) return true;
+  return isValidEventName(value);
+}
+
+export function optionalEventDateValid(value: string | null | undefined) {
+  if (!value?.trim()) return true;
+  return normalizeEventDate(value) !== null;
+}
+
 export function evaluateEventSetup(input: {
   standeeType: StandeeType;
   businessName: string | null;
@@ -78,8 +101,8 @@ export function evaluateEventSetup(input: {
 
   const phone = Boolean(input.phone && normalizePhone(input.phone));
   const mapLink = Boolean(input.mapLink && normalizeMapLink(input.mapLink));
-  const eventName = Boolean(input.eventName && isValidEventName(input.eventName));
-  const eventDate = Boolean(input.eventDate && normalizeEventDate(input.eventDate));
+  const eventName = optionalEventNameValid(input.eventName);
+  const eventDate = optionalEventDateValid(input.eventDate);
   const hasArea = input.areaCount >= 1;
 
   const missingLabels: string[] = [];
@@ -87,12 +110,11 @@ export function evaluateEventSetup(input: {
   if (input.city?.trim() && !city) missingLabels.push("City");
   if (!phone) missingLabels.push("Phone");
   if (!mapLink) missingLabels.push("Google review link");
-  if (!eventName) missingLabels.push("Event name");
-  if (!eventDate) missingLabels.push("Event date");
-  if (!hasArea) missingLabels.push("At least one area (Food, Hall, …)");
+  if (!eventName) missingLabels.push("Event name (fix or clear)");
+  if (!eventDate) missingLabels.push("Event date (fix or clear)");
+  if (!hasArea) missingLabels.push("At least one guest area");
 
-  const complete =
-    businessName && phone && mapLink && eventName && eventDate && hasArea;
+  const complete = businessName && phone && mapLink && eventName && eventDate && hasArea;
 
   return {
     businessName,

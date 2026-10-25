@@ -12,11 +12,12 @@ alter table public.business_owners
 
 create table if not exists public.business_event_profiles (
   business_owner_id uuid primary key references public.business_owners (id) on delete cascade,
-  event_name text not null,
+  event_name text,
   event_date date,
   updated_at timestamptz not null default now(),
   constraint business_event_profiles_event_name_len check (
-    char_length(trim(event_name)) between 2 and 120
+    event_name is null
+    or char_length(trim(event_name)) between 2 and 120
   )
 );
 

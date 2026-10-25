@@ -63,6 +63,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
   const addressLine = guestAddressLine(experience.address, experience.city);
   const contactPhone = formatGuestContactPhone(experience.phone);
   const eventDateLabel = formatEventDateForDisplay(experience.eventDate);
+  const eventSubtitle = [experience.eventName, eventDateLabel].filter(Boolean).join(" · ");
 
   const [step, setStep] = useState<StepIndex>(0);
   const [areaIds, setAreaIds] = useState<string[]>(
@@ -196,9 +197,9 @@ export function EventGuestReviewFlow({ experience }: Props) {
               Share your experience
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
-            <p className="mt-2 text-sm font-medium text-white/90">
-              {experience.eventName} · {eventDateLabel}
-            </p>
+            {eventSubtitle ? (
+              <p className="mt-2 text-sm font-medium text-white/90">{eventSubtitle}</p>
+            ) : null}
             {addressLine ? (
               <p className="mt-2 text-sm leading-5 text-white/70">{addressLine}</p>
             ) : null}

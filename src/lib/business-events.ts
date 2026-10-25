@@ -7,10 +7,8 @@ import {
 } from "@/lib/business-validation";
 import {
   evaluateEventSetup,
-  isValidEventDateInput,
-  isValidEventName,
-  normalizeEventDate,
-  normalizeEventName,
+  parseOptionalEventDate,
+  parseOptionalEventName,
   type EventSetupChecklist,
 } from "@/lib/event-validation";
 import { businessLogoPublicUrl } from "@/lib/business-logos";
@@ -94,8 +92,8 @@ export type EventGuestExperience = {
   brief: string;
   guestThemeId: string;
   logoUrl: string | null;
-  eventName: string;
-  eventDate: string;
+  eventName: string | null;
+  eventDate: string | null;
   areas: EventAreaRecord[];
 };
 
@@ -252,26 +250,33 @@ export async function saveEventDetails(
   if (normalizeStandeeType(row.standee_type) !== "event") {
     throw new OwnerStoreError("This account is not an event standee.", 400);
   }
-  if (!isValidEventName(input.eventName)) {
-    throw new OwnerStoreError("Event name must be 2 to 120 characters.", 400);
+  const eventName = parseOptionalEventName(input.eventName);
+  const eventDate = parseOptionalEventDate(input.eventDate);
+  if (input.eventName.trim() && !eventName) {
+    throw new OwnerStoreError("Event name must be 2 to 120 characters, or leave blank.", 400);
   }
-  if (!isValidEventDateInput(input.eventDate)) {
-    throw new OwnerStoreError("Pick a valid event date.", 400);
+  if (input.eventDate.trim() && !eventDate) {
+    throw new OwnerStoreError("Pick a valid event date, or leave blank.", 400);
   }
 
-  const eventName = normalizeEventName(input.eventName);
-  const eventDate = normalizeEventDate(input.eventDate)!;
-
-  const { error } = await database().from("business_event_profiles").upsert(
-    {
-      business_owner_id: row.id,
-      event_name: eventName,
-      event_date: eventDate,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "business_owner_id" },
-  );
-  if (error) throw mapDbError(error);
+  if (!eventName && !eventDate) {
+    const { error } = await database()
+      .from("business_event_profiles")
+      .delete()
+      .eq("business_owner_id", row.id);
+    if (error) throw mapDbError(error);
+  } else {
+    const { error } = await database().from("business_event_profiles").upsert(
+      {
+        business_owner_id: row.id,
+        event_name: eventName,
+        event_date: eventDate,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "business_owner_id" },
+    );
+    if (error) throw mapDbError(error);
+  }
 
   const areaCount = await countEventAreas(row.id);
   const checklist = await recomputeEventSetupComplete(row.id, row, {
@@ -350,7 +355,6 @@ export async function loadEventGuestExperience(
   if (!mapLink || !brief) return null;
 
   const profile = await fetchEventProfile(row.id);
-  if (!profile?.event_name || !profile.event_date) return null;
 
   const areas = await listEventAreasForOwner(id);
   if (areas.length === 0) return null;
@@ -371,8 +375,8 @@ export async function loadEventGuestExperience(
     brief,
     guestThemeId,
     logoUrl: businessLogoPublicUrl(row.logo_path ?? null),
-    eventName: profile.event_name,
-    eventDate: profile.event_date,
+    eventName: profile?.event_name?.trim() || null,
+    eventDate: profile?.event_date ?? null,
     areas,
   };
 }

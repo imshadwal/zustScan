@@ -32,9 +32,7 @@ const eventChecklistItems: {
   { key: "businessName", label: "Business name (venue)", href: "/business/profile" },
   { key: "phone", label: "Phone", href: "/business/profile" },
   { key: "mapLink", label: "Google review link", href: "/business/profile" },
-  { key: "eventName", label: "Event name", href: "/business/event" },
-  { key: "eventDate", label: "Event date", href: "/business/event" },
-  { key: "hasArea", label: "Guest areas (Food, Hall, …)", href: "/business/event" },
+  { key: "hasArea", label: "Guest areas", href: "/business/event" },
 ];
 
 function progress(

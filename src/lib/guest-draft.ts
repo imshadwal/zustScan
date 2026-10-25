@@ -277,8 +277,8 @@ export type EventDraftInput = {
   businessName: string;
   city: string | null;
   brief: string;
-  eventName: string;
-  eventDate: string;
+  eventName: string | null;
+  eventDate: string | null;
   areaNames: string[];
   tier: "Good" | "Great" | "Exceptional";
   stars: number;
@@ -300,14 +300,16 @@ function buildEventDraftMessages(input: EventDraftInput) {
   const placeLine = input.city
     ? `${input.businessName}, ${input.city}`
     : input.businessName;
-  const dateLine = input.eventDate;
-
   const system = [
     "You write short, natural review text that a guest will paste directly into Google Reviews.",
-    "The guest attended a specific function or event at a venue — frame the visit around that event, not a random weekday meal.",
+    input.eventName
+      ? "The guest attended a specific function or event at a venue — frame the visit around that event, not a random weekday meal."
+      : "The guest visited this venue for a function or gathering — frame the visit naturally without inventing an event name.",
     "Write as if the review is already on Google — never mention Google, posting, uploading, copy-paste, or that you are writing a review.",
     "First person, no hashtags or emojis, 2 to 4 sentences.",
-    "Include the venue/business name and event name naturally once.",
+    input.eventName
+      ? "Include the venue/business name and event name naturally once."
+      : "Include the venue/business name naturally once.",
     "Include every selected area name verbatim (e.g. Food, Hall, Staff) — spread across sentences.",
     "Do not invent facts beyond the venue context, event, and guest choices.",
     "Never say the review was written by AI.",
@@ -328,17 +330,21 @@ function buildEventDraftMessages(input: EventDraftInput) {
 
   const user = [
     `Venue on Google: ${placeLine}`,
-    `Event: ${input.eventName}`,
-    `Event date: ${dateLine}`,
+    input.eventName ? `Event: ${input.eventName}` : null,
+    input.eventDate ? `Event date: ${input.eventDate}` : null,
     `Why trust us (context): ${input.brief.slice(0, 800)}`,
     `What mattered to the guest (areas): ${input.areaNames.join(", ")}`,
     `How it felt (tone only — do not quote these labels): ${input.tier}`,
     `Star rating (for tone only — do not mention stars, ratings, or numbers in the review text): ${input.stars} out of 5`,
     `Variation token (must change wording from any other token): ${input.variationSeed}`,
     variationInstructions(input.variationSeed, language),
-    "Example framing (do not copy verbatim): I took part in {event} at {venue}; {area} stood out…",
+    input.eventName
+      ? "Example framing (do not copy verbatim): I took part in {event} at {venue}; {area} stood out…"
+      : "Example framing (do not copy verbatim): We visited {venue}; {area} stood out…",
     hindiOnly ? "Output ONLY the review in Devanagari Hindi. No English explanation." : "Write the review draft only.",
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return [
     { role: "system" as const, content: system },

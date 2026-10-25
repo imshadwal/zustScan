@@ -84,7 +84,8 @@ export function EventSetupManager({
       <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
         <h2 className="text-sm font-semibold text-muted">Event details</h2>
         <p className="mt-1 text-sm text-muted">
-          For the next function, edit the name and date here. Your venue name stays under Profile.
+          Optional — leave blank if you do not want a name or date on the guest page. Venue name stays
+          under Profile.
         </p>
         <div className="mt-4 space-y-4">
           <div>
