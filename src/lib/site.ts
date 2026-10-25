@@ -295,9 +295,9 @@ export const roiPricingPoints = [
 /** Standalone offerings beyond the everyday counter/table QR plan. */
 export const otherProductsPage = {
   eyebrow: forEventsLabel,
-  title: "Customised QR for weddings and banquets.",
+  title: "Customised QR for weddings, corporate events, and more.",
   description:
-    "Your everyday Zust Scan works at the table or counter. For function nights, we tailor the QR, standee art, and guest page to your event — so reviews describe the wedding, birthday, or corporate night guests actually attended.",
+    "Your everyday Zust Scan works at the table or counter. For any function or gathering, we tailor the QR, standee art, and guest page to your event — so reviews describe the night your guests actually attended.",
 } as const;
 
 export const otherProducts = [

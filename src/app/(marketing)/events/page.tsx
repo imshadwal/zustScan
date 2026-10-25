@@ -5,7 +5,7 @@ import { forEventsLabel } from "@/lib/site";
 export const metadata: Metadata = {
   title: `${forEventsLabel} | Zust Scan`,
   description:
-    "Customised QR standees for weddings, banquets, and function nights — guest reviews tailored to the event your guests attended.",
+    "Customised QR standees for weddings, corporate meetings, banquets, birthdays, and more — guest reviews tailored to the event your guests attended.",
 };
 
 export default function EventsPage() {
