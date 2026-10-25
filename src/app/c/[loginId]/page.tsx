@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GuestShell } from "@/components/guest/shell";
 import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
 import { displayGuestBusinessTitle } from "@/lib/initials";
@@ -47,6 +47,10 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
   }
 
   if (!owner) notFound();
+
+  if (owner.standeeType === "event") {
+    redirect(`/e/${owner.loginId}`);
+  }
 
   const title = displayGuestBusinessTitle(owner.businessName, owner.loginId, owner.city);
 

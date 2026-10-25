@@ -43,6 +43,10 @@ export function guestPageUrl(loginId: string) {
   return `${siteOrigin()}/c/${loginId}`;
 }
 
+export function eventGuestPageUrl(loginId: string) {
+  return `${siteOrigin()}/e/${loginId}`;
+}
+
 export function formatCreatedAt(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;

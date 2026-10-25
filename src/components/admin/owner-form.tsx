@@ -10,6 +10,7 @@ import {
 import { PasswordInput, RevealableSecret } from "@/components/password-input";
 import { useToast } from "@/components/toast/toast-provider";
 import { isValidLoginId, normalizeLoginId, parseSoldPrice, formatRupees } from "@/lib/login-id";
+import type { StandeeType } from "@/lib/standee-type";
 
 type Created = { loginId: string; password: string; soldPriceLabel: string };
 
@@ -18,13 +19,18 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
+  const [standeeType, setStandeeType] = useState<StandeeType>("table");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [created, setCreated] = useState<Created | null>(null);
   const [copied, setCopied] = useState(false);
 
   const normalized = normalizeLoginId(loginId);
-  const preview = isValidLoginId(normalized) ? `${siteOrigin}/c/${normalized}` : null;
+  const preview = isValidLoginId(normalized)
+    ? standeeType === "event"
+      ? `${siteOrigin}/e/${normalized}`
+      : `${siteOrigin}/c/${normalized}`
+    : null;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,7 +53,12 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
       const response = await fetch("/api/admin/business-owners", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loginId: normalized, password, soldPrice: String(price) }),
+        body: JSON.stringify({
+          loginId: normalized,
+          password,
+          soldPrice: String(price),
+          standeeType,
+        }),
       });
       const body = (await response.json().catch(() => null)) as
         | { loginId?: string; password?: string; error?: string }
@@ -206,6 +217,43 @@ export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
             />
             <p className="mt-1.5 text-xs text-muted">Whole rupees this business owner paid.</p>
           </div>
+          <fieldset>
+            <legend className="text-sm font-semibold text-ink">Standee type</legend>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-slate-200 p-4 has-checked:border-blue has-checked:bg-blue/5">
+                <input
+                  type="radio"
+                  name="standeeType"
+                  value="table"
+                  checked={standeeType === "table"}
+                  onChange={() => setStandeeType("table")}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block text-sm font-semibold">Table standee</span>
+                  <span className="mt-1 block text-xs text-muted">
+                    Everyday QR — guests use /c/login-id (services & products).
+                  </span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-slate-200 p-4 has-checked:border-blue has-checked:bg-blue/5">
+                <input
+                  type="radio"
+                  name="standeeType"
+                  value="event"
+                  checked={standeeType === "event"}
+                  onChange={() => setStandeeType("event")}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block text-sm font-semibold">Event standee</span>
+                  <span className="mt-1 block text-xs text-muted">
+                    Function QR — /e/login-id, event name, date, and areas (Food, Hall…).
+                  </span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
         </div>
         {error ? (
           <p className="mt-4 text-sm text-red-700" role="alert">

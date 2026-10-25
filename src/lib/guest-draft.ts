@@ -272,3 +272,117 @@ async function openAiDraft(input: DraftInput): Promise<string> {
 export async function generateGuestDraft(input: DraftInput): Promise<string> {
   return openAiDraft(input);
 }
+
+export type EventDraftInput = {
+  businessName: string;
+  city: string | null;
+  brief: string;
+  eventName: string;
+  eventDate: string;
+  areaNames: string[];
+  tier: "Good" | "Great" | "Exceptional";
+  stars: number;
+  languages: DraftInput["languages"];
+  voice: DraftInput["voice"];
+  variationSeed: string;
+};
+
+const STAR_MENTION_PATTERN =
+  /\b\d\s*stars?\b|\bout of 5\b|\bstar rating\b|\bmy rating\b|★|⭐|रेटिंग|सितार|स्टार|star/i;
+
+function draftMentionsStars(text: string) {
+  return STAR_MENTION_PATTERN.test(text);
+}
+
+function buildEventDraftMessages(input: EventDraftInput) {
+  const language = input.languages[0] ?? "english";
+  const hindiOnly = isHindiOnly(input.languages);
+  const placeLine = input.city
+    ? `${input.businessName}, ${input.city}`
+    : input.businessName;
+  const dateLine = input.eventDate;
+
+  const system = [
+    "You write short, natural review text that a guest will paste directly into Google Reviews.",
+    "The guest attended a specific function or event at a venue — frame the visit around that event, not a random weekday meal.",
+    "Write as if the review is already on Google — never mention Google, posting, uploading, copy-paste, or that you are writing a review.",
+    "First person, no hashtags or emojis, 2 to 4 sentences.",
+    "Include the venue/business name and event name naturally once.",
+    "Include every selected area name verbatim (e.g. Food, Hall, Staff) — spread across sentences.",
+    "Do not invent facts beyond the venue context, event, and guest choices.",
+    "Never say the review was written by AI.",
+    "Never use the words Good, Great, or Exceptional; those are internal labels only. Express feeling in natural language.",
+    "Do not write the star number, star count, or 'out of 5' in the text — the guest picks stars separately in Google.",
+    "Never write sentences about your rating or stars (not in English, not in Hindi — no 'my rating', no 'चार सितारे', no 'रेटिंग').",
+    hindiOnly
+      ? "CRITICAL: Every Hindi word must be in Devanagari script. Never write Hindi in Roman letters."
+      : "Prefer active first-person over passive unless the context suggests otherwise.",
+    hindiOnly
+      ? "Do not use English words such as recommend — use Hindi in Devanagari (e.g. सिफ़ारिश करूँगी)."
+      : "Do not use future tense about sharing feedback on Google.",
+    languageInstruction(input.languages),
+    voiceInstruction(language, input.voice),
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const user = [
+    `Venue on Google: ${placeLine}`,
+    `Event: ${input.eventName}`,
+    `Event date: ${dateLine}`,
+    `Why trust us (context): ${input.brief.slice(0, 800)}`,
+    `What mattered to the guest (areas): ${input.areaNames.join(", ")}`,
+    `How it felt (tone only — do not quote these labels): ${input.tier}`,
+    `Star rating (for tone only — do not mention stars, ratings, or numbers in the review text): ${input.stars} out of 5`,
+    `Variation token (must change wording from any other token): ${input.variationSeed}`,
+    variationInstructions(input.variationSeed, language),
+    "Example framing (do not copy verbatim): I took part in {event} at {venue}; {area} stood out…",
+    hindiOnly ? "Output ONLY the review in Devanagari Hindi. No English explanation." : "Write the review draft only.",
+  ].join("\n");
+
+  return [
+    { role: "system" as const, content: system },
+    { role: "user" as const, content: user },
+  ];
+}
+
+async function openAiEventDraft(input: EventDraftInput): Promise<string> {
+  const { key, model } = resolveOpenAiConfig();
+  const messages = buildEventDraftMessages(input);
+  let text = await callOpenAiChat(key, model, messages);
+  const hindiOnly = isHindiOnly(input.languages);
+
+  if (hindiOnly && hindiDraftNeedsRetry(text)) {
+    console.warn("[guest-draft] Event Hindi draft used Roman script — retrying once.");
+    text = await callOpenAiChat(key, model, [
+      ...messages,
+      { role: "assistant", content: text },
+      {
+        role: "user",
+        content:
+          "Wrong script. Rewrite the entire review in Devanagari Hindi only. " +
+          "Keep the same facts and names. Review text only.",
+      },
+    ]);
+  }
+
+  if (draftMentionsStars(text)) {
+    console.warn("[guest-draft] Event draft mentioned stars — retrying once.");
+    text = await callOpenAiChat(key, model, [
+      ...messages,
+      { role: "assistant", content: text },
+      {
+        role: "user",
+        content:
+          "Remove any mention of stars, star count, rating, or 'out of 5' from the review. " +
+          "The guest sets stars on Google separately. Rewrite the review text only, same facts and language.",
+      },
+    ]);
+  }
+
+  return text;
+}
+
+export async function generateEventGuestDraft(input: EventDraftInput): Promise<string> {
+  return openAiEventDraft(input);
+}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { OwnerIdentity } from "@/components/initials-badge";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { OwnerManageModal } from "@/components/admin/owner-manage-modal";
 import { useToast } from "@/components/toast/toast-provider";
 import {
   dangerButtonClass,
@@ -16,19 +17,105 @@ import { GuestAnalyticsStats } from "@/components/home/guest-analytics-stats";
 import { displayTitle } from "@/lib/initials";
 import { PasswordInput, RevealableSecret } from "@/components/password-input";
 
-type OwnerCardData = {
+export type OwnerCardData = {
   loginId: string;
   businessName: string | null;
   createdAtLabel: string;
   soldPriceLabel: string;
   setupComplete: boolean;
   qrActive: boolean;
+  standeeType: "table" | "event";
   pageViews: number;
   draftsGenerated: number;
   copyContinueTaps: number;
 };
 
-function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: string }) {
+function OwnerSummaryCard({
+  owner,
+  siteOrigin,
+  onOpen,
+}: {
+  owner: OwnerCardData;
+  siteOrigin: string;
+  onOpen: () => void;
+}) {
+  const label = displayTitle(owner.businessName, owner.loginId);
+  const pagePath =
+    owner.standeeType === "event" ? `/e/${owner.loginId}` : `/c/${owner.loginId}`;
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group w-full rounded-2xl bg-white p-4 text-left text-ink shadow-[0_12px_40px_rgba(0,0,0,0.22)] transition hover:ring-2 hover:ring-blue/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
+    >
+      <div className="flex gap-3">
+        <div className="relative shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/admin/business-owners/${owner.loginId}/qr`}
+            alt=""
+            width={56}
+            height={56}
+            className={`h-14 w-14 rounded-xl border border-slate-200 ${
+              owner.qrActive ? "" : "opacity-40 grayscale"
+            }`}
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-ink group-hover:text-blue">{label}</p>
+          <p className="truncate font-mono text-xs text-muted">{owner.loginId}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                owner.standeeType === "event"
+                  ? "bg-violet-100 text-violet-800"
+                  : "bg-slate-100 text-slate-700"
+              }`}
+            >
+              {owner.standeeType === "event" ? "Event" : "Table"}
+            </span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                owner.setupComplete ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"
+              }`}
+            >
+              {owner.setupComplete ? "Ready" : "Setup incomplete"}
+            </span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                owner.qrActive ? "bg-blue/10 text-blue" : "bg-slate-200 text-slate-600"
+              }`}
+            >
+              {owner.qrActive ? "QR on" : "QR paused"}
+            </span>
+          </div>
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-muted">
+        {owner.soldPriceLabel} · {owner.createdAtLabel}
+      </p>
+      <p className="mt-1 truncate text-xs text-muted">
+        {siteOrigin}
+        {pagePath}
+      </p>
+      <p className="mt-2 text-xs tabular-nums text-muted">
+        {owner.pageViews} scans · {owner.draftsGenerated} drafts · {owner.copyContinueTaps} copy
+      </p>
+      <p className="mt-2 text-xs font-semibold text-blue">Manage →</p>
+    </button>
+  );
+}
+
+function OwnerManagePanel({
+  owner,
+  siteOrigin,
+  onDeleted,
+}: {
+  owner: OwnerCardData;
+  siteOrigin: string;
+  onDeleted?: () => void;
+}) {
   const router = useRouter();
   const { success, error: toastError } = useToast();
   const [password, setPassword] = useState("");
@@ -41,13 +128,63 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
   const [copied, setCopied] = useState(false);
   const [qrActive, setQrActive] = useState(owner.qrActive);
   const [qrPending, setQrPending] = useState(false);
+  const [standeeType, setStandeeType] = useState(owner.standeeType);
+  const [standeeDraft, setStandeeDraft] = useState(owner.standeeType);
+  const [standeePending, setStandeePending] = useState(false);
+  const [qrVersion, setQrVersion] = useState(0);
 
   useEffect(() => {
     setQrActive(owner.qrActive);
   }, [owner.qrActive]);
 
-  const pageUrl = `${siteOrigin}/c/${owner.loginId}`;
+  useEffect(() => {
+    setStandeeType(owner.standeeType);
+    setStandeeDraft(owner.standeeType);
+  }, [owner.standeeType, owner.loginId]);
+
+  const pageUrl =
+    standeeType === "event"
+      ? `${siteOrigin}/e/${owner.loginId}`
+      : `${siteOrigin}/c/${owner.loginId}`;
   const label = displayTitle(owner.businessName, owner.loginId);
+
+  async function saveStandeeType() {
+    if (standeeDraft === standeeType) return;
+    setStandeePending(true);
+    try {
+      const response = await fetch(
+        `/api/admin/business-owners/${owner.loginId}/standee-type`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ standeeType: standeeDraft }),
+        },
+      );
+      const body = (await response.json().catch(() => null)) as
+        | { standeeType?: "table" | "event"; error?: string }
+        | null;
+      if (!response.ok || !body?.standeeType) {
+        toastError(body?.error ?? "Standee type could not be updated.");
+        setStandeeDraft(standeeType);
+        setStandeePending(false);
+        return;
+      }
+      setStandeeType(body.standeeType);
+      setStandeeDraft(body.standeeType);
+      setQrVersion((v) => v + 1);
+      success(
+        body.standeeType === "event"
+          ? "Event standee — guest URL is /e/… Re-download QR if needed."
+          : "Table standee — guest URL is /c/… Re-download QR if needed.",
+      );
+      router.refresh();
+      setStandeePending(false);
+    } catch {
+      toastError("The request could not be sent.");
+      setStandeeDraft(standeeType);
+      setStandeePending(false);
+    }
+  }
 
   async function toggleQrActive() {
     const next = !qrActive;
@@ -139,6 +276,7 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
       setDeleteOpen(false);
       setDeletePending(false);
       success("Business deleted.");
+      onDeleted?.();
       router.refresh();
     } catch {
       setDeleteError("The request could not be sent.");
@@ -148,42 +286,41 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
 
   return (
     <>
-    <ConfirmDialog
-      open={deleteOpen}
-      tone="danger"
-      title="Delete this business?"
-      description={
-        <>
-          <p>
-            You are about to remove <span className="font-semibold text-ink">{label}</span>{" "}
-            <span className="font-mono text-ink">({owner.loginId})</span>.
-          </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5">
-            <li>Business login and password</li>
-            <li>Guest QR link and public page</li>
-            <li>All services and products</li>
-          </ul>
-          {deleteError ? (
-            <p className="mt-4 text-sm text-red-700" role="alert">
-              {deleteError}
+      <ConfirmDialog
+        open={deleteOpen}
+        tone="danger"
+        title="Delete this business?"
+        description={
+          <>
+            <p>
+              You are about to remove <span className="font-semibold text-ink">{label}</span>{" "}
+              <span className="font-mono text-ink">({owner.loginId})</span>.
             </p>
-          ) : null}
-        </>
-      }
-      cancelLabel="Keep business"
-      confirmLabel="Delete permanently"
-      pending={deletePending}
-      onCancel={() => {
-        if (!deletePending) setDeleteOpen(false);
-      }}
-      onConfirm={confirmDelete}
-    />
-    <article className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+            <ul className="mt-3 list-disc space-y-1 pl-5">
+              <li>Business login and password</li>
+              <li>Guest QR link and public page</li>
+              <li>All services and products</li>
+            </ul>
+            {deleteError ? (
+              <p className="mt-4 text-sm text-red-700" role="alert">
+                {deleteError}
+              </p>
+            ) : null}
+          </>
+        }
+        cancelLabel="Keep business"
+        confirmLabel="Delete permanently"
+        pending={deletePending}
+        onCancel={() => {
+          if (!deletePending) setDeleteOpen(false);
+        }}
+        onConfirm={confirmDelete}
+      />
       <div className="flex flex-col gap-5 sm:flex-row">
-        <div className="relative shrink-0">
+        <div className="relative shrink-0 self-start">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/api/admin/business-owners/${owner.loginId}/qr`}
+            src={`/api/admin/business-owners/${owner.loginId}/qr?v=${qrVersion}`}
             alt={`QR code linking to ${pageUrl}`}
             width={144}
             height={144}
@@ -199,15 +336,48 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
         </div>
         <div className="min-w-0 flex-1">
           <OwnerIdentity businessName={owner.businessName} loginId={owner.loginId} />
-          <p className="mt-2 font-mono text-sm text-muted">{owner.loginId}</p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-2 text-sm text-muted">
             Sold for {owner.soldPriceLabel} · Created {owner.createdAtLabel}
             {owner.setupComplete ? " · Ready for guests" : " · Setup incomplete"}
             {qrActive ? " · QR active" : " · QR paused"}
           </p>
           <p className="mt-1 text-sm break-all text-muted">{pageUrl}</p>
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-mist/50 p-4">
+            <p className="text-xs font-semibold tracking-wide text-muted uppercase">Standee type</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <select
+                value={standeeDraft}
+                disabled={standeePending || deletePending || pending || qrPending}
+                onChange={(event) =>
+                  setStandeeDraft(event.target.value as "table" | "event")
+                }
+                className={`${fieldClass} min-w-0 flex-1 bg-white py-2.5 text-sm`}
+              >
+                <option value="table">Table standee (/c/ — services & products)</option>
+                <option value="event">Event standee (/e/ — event name, date, areas)</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => void saveStandeeType()}
+                disabled={
+                  standeePending ||
+                  standeeDraft === standeeType ||
+                  deletePending ||
+                  pending ||
+                  qrPending
+                }
+                className={`${primaryButtonClass} shrink-0`}
+              >
+                {standeePending ? "Saving…" : "Save"}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              Switching to event adds default areas (Food, Hall, Staff, Ambience) if none exist.
+              Owner completes event name and date in their portal.
+            </p>
+          </div>
           <div className="mt-4">
-            <p className="text-xs font-semibold text-muted uppercase tracking-wide">Guest funnel</p>
+            <p className="text-xs font-semibold tracking-wide text-muted uppercase">Guest funnel</p>
             <GuestAnalyticsStats
               variant="admin"
               compact
@@ -253,7 +423,10 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
             </div>
           ) : (
             <form onSubmit={reset} className="mt-5">
-              <label className="block text-sm font-semibold text-ink" htmlFor={`reset-${owner.loginId}`}>
+              <label
+                className="block text-sm font-semibold text-ink"
+                htmlFor={`reset-${owner.loginId}`}
+              >
                 New password
               </label>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -278,7 +451,6 @@ function OwnerCard({ owner, siteOrigin }: { owner: OwnerCardData; siteOrigin: st
           )}
         </div>
       </div>
-    </article>
     </>
   );
 }
@@ -300,12 +472,18 @@ export function OwnerList({
   };
   notice?: string | null;
 }) {
+  const [manageOwner, setManageOwner] = useState<OwnerCardData | null>(null);
+
+  const manageLabel = manageOwner
+    ? displayTitle(manageOwner.businessName, manageOwner.loginId)
+    : "";
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
         Pause or activate guest reviews per owner here — same printed QR, paused message for guests
-        until you turn it back on. Business owners cannot change this in their portal.
+        until you turn it back on. Tap a business card to manage QR, standee type, and password.
       </p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
@@ -350,12 +528,32 @@ export function OwnerList({
           </Link>
         </div>
       ) : (
-        <div className="mt-6 flex flex-col gap-4">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {owners.map((owner) => (
-            <OwnerCard key={owner.loginId} owner={owner} siteOrigin={siteOrigin} />
+            <OwnerSummaryCard
+              key={owner.loginId}
+              owner={owner}
+              siteOrigin={siteOrigin}
+              onOpen={() => setManageOwner(owner)}
+            />
           ))}
         </div>
       )}
+
+      <OwnerManageModal
+        open={manageOwner !== null}
+        title={manageLabel}
+        subtitle={manageOwner?.loginId}
+        onClose={() => setManageOwner(null)}
+      >
+        {manageOwner ? (
+          <OwnerManagePanel
+            owner={manageOwner}
+            siteOrigin={siteOrigin}
+            onDeleted={() => setManageOwner(null)}
+          />
+        ) : null}
+      </OwnerManageModal>
     </div>
   );
 }

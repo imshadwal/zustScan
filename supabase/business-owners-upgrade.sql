@@ -21,3 +21,4 @@ where guest_theme_id is null;
 --   supabase/guest-analytics.sql
 --   supabase/business-logos-storage.sql
 --   supabase/business-category-options.sql
+--   supabase/business-event-standee.sql

@@ -13,6 +13,7 @@ import {
   type BusinessCategoryOption,
 } from "@/lib/business-categories";
 import { isGuestThemeId, type GuestThemeId } from "@/lib/guest-themes";
+import type { StandeeType } from "@/lib/standee-type";
 
 type Profile = {
   businessName: string | null;
@@ -30,10 +31,13 @@ type Profile = {
 export function ProfileForm({
   initial,
   categories,
+  standeeType = "table",
 }: {
   initial: Profile;
   categories: BusinessCategoryOption[];
+  standeeType?: StandeeType;
 }) {
+  const isEventStandee = standeeType === "event";
   const router = useRouter();
   const { success, error: toastError } = useToast();
   const [businessName, setBusinessName] = useState(initial.businessName ?? "");
@@ -55,24 +59,31 @@ export function ProfileForm({
   const categoryId = isBusinessCategoryId(businessCategory, categories)
     ? businessCategory
     : null;
-  const canGenerateTrust = categoryId !== null;
+  const canGenerateTrust = isEventStandee
+    ? businessName.trim().length >= 2
+    : categoryId !== null;
 
   const guestNamePreview = displayTitle(businessName || null, "your-business");
   const guestAddressPreview = guestAddressLine(address, city);
 
   const generateTrustLabel = useMemo(() => {
+    if (isEventStandee) {
+      return businessName.trim().length >= 2 ? "Generate" : "Generate (add venue name first)";
+    }
     if (!categoryId) return "Generate";
     if (categoryId === OTHERS_CATEGORY_ID && !businessCategoryOther.trim()) {
       return "Generate (add business type first)";
     }
     return "Generate";
-  }, [categoryId, businessCategoryOther]);
+  }, [categoryId, businessCategoryOther, isEventStandee, businessName]);
 
   async function generateWhyTrust() {
-    if (!categoryId) return;
-    if (categoryId === OTHERS_CATEGORY_ID && businessCategoryOther.trim().length < 2) {
-      toastError("Describe your business type under Others first.");
-      return;
+    if (!isEventStandee) {
+      if (!categoryId) return;
+      if (categoryId === OTHERS_CATEGORY_ID && businessCategoryOther.trim().length < 2) {
+        toastError("Describe your business type under Others first.");
+        return;
+      }
     }
     if (!businessName.trim()) {
       toastError("Enter a business name first.");
@@ -83,13 +94,17 @@ export function ProfileForm({
       const response = await fetch("/api/business/why-trust/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessName,
-          city,
-          address,
-          categoryId,
-          categoryOther: businessCategoryOther,
-        }),
+        body: JSON.stringify(
+          isEventStandee
+            ? { businessName, city, address }
+            : {
+                businessName,
+                city,
+                address,
+                categoryId,
+                categoryOther: businessCategoryOther,
+              },
+        ),
       });
       const body = (await response.json().catch(() => null)) as {
         whyTrustUs?: string;
@@ -188,41 +203,48 @@ export function ProfileForm({
             maxLength={80}
           />
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-ink" htmlFor="business-category">
-            Category <span className="text-red-600">*</span>
-          </label>
-          <select
-            id="business-category"
-            value={businessCategory}
-            onChange={(e) => setBusinessCategory(e.target.value)}
-            className={`${fieldClass} mt-2`}
-            required
-          >
-            <option value="">Select Category…</option>
-            {categories.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        {businessCategory === OTHERS_CATEGORY_ID ? (
-          <div>
-            <label className="block text-sm font-semibold text-ink" htmlFor="business-category-other">
-              Your business type <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="business-category-other"
-              value={businessCategoryOther}
-              onChange={(e) => setBusinessCategoryOther(e.target.value)}
-              placeholder="e.g. Photography studio"
-              className={`${fieldClass} mt-2`}
-              required
-              minLength={2}
-              maxLength={80}
-            />
-          </div>
+        {!isEventStandee ? (
+          <>
+            <div>
+              <label className="block text-sm font-semibold text-ink" htmlFor="business-category">
+                Category <span className="text-red-600">*</span>
+              </label>
+              <select
+                id="business-category"
+                value={businessCategory}
+                onChange={(e) => setBusinessCategory(e.target.value)}
+                className={`${fieldClass} mt-2`}
+                required
+              >
+                <option value="">Select Category…</option>
+                {categories.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {businessCategory === OTHERS_CATEGORY_ID ? (
+              <div>
+                <label
+                  className="block text-sm font-semibold text-ink"
+                  htmlFor="business-category-other"
+                >
+                  Your business type <span className="text-red-600">*</span>
+                </label>
+                <input
+                  id="business-category-other"
+                  value={businessCategoryOther}
+                  onChange={(e) => setBusinessCategoryOther(e.target.value)}
+                  placeholder="e.g. Photography studio"
+                  className={`${fieldClass} mt-2`}
+                  required
+                  minLength={2}
+                  maxLength={80}
+                />
+              </div>
+            ) : null}
+          </>
         ) : null}
         <div>
           <label className="block text-sm font-semibold text-ink" htmlFor="business-address">
@@ -292,7 +314,9 @@ export function ProfileForm({
           />
           <p className="mt-1.5 text-xs text-muted">
             10 to 300 characters. Shown on the guest page and used as context for AI review drafts.
-            Pick a category, then Generate writes a starter line with AI — edit before you save.
+            {isEventStandee
+              ? " Generate writes a starter line for your venue — edit before you save."
+              : " Pick a category, then Generate writes a starter line with AI — edit before you save."}
           </p>
         </div>
         <div>

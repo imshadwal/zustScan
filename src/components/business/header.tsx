@@ -9,10 +9,12 @@ export function BusinessHeader({
   businessName,
   loginId,
   logoUrl,
+  standeeType = "table",
 }: {
   businessName: string | null;
   loginId: string;
   logoUrl?: string | null;
+  standeeType?: "table" | "event";
 }) {
   const [pending, setPending] = useState(false);
 
@@ -61,9 +63,15 @@ export function BusinessHeader({
             <Link href="/business/profile" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
               Profile
             </Link>
-            <Link href="/business/services" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
-              Services
-            </Link>
+            {standeeType === "event" ? (
+              <Link href="/business/event" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
+                Event
+              </Link>
+            ) : (
+              <Link href="/business/services" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
+                Services
+              </Link>
+            )}
           </nav>
           <button
             type="button"

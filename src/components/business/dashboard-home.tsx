@@ -7,8 +7,10 @@ import {
 import { OwnerIdentity } from "@/components/initials-badge";
 import { primaryButtonClass, quietButtonClass } from "@/components/admin/styles";
 import type { SetupChecklist } from "@/lib/business-validation";
+import type { EventSetupChecklist } from "@/lib/event-validation";
+import type { StandeeType } from "@/lib/standee-type";
 
-const checklistItems = [
+const tableChecklistItems = [
   { key: "businessName" as const, label: "Business name", href: "/business/profile" },
   { key: "city" as const, label: "City", href: "/business/profile" },
   { key: "category" as const, label: "Category", href: "/business/profile" },
@@ -22,9 +24,30 @@ const checklistItems = [
   },
 ];
 
-function progress(checklist: SetupChecklist) {
-  const done = checklistItems.filter((item) => checklist[item.key]).length;
-  return { done, total: checklistItems.length };
+const eventChecklistItems: {
+  key: keyof EventSetupChecklist;
+  label: string;
+  href: string;
+}[] = [
+  { key: "businessName", label: "Business name (venue)", href: "/business/profile" },
+  { key: "phone", label: "Phone", href: "/business/profile" },
+  { key: "mapLink", label: "Google review link", href: "/business/profile" },
+  { key: "eventName", label: "Event name", href: "/business/event" },
+  { key: "eventDate", label: "Event date", href: "/business/event" },
+  { key: "hasArea", label: "Guest areas (Food, Hall, …)", href: "/business/event" },
+];
+
+function progress(
+  checklist: SetupChecklist,
+  standeeType: StandeeType,
+  eventChecklist: EventSetupChecklist | null,
+) {
+  if (standeeType === "event" && eventChecklist) {
+    const done = eventChecklistItems.filter((item) => eventChecklist[item.key]).length;
+    return { done, total: eventChecklistItems.length };
+  }
+  const done = tableChecklistItems.filter((item) => checklist[item.key]).length;
+  return { done, total: tableChecklistItems.length };
 }
 
 export function DashboardHome({
@@ -36,6 +59,8 @@ export function DashboardHome({
   productCount,
   guestUrl,
   guestAnalytics,
+  standeeType = "table",
+  eventChecklist = null,
 }: {
   businessName: string | null;
   loginId: string;
@@ -45,8 +70,14 @@ export function DashboardHome({
   productCount: number;
   guestUrl: string;
   guestAnalytics: GuestAnalyticsDisplay;
+  standeeType?: StandeeType;
+  eventChecklist?: EventSetupChecklist | null;
 }) {
-  const { done, total } = progress(checklist);
+  const { done, total } = progress(checklist, standeeType, eventChecklist);
+  const isEvent = standeeType === "event";
+  const setupComplete = isEvent
+    ? (eventChecklist?.complete ?? false)
+    : checklist.complete;
   const percent = Math.round((done / total) * 100);
 
   return (
@@ -83,10 +114,12 @@ export function DashboardHome({
             />
           </div>
           <p className="mt-2 text-sm text-white/70">
-            {checklist.complete
+            {setupComplete
               ? "All steps complete — guests can use your QR."
               : percent === 0
-                ? "Start with your profile, then add services guests can pick from."
+                ? isEvent
+                  ? "Start with Profile, then Event name, date, and guest areas."
+                  : "Start with your profile, then add services guests can pick from."
                 : `${total - done} step${total - done === 1 ? "" : "s"} left before your QR is ready for guests.`}
           </p>
         </div>
@@ -94,7 +127,7 @@ export function DashboardHome({
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
-          {checklist.complete ? (
+          {setupComplete ? (
             <section className="rounded-3xl bg-blue p-5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
               <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
                 Ready for guests
@@ -104,11 +137,12 @@ export function DashboardHome({
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <p className="text-sm text-white/85">
-                  {serviceCount} service{serviceCount === 1 ? "" : "s"} · {productCount} product
-                  {productCount === 1 ? "" : "s"}
+                  {isEvent
+                    ? "Event standee QR"
+                    : `${serviceCount} service${serviceCount === 1 ? "" : "s"} · ${productCount} product${productCount === 1 ? "" : "s"}`}
                 </p>
                 <Link
-                  href={`/c/${loginId}`}
+                  href={guestUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
@@ -122,13 +156,16 @@ export function DashboardHome({
           <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8">
             <h2 className="text-lg font-semibold">Setup checklist</h2>
             <p className="mt-2 text-sm text-muted">
-              {checklist.complete
-                ? "All setup steps are done. You can still open any item to update your profile or catalog."
+              {setupComplete
+                ? "All setup steps are done. You can still open any item to update your profile or event."
                 : "Guests cannot use your QR for reviews until every item is complete."}
             </p>
             <ul className="mt-6 space-y-2">
-              {checklistItems.map((item) => {
-                const complete = checklist[item.key];
+              {(isEvent && eventChecklist ? eventChecklistItems : tableChecklistItems).map(
+                (item) => {
+                const complete = isEvent && eventChecklist
+                  ? Boolean(eventChecklist[item.key as keyof EventSetupChecklist])
+                  : checklist[item.key as keyof SetupChecklist];
                 return (
                   <li key={item.key}>
                     <Link
@@ -154,7 +191,8 @@ export function DashboardHome({
                     </Link>
                   </li>
                 );
-              })}
+              },
+              )}
             </ul>
           </section>
         </div>
@@ -176,14 +214,20 @@ export function DashboardHome({
               <Link href="/business/profile" className={primaryButtonClass}>
                 Business profile
               </Link>
-              <Link href="/business/services" className={primaryButtonClass}>
-                Services & products
-              </Link>
+              {isEvent ? (
+                <Link href="/business/event" className={primaryButtonClass}>
+                  Event setup
+                </Link>
+              ) : (
+                <Link href="/business/services" className={primaryButtonClass}>
+                  Services & products
+                </Link>
+              )}
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted">
-              Profile covers category, name, city, address, contact, Why trust us, Google review link,
-              logo, and theme. Services are what guests choose after they
-              scan.
+              {isEvent
+                ? "Profile is your venue on Google. Event setup is the function name, date, and areas guests pick on /e/…"
+                : "Profile covers category, name, city, address, contact, Why trust us, Google review link, logo, and theme. Services are what guests choose after they scan."}
             </p>
           </section>
 
@@ -195,24 +239,26 @@ export function DashboardHome({
             <GuestLinkCopy url={guestUrl} onDark />
           </section>
 
-          <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-            <h2 className="text-sm font-semibold text-muted">Catalog</h2>
-            <dl className="mt-3 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-mist px-3 py-3">
-                <dt className="text-xs font-semibold text-muted">Services</dt>
-                <dd className="mt-1 text-2xl font-semibold tabular-nums">{serviceCount}</dd>
-              </div>
-              <div className="rounded-2xl bg-mist px-3 py-3">
-                <dt className="text-xs font-semibold text-muted">Products</dt>
-                <dd className="mt-1 text-2xl font-semibold tabular-nums">{productCount}</dd>
-              </div>
-            </dl>
-            {serviceCount === 0 ? (
-              <Link href="/business/services" className={`${quietButtonClass} mt-4 w-full`}>
-                Add your first service
-              </Link>
-            ) : null}
-          </section>
+          {!isEvent ? (
+            <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+              <h2 className="text-sm font-semibold text-muted">Catalog</h2>
+              <dl className="mt-3 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-mist px-3 py-3">
+                  <dt className="text-xs font-semibold text-muted">Services</dt>
+                  <dd className="mt-1 text-2xl font-semibold tabular-nums">{serviceCount}</dd>
+                </div>
+                <div className="rounded-2xl bg-mist px-3 py-3">
+                  <dt className="text-xs font-semibold text-muted">Products</dt>
+                  <dd className="mt-1 text-2xl font-semibold tabular-nums">{productCount}</dd>
+                </div>
+              </dl>
+              {serviceCount === 0 ? (
+                <Link href="/business/services" className={`${quietButtonClass} mt-4 w-full`}>
+                  Add your first service
+                </Link>
+              ) : null}
+            </section>
+          ) : null}
         </aside>
       </div>
     </div>

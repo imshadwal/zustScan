@@ -37,8 +37,16 @@ import {
 import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { businessLogoPublicUrl } from "@/lib/business-logos";
 import { isGuestThemeId } from "@/lib/guest-themes";
+import {
+  countEventAreas,
+  getEventPortalState,
+  recomputeEventSetupComplete,
+  seedDefaultEventAreas,
+} from "@/lib/business-events";
 import { OwnerStoreError } from "@/lib/store-error";
+import { normalizeStandeeType, type StandeeType } from "@/lib/standee-type";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import type { EventSetupChecklist } from "@/lib/event-validation";
 
 export type BusinessOwnerListRecord = {
   loginId: string;
@@ -47,6 +55,7 @@ export type BusinessOwnerListRecord = {
   soldPrice: number;
   setupComplete: boolean;
   qrActive: boolean;
+  standeeType: StandeeType;
 };
 
 export type BusinessOwnerPublic = {
@@ -55,6 +64,7 @@ export type BusinessOwnerPublic = {
   city: string | null;
   setupComplete: boolean;
   qrActive: boolean;
+  standeeType: StandeeType;
 };
 
 export type BusinessOwnerProfile = {
@@ -70,7 +80,9 @@ export type BusinessOwnerProfile = {
   guestThemeId: string;
   logoUrl: string | null;
   setupComplete: boolean;
+  standeeType: StandeeType;
   checklist: SetupChecklist;
+  eventChecklist: EventSetupChecklist | null;
 };
 
 function notReadyMessage(error: { code?: string; message?: string }) {
@@ -129,6 +141,7 @@ type OwnerRow = {
   setup_complete: boolean;
   qr_active: boolean;
   guest_theme_id: string;
+  standee_type: string | null;
   logo_path: string | null;
   created_at: string;
 };
@@ -198,6 +211,37 @@ function guestDraftContext(row: OwnerRow): string | null {
 }
 
 async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
+  if (normalizeStandeeType(row.standee_type) === "event") {
+    const eventChecklist = await recomputeEventSetupComplete(ownerId, {
+      id: ownerId,
+      login_id: row.login_id,
+      standee_type: row.standee_type,
+      business_name: row.business_name,
+      city: row.city,
+      business_category: row.business_category,
+      business_category_other: row.business_category_other,
+      address: row.address,
+      why_trust_us: row.why_trust_us,
+      phone: row.phone,
+      map_link: row.map_link,
+      setup_complete: row.setup_complete,
+      qr_active: row.qr_active,
+      guest_theme_id: row.guest_theme_id,
+      logo_path: row.logo_path,
+    });
+    return {
+      businessName: eventChecklist.businessName,
+      city: eventChecklist.city,
+      category: eventChecklist.category,
+      phone: eventChecklist.phone,
+      mapLink: eventChecklist.mapLink,
+      hasService: eventChecklist.hasArea,
+      everyServiceHasProduct: eventChecklist.hasArea,
+      complete: eventChecklist.complete,
+      missingLabels: eventChecklist.missingLabels,
+    };
+  }
+
   const services = await productCountsForOwner(ownerId);
   const categoryOptions = await listBusinessCategoryOptions();
   const checklist = evaluateSetup({
@@ -227,7 +271,7 @@ async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
 export async function listBusinessOwners(): Promise<BusinessOwnerListRecord[]> {
   const { data, error } = await database()
     .from("business_owners")
-    .select("login_id, business_name, created_at, sold_price, setup_complete, qr_active")
+    .select("login_id, business_name, created_at, sold_price, setup_complete, qr_active, standee_type")
     .order("created_at", { ascending: false });
   if (error) throw mapDbError(error);
   return (data ?? []).map((row) => ({
@@ -237,6 +281,7 @@ export async function listBusinessOwners(): Promise<BusinessOwnerListRecord[]> {
     soldPrice: row.sold_price,
     setupComplete: row.setup_complete,
     qrActive: row.qr_active !== false,
+    standeeType: normalizeStandeeType(row.standee_type),
   }));
 }
 
@@ -294,6 +339,14 @@ export type GuestExperience = {
 export async function loadGuestExperience(loginId: string): Promise<GuestExperience | null> {
   const id = normalizeLoginId(loginId);
   if (!isValidLoginId(id)) return null;
+  const ownerPeek = await database()
+    .from("business_owners")
+    .select("standee_type")
+    .eq("login_id", id)
+    .maybeSingle();
+  if (ownerPeek.data && normalizeStandeeType(ownerPeek.data.standee_type) === "event") {
+    return null;
+  }
   const { data, error } = await database()
     .from("business_owners")
     .select(
@@ -335,6 +388,40 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
   };
 }
 
+/** Minimal lookup for admin QR PNG — avoids setup recompute and tolerates pre-migration DB. */
+export async function getBusinessOwnerQrLink(
+  loginId: string,
+): Promise<{ loginId: string; standeeType: StandeeType } | null> {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) return null;
+
+  const { data, error } = await database()
+    .from("business_owners")
+    .select("login_id, standee_type")
+    .eq("login_id", id)
+    .maybeSingle();
+
+  if (error?.code === "42703" || error?.code === "PGRST204") {
+    const { data: fallback, error: fallbackError } = await database()
+      .from("business_owners")
+      .select("login_id")
+      .eq("login_id", id)
+      .maybeSingle();
+    if (fallbackError) throw mapDbError(fallbackError);
+    if (!fallback) return null;
+    return { loginId: fallback.login_id as string, standeeType: "table" };
+  }
+
+  if (error) throw mapDbError(error);
+  if (!data) return null;
+  return {
+    loginId: data.login_id as string,
+    standeeType: normalizeStandeeType(
+      (data as { standee_type?: string | null }).standee_type,
+    ),
+  };
+}
+
 export async function findBusinessOwnerPublic(
   loginId: string,
 ): Promise<BusinessOwnerPublic | null> {
@@ -343,20 +430,22 @@ export async function findBusinessOwnerPublic(
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, password_hash, sold_price, created_at",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, standee_type, password_hash, sold_price, created_at",
     )
     .eq("login_id", id)
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data) return null;
   const ownerId = data.id as string;
-  const checklist = await recomputeSetupComplete(ownerId, data as OwnerRow);
+  const row = data as OwnerRow;
+  const checklist = await recomputeSetupComplete(ownerId, row);
   return {
     loginId: data.login_id,
     businessName: data.business_name,
     city: data.city,
     setupComplete: checklist.complete,
-    qrActive: (data as OwnerRow).qr_active !== false,
+    qrActive: row.qr_active !== false,
+    standeeType: normalizeStandeeType(row.standee_type),
   };
 }
 
@@ -379,6 +468,44 @@ export async function setBusinessOwnerQrActive(loginId: string, qrActive: boolea
   return { loginId: data.login_id as string, qrActive: data.qr_active !== false };
 }
 
+const ownerRowSelectForSetup =
+  "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, standee_type, logo_path, password_hash, sold_price, created_at";
+
+export async function updateBusinessOwnerStandeeType(
+  loginId: string,
+  standeeTypeInput: unknown,
+) {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) {
+    throw new OwnerStoreError("That business owner was not found.", 404);
+  }
+  if (standeeTypeInput !== "table" && standeeTypeInput !== "event") {
+    throw new OwnerStoreError("Pick table or event standee.", 400);
+  }
+  const standeeType = standeeTypeInput;
+
+  const { data, error } = await database()
+    .from("business_owners")
+    .update({
+      standee_type: standeeType,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("login_id", id)
+    .select(ownerRowSelectForSetup)
+    .maybeSingle();
+  if (error) throw mapDbError(error);
+  if (!data) throw new OwnerStoreError("That business owner was not found.", 404);
+
+  const ownerId = data.id as string;
+  if (standeeType === "event") {
+    const areaCount = await countEventAreas(ownerId);
+    if (areaCount === 0) await seedDefaultEventAreas(ownerId);
+  }
+
+  await recomputeSetupComplete(ownerId, data as OwnerRow);
+  return { loginId: id, standeeType: standeeType as StandeeType };
+}
+
 export async function verifyBusinessOwnerPassword(loginId: string, password: string) {
   const id = normalizeLoginId(loginId);
   if (!isValidLoginId(id)) return false;
@@ -396,9 +523,11 @@ export async function createBusinessOwner(
   loginId: string,
   password: string,
   soldPriceInput: string,
+  standeeTypeInput?: unknown,
 ) {
   const id = normalizeLoginId(loginId);
   const soldPrice = parseSoldPrice(soldPriceInput);
+  const standeeType = standeeTypeInput === "event" ? "event" : "table";
   if (!isValidLoginId(id)) {
     throw new OwnerStoreError("Use 2 to 40 letters, numbers, and hyphens.", 400);
   }
@@ -409,13 +538,21 @@ export async function createBusinessOwner(
     throw new OwnerStoreError("Enter the price in whole rupees.", 400);
   }
   const passwordHash = await hash(password, 12);
-  const { error } = await database().from("business_owners").insert({
-    login_id: id,
-    password_hash: passwordHash,
-    sold_price: soldPrice,
-  });
+  const { data, error } = await database()
+    .from("business_owners")
+    .insert({
+      login_id: id,
+      password_hash: passwordHash,
+      sold_price: soldPrice,
+      standee_type: standeeType,
+    })
+    .select("id")
+    .single();
   if (error) throw mapDbError(error);
-  return { loginId: id, password };
+  if (standeeType === "event") {
+    await seedDefaultEventAreas(data.id as string);
+  }
+  return { loginId: id, password, standeeType };
 }
 
 export async function deleteBusinessOwner(loginId: string) {
@@ -461,7 +598,7 @@ export async function getBusinessOwnerProfile(
   const { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, guest_theme_id, logo_path, password_hash",
+      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, standee_type, logo_path, password_hash",
     )
     .eq("login_id", id)
     .maybeSingle();
@@ -469,8 +606,11 @@ export async function getBusinessOwnerProfile(
   if (!data) return null;
   const ownerId = data.id as string;
   const row = data as OwnerRow;
+  const standeeType = normalizeStandeeType(row.standee_type);
   const checklist = await recomputeSetupComplete(ownerId, row);
   const branding = mapBrandingFields(row);
+  const eventState =
+    standeeType === "event" ? await getEventPortalState(id) : null;
   const categoryOptions = await listBusinessCategoryOptions();
   const categoryRaw = row.business_category?.trim();
   const businessCategory =
@@ -491,7 +631,9 @@ export async function getBusinessOwnerProfile(
     guestThemeId: branding.guestThemeId,
     logoUrl: branding.logoUrl,
     setupComplete: checklist.complete,
+    standeeType,
     checklist,
+    eventChecklist: eventState?.checklist ?? null,
   };
 }
 
@@ -538,17 +680,30 @@ export async function updateBusinessOwnerProfile(
       400,
     );
   }
-  const categoryOptions = await listBusinessCategoryOptions();
-  const categoryRaw = input.businessCategory.trim();
-  if (!isBusinessCategoryId(categoryRaw, categoryOptions)) {
-    throw new OwnerStoreError("Pick a category from the list.", 400);
-  }
-  let businessCategoryOther: string | null = null;
-  if (categoryRaw === "others") {
-    if (!isValidCategoryOther(input.businessCategoryOther)) {
-      throw new OwnerStoreError("Describe your business type (2 to 80 characters).", 400);
+
+  const { data: standeeRow, error: standeeError } = await database()
+    .from("business_owners")
+    .select("standee_type")
+    .eq("id", ownerId)
+    .maybeSingle();
+  if (standeeError) throw mapDbError(standeeError);
+  const isEventStandee = normalizeStandeeType(standeeRow?.standee_type) === "event";
+
+  let businessCategoryPatch: string | null = null;
+  let businessCategoryOtherPatch: string | null = null;
+  if (!isEventStandee) {
+    const categoryOptions = await listBusinessCategoryOptions();
+    const categoryRaw = input.businessCategory.trim();
+    if (!isBusinessCategoryId(categoryRaw, categoryOptions)) {
+      throw new OwnerStoreError("Pick a category from the list.", 400);
     }
-    businessCategoryOther = normalizeCategoryOther(input.businessCategoryOther);
+    businessCategoryPatch = categoryRaw;
+    if (categoryRaw === "others") {
+      if (!isValidCategoryOther(input.businessCategoryOther)) {
+        throw new OwnerStoreError("Describe your business type (2 to 80 characters).", 400);
+      }
+      businessCategoryOtherPatch = normalizeCategoryOther(input.businessCategoryOther);
+    }
   }
 
   const businessName = normalizeBusinessName(input.businessName);
@@ -560,8 +715,8 @@ export async function updateBusinessOwnerProfile(
   const patch: Record<string, string | null> = {
     business_name: businessName,
     city,
-    business_category: categoryRaw,
-    business_category_other: categoryRaw === "others" ? businessCategoryOther : null,
+    business_category: businessCategoryPatch,
+    business_category_other: businessCategoryOtherPatch,
     address,
     why_trust_us: whyTrustUs,
     phone,
@@ -580,9 +735,7 @@ export async function updateBusinessOwnerProfile(
     .from("business_owners")
     .update(patch)
     .eq("id", ownerId)
-    .select(
-      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, guest_theme_id, logo_path, password_hash, sold_price, created_at",
-    )
+    .select(ownerRowSelectForSetup)
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data) throw new OwnerStoreError("That business owner was not found.", 404);

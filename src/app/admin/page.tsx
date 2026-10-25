@@ -32,6 +32,7 @@ async function OwnersGate() {
     soldPriceLabel: string;
     setupComplete: boolean;
     qrActive: boolean;
+    standeeType: "table" | "event";
     pageViews: number;
     draftsGenerated: number;
     copyContinueTaps: number;
@@ -50,6 +51,7 @@ async function OwnersGate() {
       soldPriceLabel: formatRupees(owner.soldPrice),
       setupComplete: owner.setupComplete,
       qrActive: owner.qrActive,
+      standeeType: owner.standeeType,
       pageViews: analytics[owner.loginId]?.pageViews ?? 0,
       draftsGenerated: analytics[owner.loginId]?.draftsGenerated ?? 0,
       copyContinueTaps: analytics[owner.loginId]?.copyContinueTaps ?? 0,

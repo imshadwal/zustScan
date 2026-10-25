@@ -25,6 +25,7 @@ async function ServicesGate() {
 
   const profile = await getBusinessOwnerProfile(loginId);
   if (!profile) redirect("/business/login");
+  if (profile.standeeType === "event") redirect("/business/event");
 
   const services = await listServicesForOwner(loginId);
 

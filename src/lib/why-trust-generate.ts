@@ -12,8 +12,10 @@ export type WhyTrustGenerateInput = {
   businessName: string;
   city: string;
   address?: string;
-  categoryId: string;
+  categoryId?: string;
   categoryOther?: string;
+  /** When set, used instead of category (e.g. event standee venues). */
+  businessTypeLabel?: string;
 };
 
 function resolveOpenAiConfig() {
@@ -83,7 +85,11 @@ function fitWhyTrustUs(raw: string): string | null {
 function buildMessages(input: WhyTrustGenerateInput, options: BusinessCategoryOption[]) {
   const name = input.businessName.trim() || "This business";
   const city = input.city.trim();
-  const typeLabel = categoryLabel(input.categoryId, options, input.categoryOther);
+  const typeLabel =
+    input.businessTypeLabel?.trim() ||
+    (input.categoryId
+      ? categoryLabel(input.categoryId, options, input.categoryOther)
+      : "Business");
 
   const system = [
     "You write one short “Why trust us” line for a business guest QR page in India.",

@@ -7,7 +7,7 @@ import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 import { getBusinessOwnerProfile, listServicesForOwner } from "@/lib/business-owners";
 import { getGuestAnalyticsForLogin } from "@/lib/guest-analytics";
-import { guestPageUrl } from "@/lib/login-id";
+import { guestPageUrlForStandeeType } from "@/lib/guest-urls";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -28,9 +28,12 @@ async function BusinessHomeGate() {
   const profile = await getBusinessOwnerProfile(loginId);
   if (!profile) redirect("/business/login");
 
-  const services = await listServicesForOwner(loginId);
-  const serviceCount = services.length;
-  const productCount = services.reduce((sum, service) => sum + service.products.length, 0);
+  const isEvent = profile.standeeType === "event";
+  const services = isEvent ? [] : await listServicesForOwner(loginId);
+  const serviceCount = isEvent
+    ? (profile.eventChecklist?.hasArea ? 1 : 0)
+    : services.length;
+  const productCount = isEvent ? 0 : services.reduce((sum, s) => sum + s.products.length, 0);
   const guestAnalytics = await getGuestAnalyticsForLogin(loginId);
 
   return (
@@ -39,6 +42,7 @@ async function BusinessHomeGate() {
         businessName={profile.businessName}
         loginId={profile.loginId}
         logoUrl={profile.logoUrl}
+        standeeType={profile.standeeType}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <DashboardHome
@@ -48,7 +52,9 @@ async function BusinessHomeGate() {
           checklist={profile.checklist}
           serviceCount={serviceCount}
           productCount={productCount}
-          guestUrl={guestPageUrl(profile.loginId)}
+          guestUrl={guestPageUrlForStandeeType(profile.loginId, profile.standeeType)}
+          standeeType={profile.standeeType}
+          eventChecklist={profile.eventChecklist}
           guestAnalytics={guestAnalytics}
         />
       </main>

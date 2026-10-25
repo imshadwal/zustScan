@@ -22,8 +22,9 @@ export async function POST(request: Request) {
   const loginId = typeof body?.loginId === "string" ? body.loginId : "";
   const password = typeof body?.password === "string" ? body.password : "";
   const soldPrice = typeof body?.soldPrice === "string" ? body.soldPrice : "";
+  const standeeType = body?.standeeType;
   try {
-    const created = await createBusinessOwner(loginId, password, soldPrice);
+    const created = await createBusinessOwner(loginId, password, soldPrice, standeeType);
     return json(created, 201);
   } catch (error) {
     return failure(error);
