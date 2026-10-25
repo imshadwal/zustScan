@@ -16,6 +16,14 @@ export const navLinks = [
 
 export const productBrochurePath = "/brochure";
 
+/** Homepage value strip — colon headline + product line. */
+export const homeValueStrip = {
+  lead: "Never leave a customer waiting:",
+  product: "AI-powered review draft system.",
+  detail:
+    "Guests scan at the table or counter, get an editable draft in English, Hindi, or Hinglish, and post on Google themselves.",
+} as const;
+
 /** Short guest path shown on the home timeline and footer. */
 export const journeyTimeline = [
   {
@@ -76,6 +84,44 @@ export const journey = [
     title: "Check and post",
     body: "The guest confirms the stars and the words, then taps Post themselves.",
     tags: ["GUEST POSTS", "REAL REVIEW"],
+  },
+] as const;
+
+export const whyDifferent = [
+  {
+    id: "languages",
+    step: "01",
+    title: "Reviews in multiple languages",
+    body: "Guests pick the language on your page. Drafts match — not a one-size English template.",
+    chips: ["English", "Hindi", "Hinglish"],
+  },
+  {
+    id: "voice",
+    step: "02",
+    title: "Gender-based review voice",
+    body: "For Hindi and Hinglish, neutral, female, or male voice so verbs sound natural when they post.",
+    chips: ["Neutral", "Female", "Male"],
+  },
+  {
+    id: "analytics",
+    step: "03",
+    title: "Analytics for business owners",
+    body: "Anonymous funnel counts in your portal — no guest names or review text stored.",
+    chips: ["Scans", "Drafts", "Copy & Continue"],
+  },
+  {
+    id: "speed",
+    step: "04",
+    title: "10 sec scan to publish",
+    body: "QR → service → stars → copy → Google. Built for speed at the table or counter.",
+    highlight: "10 sec",
+  },
+  {
+    id: "no-app",
+    step: "05",
+    title: "100% zero app required",
+    body: "Mobile browser only. No store download, no guest login — scan and go.",
+    highlight: "0 apps",
   },
 ] as const;
 
