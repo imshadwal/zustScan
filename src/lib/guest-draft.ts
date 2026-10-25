@@ -22,6 +22,9 @@ export type DraftInput = {
 const GUEST_DRAFT_UNAVAILABLE =
   "We could not create your review draft right now. Please try again in a moment.";
 
+const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+const DEFAULT_DRAFT_MODEL = "gpt-4o-mini";
+
 export class GuestDraftUnavailableError extends Error {
   readonly guestMessage: string;
 
@@ -72,68 +75,24 @@ function draftAngleInstruction(seed: string) {
   return pickVariant(DRAFT_ANGLES, `${seed}:angle`);
 }
 
-const PUTER_CHAT_URL =
-  "https://api.puter.com/puterai/openai/v1/chat/completions";
-const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
-
-type DraftLlmBackend = {
-  label: "puter" | "openai";
-  url: string;
-  key: string;
-  model: string;
-};
-
-function resolveDraftLlmBackend(): DraftLlmBackend {
-  const provider = serverEnv("AI_DRAFT_PROVIDER")?.trim().toLowerCase();
-  const puterToken = serverEnv("PUTER_AUTH_TOKEN")?.trim();
-  const openaiKey = serverEnv("OPENAI_API_KEY")?.trim();
-  const modelOverride = serverEnv("AI_DRAFT_MODEL")?.trim();
-
-  const usePuter =
-    provider === "puter" ||
-    (provider !== "openai" &&
-      (Boolean(puterToken) ||
-        Boolean(openaiKey && !openaiKey.startsWith("sk-"))));
-
-  if (usePuter) {
-    const key = puterToken || openaiKey;
-    if (!key) {
-      console.error(
-        "[guest-draft] Puter selected but PUTER_AUTH_TOKEN (or OPENAI_API_KEY with Puter token) is missing.",
-      );
-      throw new GuestDraftUnavailableError();
-    }
-    return {
-      label: "puter",
-      url: PUTER_CHAT_URL,
-      key,
-      model: modelOverride || "gpt-5.4-nano",
-    };
-  }
-
-  if (!openaiKey) {
+function resolveOpenAiConfig() {
+  const key = serverEnv("OPENAI_API_KEY")?.trim();
+  const model = serverEnv("AI_DRAFT_MODEL")?.trim() || DEFAULT_DRAFT_MODEL;
+  if (!key?.startsWith("sk-")) {
     console.error(
-      "[guest-draft] Set OPENAI_API_KEY (sk-…) or PUTER_AUTH_TOKEN / AI_DRAFT_PROVIDER=puter.",
+      "[guest-draft] OPENAI_API_KEY is missing or invalid (must start with sk-).",
     );
     throw new GuestDraftUnavailableError();
   }
-  if (!openaiKey.startsWith("sk-")) {
-    console.error(
-      "[guest-draft] OPENAI_API_KEY must start with sk- for direct OpenAI, or use Puter (PUTER_AUTH_TOKEN + AI_DRAFT_PROVIDER=puter).",
-    );
-    throw new GuestDraftUnavailableError();
-  }
+  return { key, model };
+}
 
-  return {
-    label: "openai",
-    url: OPENAI_CHAT_URL,
-    key: openaiKey,
-    model: modelOverride || "gpt-4o-mini",
-  };
+export function guestDraftModel(): string {
+  return resolveOpenAiConfig().model;
 }
 
 async function openAiDraft(input: DraftInput): Promise<string> {
-  const backend = resolveDraftLlmBackend();
+  const { key, model } = resolveOpenAiConfig();
 
   const system = [
     "You write short, natural review text that a guest will paste directly into Google Reviews.",
@@ -168,14 +127,14 @@ async function openAiDraft(input: DraftInput): Promise<string> {
 
   let response: Response;
   try {
-    response = await fetch(backend.url, {
+    response = await fetch(OPENAI_CHAT_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${backend.key}`,
+        Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: backend.model,
+        model,
         temperature: 0.95,
         presence_penalty: 0.35,
         frequency_penalty: 0.25,
@@ -186,7 +145,7 @@ async function openAiDraft(input: DraftInput): Promise<string> {
       }),
     });
   } catch (error) {
-    console.error(`[guest-draft] ${backend.label} request failed:`, error);
+    console.error("[guest-draft] OpenAI request failed:", error);
     throw new GuestDraftUnavailableError();
   }
 
@@ -198,32 +157,21 @@ async function openAiDraft(input: DraftInput): Promise<string> {
   if (!response.ok) {
     const detail = body?.error?.message ?? response.statusText;
     const code = body?.error?.code ?? "";
-    if (backend.label === "puter" && response.status === 402) {
-      console.error(
-        "[guest-draft] Puter HTTP 402: subscription or credits required for server-side AI. " +
-          "Enable billing at puter.com/dashboard, or set AI_DRAFT_PROVIDER=openai with an sk- OpenAI key.",
-      );
-    } else {
-      console.error(
-        `[guest-draft] ${backend.label} HTTP ${response.status}${code ? ` (${code})` : ""}: ${detail}`,
-      );
-    }
+    console.error(
+      `[guest-draft] OpenAI HTTP ${response.status}${code ? ` (${code})` : ""}: ${detail}`,
+    );
     throw new GuestDraftUnavailableError();
   }
 
   const text = body?.choices?.[0]?.message?.content?.trim();
   if (!text) {
-    console.error(`[guest-draft] ${backend.label} returned empty content.`);
+    console.error("[guest-draft] OpenAI returned empty content.");
     throw new GuestDraftUnavailableError();
   }
   return text;
 }
 
-export function guestDraftSourceLabel(): "openai" | "puter" {
-  return resolveDraftLlmBackend().label;
-}
-
-/** AI-only guest drafts (OpenAI direct or Puter OpenAI-compatible API). */
+/** AI guest drafts via OpenAI Chat Completions. */
 export async function generateGuestDraft(input: DraftInput): Promise<string> {
   return openAiDraft(input);
 }

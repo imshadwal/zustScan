@@ -3,7 +3,7 @@ import { loadGuestExperience } from "@/lib/business-owners";
 import { recordGuestMetric } from "@/lib/guest-analytics";
 import {
   generateGuestDraft,
-  guestDraftSourceLabel,
+  guestDraftModel,
   GuestDraftUnavailableError,
 } from "@/lib/guest-draft";
 import { normalizeGuestLanguages } from "@/lib/guest-languages";
@@ -105,7 +105,11 @@ export async function POST(request: Request) {
       variationSeed,
     });
     void recordGuestMetric(loginId, "draft");
-    return json({ draft, draftSource: guestDraftSourceLabel() });
+    return json({
+      draft,
+      draftSource: "openai" as const,
+      draftModel: guestDraftModel(),
+    });
   } catch (error) {
     if (error instanceof GuestDraftUnavailableError) {
       return json({ error: error.guestMessage }, 503);
