@@ -1,6 +1,7 @@
 import { failure, json } from "@/lib/admin-http";
 import { requireBusinessOwnerSession } from "@/lib/business-api";
 import { createProduct, createProductsBatch } from "@/lib/business-owners";
+import { revalidateGuestExperienceCache } from "@/lib/guest-cache";
 
 export async function POST(
   request: Request,
@@ -19,10 +20,12 @@ export async function POST(
   try {
     if (namesFromArray.length > 0) {
       const products = await createProductsBatch(session.loginId, serviceId, namesFromArray);
+      revalidateGuestExperienceCache(session.loginId);
       return json({ products }, 201);
     }
     if (singleName) {
       const product = await createProduct(session.loginId, serviceId, singleName);
+      revalidateGuestExperienceCache(session.loginId);
       return json({ product }, 201);
     }
     return json({ error: "Add a product name." }, 400);

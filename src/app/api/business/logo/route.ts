@@ -1,6 +1,7 @@
 import { failure, json } from "@/lib/admin-http";
 import { requireBusinessOwnerSession } from "@/lib/business-api";
 import { removeBusinessLogo, uploadBusinessLogo } from "@/lib/business-logos";
+import { revalidateGuestExperienceCache } from "@/lib/guest-cache";
 
 export async function POST(request: Request) {
   const session = await requireBusinessOwnerSession();
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await uploadBusinessLogo(session.loginId, bytes, contentType);
+    revalidateGuestExperienceCache(session.loginId);
     return json(result);
   } catch (error) {
     return failure(error);
@@ -29,6 +31,7 @@ export async function DELETE() {
 
   try {
     await removeBusinessLogo(session.loginId);
+    revalidateGuestExperienceCache(session.loginId);
     return json({ ok: true });
   } catch (error) {
     return failure(error);

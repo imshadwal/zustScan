@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
+import { GuestPageSkeleton } from "@/components/guest/guest-page-skeleton";
 import { GuestShell } from "@/components/guest/shell";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
 import { displayGuestBusinessTitle } from "@/lib/initials";
 import { GuestQrPausedCard } from "@/components/guest/qr-paused";
 import { GuestReviewFlow } from "@/components/guest/review-flow";
-import { findBusinessOwnerPublic, loadGuestExperience } from "@/lib/business-owners";
+import { loadTableGuestPage } from "@/lib/business-owners";
 
 export const metadata: Metadata = {
   title: "Guest page | Zust Scan",
@@ -20,7 +20,11 @@ export default function GuestPageRoute({
 }) {
   return (
     <Suspense
-      fallback={<LogoSpinnerPage theme="light" />}
+      fallback={
+        <GuestShell>
+          <GuestPageSkeleton stepCount={4} />
+        </GuestShell>
+      }
     >
       <GuestPage params={params} />
     </Suspense>
@@ -29,15 +33,10 @@ export default function GuestPageRoute({
 
 async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
   const { loginId } = await params;
-  let owner: Awaited<ReturnType<typeof findBusinessOwnerPublic>> = null;
-  let unavailable = false;
+  let page: Awaited<ReturnType<typeof loadTableGuestPage>>;
   try {
-    owner = await findBusinessOwnerPublic(loginId);
+    page = await loadTableGuestPage(loginId);
   } catch {
-    unavailable = true;
-  }
-
-  if (unavailable) {
     return (
       <GuestShell>
         <h1 className="text-2xl font-semibold">This page is not available right now.</h1>
@@ -46,43 +45,28 @@ async function GuestPage({ params }: { params: Promise<{ loginId: string }> }) {
     );
   }
 
-  if (!owner) notFound();
+  if (page.status === "not_found") notFound();
+  if (page.status === "event") redirect(`/e/${page.loginId}`);
 
-  if (owner.standeeType === "event") {
-    redirect(`/e/${owner.loginId}`);
+  if (page.status === "ready") {
+    return (
+      <GuestShell themeId={page.experience.guestThemeId}>
+        <GuestReviewFlow experience={page.experience} />
+      </GuestShell>
+    );
   }
 
-  const title = displayGuestBusinessTitle(owner.businessName, owner.loginId, owner.city);
+  const title = displayGuestBusinessTitle(page.businessName, page.loginId, page.city);
 
-  if (!owner.qrActive) {
+  if (page.status === "qr_paused") {
     return (
       <GuestShell center>
-        <GuestQrPausedCard businessTitle={title} loginId={owner.loginId} />
+        <GuestQrPausedCard businessTitle={title} loginId={page.loginId} />
       </GuestShell>
     );
   }
 
-  let experience: Awaited<ReturnType<typeof loadGuestExperience>> = null;
-  try {
-    experience = await loadGuestExperience(loginId);
-  } catch {
-    return (
-      <GuestShell>
-        <h1 className="text-2xl font-semibold">This page is not available right now.</h1>
-        <p className="mt-3 text-muted">Please try again later.</p>
-      </GuestShell>
-    );
-  }
-
-  if (experience) {
-    return (
-      <GuestShell themeId={experience.guestThemeId}>
-        <GuestReviewFlow experience={experience} />
-      </GuestShell>
-    );
-  }
-
-  if (!owner.setupComplete) {
+  if (page.status === "setup_incomplete") {
     return (
       <GuestShell>
         <p className="text-sm font-semibold tracking-wide text-blue uppercase">Business</p>

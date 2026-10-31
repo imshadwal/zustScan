@@ -1,6 +1,7 @@
 import { failure, json } from "@/lib/admin-http";
 import { requireBusinessOwnerSession } from "@/lib/business-api";
 import { getBusinessOwnerProfile, updateBusinessOwnerProfile } from "@/lib/business-owners";
+import { revalidateGuestExperienceCache } from "@/lib/guest-cache";
 
 export async function GET() {
   const session = await requireBusinessOwnerSession();
@@ -42,6 +43,7 @@ export async function PATCH(request: Request) {
       mapLink,
       guestThemeId,
     });
+    revalidateGuestExperienceCache(session.loginId);
     const profile = await getBusinessOwnerProfile(session.loginId);
     return json({ profile, checklist: result.checklist });
   } catch (error) {

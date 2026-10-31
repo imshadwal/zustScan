@@ -1,6 +1,7 @@
 import { failure, json } from "@/lib/admin-http";
 import { requireBusinessOwnerSession } from "@/lib/business-api";
 import { getEventPortalState, saveEventDetails } from "@/lib/business-events";
+import { revalidateGuestExperienceCache } from "@/lib/guest-cache";
 
 export async function GET() {
   const session = await requireBusinessOwnerSession();
@@ -24,6 +25,7 @@ export async function PATCH(request: Request) {
   const eventDate = typeof body?.eventDate === "string" ? body.eventDate : "";
   try {
     const result = await saveEventDetails(session.loginId, { eventName, eventDate });
+    revalidateGuestExperienceCache(session.loginId);
     return json(result);
   } catch (error) {
     return failure(error);

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { EventGuestReviewFlow } from "@/components/guest/event-review-flow";
 import { GuestShell } from "@/components/guest/shell";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { GuestPageSkeleton } from "@/components/guest/guest-page-skeleton";
 import { GuestQrPausedCard } from "@/components/guest/qr-paused";
 import { loadEventGuestExperience } from "@/lib/business-events";
 import { findBusinessOwnerPublic } from "@/lib/business-owners";
@@ -20,7 +20,13 @@ export default function EventGuestPageRoute({
   params: Promise<{ loginId: string }>;
 }) {
   return (
-    <Suspense fallback={<LogoSpinnerPage theme="light" />}>
+    <Suspense
+      fallback={
+        <GuestShell>
+          <GuestPageSkeleton stepCount={3} />
+        </GuestShell>
+      }
+    >
       <EventGuestPage params={params} />
     </Suspense>
   );

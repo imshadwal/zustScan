@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AdminHeader } from "@/components/admin/header";
 import { OwnerForm } from "@/components/admin/owner-form";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { AdminPageSkeleton } from "@/components/loading/admin-page-skeleton";
 import { hasAdminSession } from "@/lib/admin-session";
 import { siteOrigin } from "@/lib/login-id";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "New business owner" };
 export default function NewOwnerPage() {
   return (
     <Suspense
-      fallback={<LogoSpinnerPage theme="dark" />}
+      fallback={<AdminPageSkeleton variant="form" />}
     >
       <NewOwnerGate />
     </Suspense>

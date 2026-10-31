@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { BusinessCardsStripSkeleton } from "@/components/loading/marketing-page-skeleton";
 import { BusinessOwnerMark } from "@/components/initials-badge";
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 import { listPublicBusinesses } from "@/lib/business-owners";
@@ -64,7 +65,7 @@ async function BusinessesList() {
 
 export function BusinessesSection() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<BusinessCardsStripSkeleton />}>
       <BusinessesList />
     </Suspense>
   );

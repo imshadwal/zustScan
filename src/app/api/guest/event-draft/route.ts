@@ -23,15 +23,6 @@ export async function POST(request: Request) {
     return json({ error: "Invalid request." }, 400);
   }
 
-  try {
-    await enforceGuestDraftRateLimits(request, loginId);
-  } catch (error) {
-    if (error instanceof AiRateLimitError) {
-      return json({ error: error.message }, 429);
-    }
-    throw error;
-  }
-
   if (!isGuestTier(tier)) {
     return json({ error: "Pick Good, Great, or Exceptional." }, 400);
   }
@@ -39,8 +30,15 @@ export async function POST(request: Request) {
 
   let experience: Awaited<ReturnType<typeof loadEventGuestExperience>> = null;
   try {
-    experience = await loadEventGuestExperience(loginId);
-  } catch {
+    const [, loaded] = await Promise.all([
+      enforceGuestDraftRateLimits(request, loginId),
+      loadEventGuestExperience(loginId),
+    ]);
+    experience = loaded;
+  } catch (error) {
+    if (error instanceof AiRateLimitError) {
+      return json({ error: error.message }, 429);
+    }
     return json({ error: "Something went wrong." }, 500);
   }
   if (!experience) {

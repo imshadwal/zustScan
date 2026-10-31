@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { TrustedPartnersMarquee } from "@/components/home/trusted-partners-marquee";
+import { TrustedPartnersStripSkeleton } from "@/components/loading/marketing-page-skeleton";
 import { listPublicBusinesses } from "@/lib/business-owners";
 import { trustedPartnersHeadline, trustedPartnersSubline } from "@/lib/site";
 
@@ -37,7 +38,7 @@ async function TrustedPartnersContent() {
 
 export function TrustedPartnersSection() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<TrustedPartnersStripSkeleton />}>
       <TrustedPartnersContent />
     </Suspense>
   );

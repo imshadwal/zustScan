@@ -1,7 +1,9 @@
 import "server-only";
 
 import { compare, hash } from "bcryptjs";
+import { unstable_cache } from "next/cache";
 import { connection } from "next/server";
+import { guestExperienceCacheTag } from "@/lib/guest-cache";
 import {
   evaluateSetup,
   isValidBusinessName,
@@ -226,7 +228,25 @@ function setupChecklistFromEvent(eventChecklist: EventSetupChecklist): SetupChec
   };
 }
 
+function fastCompleteChecklist(row: OwnerRow): SetupChecklist {
+  return {
+    businessName: Boolean(row.business_name?.trim()),
+    city: Boolean(row.city?.trim()),
+    category: Boolean(row.business_category?.trim()),
+    phone: Boolean(row.phone?.trim()),
+    mapLink: Boolean(row.map_link?.trim()),
+    hasService: true,
+    everyServiceHasProduct: true,
+    complete: true,
+    missingLabels: [],
+  };
+}
+
 async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
+  if (row.setup_complete === true && normalizeStandeeType(row.standee_type) !== "event") {
+    return fastCompleteChecklist(row);
+  }
+
   if (normalizeStandeeType(row.standee_type) === "event") {
     const eventChecklist = await recomputeEventSetupComplete(ownerId, {
       id: ownerId,
@@ -343,38 +363,32 @@ export type GuestExperience = {
   services: ServiceRecord[];
 };
 
-/** Public guest page data when setup is complete. */
-export async function loadGuestExperience(loginId: string): Promise<GuestExperience | null> {
+const guestOwnerSelect =
+  "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, logo_path, standee_type, password_hash, sold_price, created_at";
+
+async function loadGuestExperienceUncached(loginId: string): Promise<GuestExperience | null> {
   const id = normalizeLoginId(loginId);
   if (!isValidLoginId(id)) return null;
-  const ownerPeek = await database()
-    .from("business_owners")
-    .select("standee_type")
-    .eq("login_id", id)
-    .maybeSingle();
-  if (ownerPeek.data && normalizeStandeeType(ownerPeek.data.standee_type) === "event") {
-    return null;
-  }
   const { data, error } = await database()
     .from("business_owners")
-    .select(
-      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, logo_path, password_hash, sold_price, created_at",
-    )
+    .select(guestOwnerSelect)
     .eq("login_id", id)
     .maybeSingle();
   if (error) throw mapDbError(error);
   if (!data) return null;
+  if (normalizeStandeeType(data.standee_type) === "event") return null;
   if (data.qr_active === false) return null;
 
   const ownerId = data.id as string;
-  const checklist = await recomputeSetupComplete(ownerId, data as OwnerRow);
+  const row = data as OwnerRow;
+  const checklist = await recomputeSetupComplete(ownerId, row);
   if (!checklist.complete) return null;
 
   const mapLink = data.map_link?.trim();
-  const draftContext = guestDraftContext(data as OwnerRow);
+  const draftContext = guestDraftContext(row);
   if (!mapLink || !draftContext) return null;
 
-  const services = await listServicesForOwner(id);
+  const services = await listServicesForOwnerId(ownerId);
   if (services.length === 0) return null;
   const hasProduct = services.some((service) => service.products.length > 0);
   if (!hasProduct) return null;
@@ -393,6 +407,102 @@ export async function loadGuestExperience(loginId: string): Promise<GuestExperie
     guestThemeId: branding.guestThemeId,
     logoUrl: branding.logoUrl,
     services,
+  };
+}
+
+/** Public guest page data when setup is complete (cached ~45s per login). */
+export async function loadGuestExperience(loginId: string): Promise<GuestExperience | null> {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) return null;
+  return unstable_cache(() => loadGuestExperienceUncached(id), ["guest-experience", id], {
+    revalidate: 120,
+    tags: [guestExperienceCacheTag(id)],
+  })();
+}
+
+export type TableGuestPageResult =
+  | { status: "not_found" }
+  | { status: "event"; loginId: string }
+  | { status: "qr_paused"; loginId: string; businessName: string | null; city: string | null }
+  | { status: "ready"; experience: GuestExperience }
+  | { status: "setup_incomplete"; loginId: string; businessName: string | null; city: string | null }
+  | { status: "broken"; loginId: string; businessName: string | null; city: string | null };
+
+/** One round-trip for /c/[loginId] — avoids duplicate owner fetch + setup recompute. */
+export async function loadTableGuestPage(loginId: string): Promise<TableGuestPageResult> {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) return { status: "not_found" };
+
+  const { data, error } = await database()
+    .from("business_owners")
+    .select(guestOwnerSelect)
+    .eq("login_id", id)
+    .maybeSingle();
+  if (error) throw mapDbError(error);
+  if (!data) return { status: "not_found" };
+
+  const row = data as OwnerRow;
+  const login = data.login_id as string;
+  if (normalizeStandeeType(row.standee_type) === "event") {
+    return { status: "event", loginId: login };
+  }
+  if (row.qr_active === false) {
+    return {
+      status: "qr_paused",
+      loginId: login,
+      businessName: row.business_name,
+      city: row.city,
+    };
+  }
+
+  const ownerId = data.id as string;
+  const checklist = await recomputeSetupComplete(ownerId, row);
+  if (!checklist.complete) {
+    return {
+      status: "setup_incomplete",
+      loginId: login,
+      businessName: row.business_name,
+      city: row.city,
+    };
+  }
+
+  const mapLink = row.map_link?.trim();
+  const draftContext = guestDraftContext(row);
+  if (!mapLink || !draftContext) {
+    return {
+      status: "broken",
+      loginId: login,
+      businessName: row.business_name,
+      city: row.city,
+    };
+  }
+
+  const services = await listServicesForOwnerId(ownerId);
+  if (services.length === 0 || !services.some((s) => s.products.length > 0)) {
+    return {
+      status: "broken",
+      loginId: login,
+      businessName: row.business_name,
+      city: row.city,
+    };
+  }
+
+  const branding = mapBrandingFields(data);
+  return {
+    status: "ready",
+    experience: {
+      loginId: login,
+      businessName: row.business_name,
+      city: row.city?.trim() || null,
+      address: row.address?.trim() || null,
+      whyTrustUs: row.why_trust_us?.trim() || null,
+      phone: row.phone,
+      mapLink,
+      brief: draftContext,
+      guestThemeId: branding.guestThemeId,
+      logoUrl: branding.logoUrl,
+      services,
+    },
   };
 }
 
@@ -446,12 +556,15 @@ export async function findBusinessOwnerPublic(
   if (!data) return null;
   const ownerId = data.id as string;
   const row = data as OwnerRow;
-  const checklist = await recomputeSetupComplete(ownerId, row);
+  const setupComplete =
+    row.setup_complete === true
+      ? true
+      : (await recomputeSetupComplete(ownerId, row)).complete;
   return {
     loginId: data.login_id,
     businessName: data.business_name,
     city: data.city,
-    setupComplete: checklist.complete,
+    setupComplete,
     qrActive: row.qr_active !== false,
     standeeType: normalizeStandeeType(row.standee_type),
   };
@@ -795,10 +908,7 @@ export type ServiceRecord = {
   products: { id: string; name: string; sortOrder: number }[];
 };
 
-export async function listServicesForOwner(loginId: string): Promise<ServiceRecord[]> {
-  const ownerId = await ownerIdByLogin(loginId);
-  if (!ownerId) throw new OwnerStoreError("That business owner was not found.", 404);
-
+export async function listServicesForOwnerId(ownerId: string): Promise<ServiceRecord[]> {
   const { data: services, error } = await database()
     .from("business_services")
     .select("id, name, sort_order")
@@ -833,6 +943,12 @@ export async function listServicesForOwner(loginId: string): Promise<ServiceReco
     sortOrder: service.sort_order as number,
     products: byService.get(service.id as string) ?? [],
   }));
+}
+
+export async function listServicesForOwner(loginId: string): Promise<ServiceRecord[]> {
+  const ownerId = await ownerIdByLogin(loginId);
+  if (!ownerId) throw new OwnerStoreError("That business owner was not found.", 404);
+  return listServicesForOwnerId(ownerId);
 }
 
 async function touchOwnerSetup(ownerId: string) {

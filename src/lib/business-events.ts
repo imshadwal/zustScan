@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { guestExperienceCacheTag } from "@/lib/guest-cache";
 import {
   isValidCatalogName,
   MAX_SERVICES,
@@ -152,12 +154,30 @@ type EventSetupPrefetch = {
   areaCount?: number;
 };
 
+function fastEventCompleteChecklist(row: EventSetupRow): EventSetupChecklist {
+  return {
+    businessName: Boolean(row.business_name?.trim()),
+    city: Boolean(row.city?.trim()),
+    category: true,
+    phone: Boolean(row.phone?.trim()),
+    mapLink: Boolean(row.map_link?.trim()),
+    eventName: true,
+    eventDate: true,
+    hasArea: true,
+    complete: true,
+    missingLabels: [],
+  };
+}
+
 export async function recomputeEventSetupComplete(
   ownerId: string,
   row: EventSetupRow,
   prefetch?: EventSetupPrefetch,
 ): Promise<EventSetupChecklist> {
   const standeeType = normalizeStandeeType(row.standee_type);
+  if (standeeType === "event" && row.setup_complete === true) {
+    return fastEventCompleteChecklist(row);
+  }
   if (standeeType !== "event") {
     return evaluateEventSetup({
       standeeType: "table",
@@ -338,7 +358,7 @@ export async function deleteEventArea(loginId: string, areaId: string) {
   return { ok: true as const };
 }
 
-export async function loadEventGuestExperience(
+async function loadEventGuestExperienceUncached(
   loginId: string,
 ): Promise<EventGuestExperience | null> {
   const id = normalizeLoginId(loginId);
@@ -347,16 +367,20 @@ export async function loadEventGuestExperience(
   if (!row || normalizeStandeeType(row.standee_type) !== "event") return null;
   if (row.qr_active === false) return null;
 
-  const checklist = await recomputeEventSetupComplete(row.id, row);
+  const checklist =
+    row.setup_complete === true
+      ? fastEventCompleteChecklist(row)
+      : await recomputeEventSetupComplete(row.id, row);
   if (!checklist.complete) return null;
 
   const mapLink = row.map_link?.trim();
   const brief = guestDraftContext(row.why_trust_us, row.business_name);
   if (!mapLink || !brief) return null;
 
-  const profile = await fetchEventProfile(row.id);
-
-  const areas = await listEventAreasForOwner(id);
+  const [profile, areas] = await Promise.all([
+    fetchEventProfile(row.id),
+    listEventAreasForOwnerId(row.id),
+  ]);
   if (areas.length === 0) return null;
 
   const guestThemeId =
@@ -379,6 +403,18 @@ export async function loadEventGuestExperience(
     eventDate: profile?.event_date ?? null,
     areas,
   };
+}
+
+export async function loadEventGuestExperience(
+  loginId: string,
+): Promise<EventGuestExperience | null> {
+  const id = normalizeLoginId(loginId);
+  if (!isValidLoginId(id)) return null;
+  return unstable_cache(
+    () => loadEventGuestExperienceUncached(id),
+    ["guest-event-experience", id],
+    { revalidate: 120, tags: [guestExperienceCacheTag(id)] },
+  )();
 }
 
 export function standeeTypeFromRow(value: string | null | undefined): StandeeType {

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { BusinessHeader } from "@/components/business/header";
 import { DashboardHome } from "@/components/business/dashboard-home";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { BusinessPageSkeleton } from "@/components/loading/business-page-skeleton";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 import { getBusinessOwnerProfile, listServicesForOwner } from "@/lib/business-owners";
 import { getGuestAnalyticsForLogin } from "@/lib/guest-analytics";
@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Dashboard" };
 export default function BusinessHomePage() {
   return (
     <Suspense
-      fallback={<LogoSpinnerPage theme="dark" />}
+      fallback={<BusinessPageSkeleton variant="dashboard" />}
     >
       <BusinessHomeGate />
     </Suspense>

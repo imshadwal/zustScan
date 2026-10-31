@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { BusinessHeader } from "@/components/business/header";
 import { ProfileForm } from "@/components/business/profile-form";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { BusinessPageSkeleton } from "@/components/loading/business-page-skeleton";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { getBusinessOwnerProfile } from "@/lib/business-owners";
@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Profile" };
 export default function BusinessProfilePage() {
   return (
     <Suspense
-      fallback={<LogoSpinnerPage theme="dark" />}
+      fallback={<BusinessPageSkeleton variant="form" />}
     >
       <ProfileGate />
     </Suspense>

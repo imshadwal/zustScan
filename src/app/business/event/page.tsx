@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { BusinessHeader } from "@/components/business/header";
 import { EventSetupManager } from "@/components/business/event-setup-manager";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { BusinessPageSkeleton } from "@/components/loading/business-page-skeleton";
 import { getBusinessOwnerProfile } from "@/lib/business-owners";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Event setup" };
 
 export default function BusinessEventPage() {
   return (
-    <Suspense fallback={<LogoSpinnerPage theme="dark" />}>
+    <Suspense fallback={<BusinessPageSkeleton variant="form" />}>
       <EventGate />
     </Suspense>
   );

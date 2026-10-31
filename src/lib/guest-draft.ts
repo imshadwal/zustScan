@@ -24,6 +24,9 @@ const GUEST_DRAFT_UNAVAILABLE =
 
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_DRAFT_MODEL = "gpt-4o-mini";
+/** Short Google reviews — cap output so the model finishes faster. */
+const DRAFT_MAX_TOKENS = 220;
+const OPENAI_TIMEOUT_MS = 28_000;
 
 export class GuestDraftUnavailableError extends Error {
   readonly guestMessage: string;
@@ -145,6 +148,21 @@ export function guestDraftModel(): string {
   return resolveOpenAiConfig().model;
 }
 
+const STAR_MENTION_PATTERN =
+  /\b\d\s*stars?\b|\bout of 5\b|\bstar rating\b|\bmy rating\b|★|⭐|रेटिंग|सितार|स्टार|star/i;
+
+function draftMentionsStars(text: string) {
+  return STAR_MENTION_PATTERN.test(text);
+}
+
+function redactStarMentions(text: string): string {
+  if (!draftMentionsStars(text)) return text;
+  const parts = text.split(/(?<=[.!?।])\s+/);
+  const kept = parts.filter((part) => part.trim() && !draftMentionsStars(part));
+  const joined = kept.join(" ").trim();
+  return joined.length >= 24 && !draftMentionsStars(joined) ? joined : text;
+}
+
 async function callOpenAiChat(
   key: string,
   model: string,
@@ -158,11 +176,13 @@ async function callOpenAiChat(
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
+      signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
       body: JSON.stringify({
         model,
-        temperature: 1,
-        presence_penalty: 0.5,
-        frequency_penalty: 0.35,
+        temperature: 0.88,
+        max_tokens: DRAFT_MAX_TOKENS,
+        presence_penalty: 0.35,
+        frequency_penalty: 0.25,
         messages,
       }),
     });
@@ -223,7 +243,7 @@ function buildDraftMessages(input: DraftInput) {
 
   const user = [
     `Business: ${input.businessName}`,
-    `Business context (Why trust us): ${input.brief.slice(0, 800)}`,
+    `Business context (Why trust us): ${input.brief.slice(0, 400)}`,
     `Services: ${input.serviceNames.join(", ") || "—"}`,
     `Products: ${input.productNames.join(", ") || "—"}`,
     `How it felt (tone only — do not quote these labels): ${input.tier}`,
@@ -287,13 +307,6 @@ export type EventDraftInput = {
   variationSeed: string;
 };
 
-const STAR_MENTION_PATTERN =
-  /\b\d\s*stars?\b|\bout of 5\b|\bstar rating\b|\bmy rating\b|★|⭐|रेटिंग|सितार|स्टार|star/i;
-
-function draftMentionsStars(text: string) {
-  return STAR_MENTION_PATTERN.test(text);
-}
-
 function buildEventDraftMessages(input: EventDraftInput) {
   const language = input.languages[0] ?? "english";
   const hindiOnly = isHindiOnly(input.languages);
@@ -332,7 +345,7 @@ function buildEventDraftMessages(input: EventDraftInput) {
     `Venue on Google: ${placeLine}`,
     input.eventName ? `Event: ${input.eventName}` : null,
     input.eventDate ? `Event date: ${input.eventDate}` : null,
-    `Why trust us (context): ${input.brief.slice(0, 800)}`,
+    `Why trust us (context): ${input.brief.slice(0, 400)}`,
     `What mattered to the guest (areas): ${input.areaNames.join(", ")}`,
     `How it felt (tone only — do not quote these labels): ${input.tier}`,
     `Star rating (for tone only — do not mention stars, ratings, or numbers in the review text): ${input.stars} out of 5`,
@@ -373,17 +386,22 @@ async function openAiEventDraft(input: EventDraftInput): Promise<string> {
   }
 
   if (draftMentionsStars(text)) {
-    console.warn("[guest-draft] Event draft mentioned stars — retrying once.");
-    text = await callOpenAiChat(key, model, [
-      ...messages,
-      { role: "assistant", content: text },
-      {
-        role: "user",
-        content:
-          "Remove any mention of stars, star count, rating, or 'out of 5' from the review. " +
-          "The guest sets stars on Google separately. Rewrite the review text only, same facts and language.",
-      },
-    ]);
+    const redacted = redactStarMentions(text);
+    if (!draftMentionsStars(redacted)) {
+      text = redacted;
+    } else {
+      console.warn("[guest-draft] Event draft mentioned stars — retrying once.");
+      text = await callOpenAiChat(key, model, [
+        ...messages,
+        { role: "assistant", content: text },
+        {
+          role: "user",
+          content:
+            "Remove any mention of stars, star count, rating, or 'out of 5' from the review. " +
+            "The guest sets stars on Google separately. Rewrite the review text only, same facts and language.",
+        },
+      ]);
+    }
   }
 
   return text;

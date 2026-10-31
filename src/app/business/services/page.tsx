@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { BusinessHeader } from "@/components/business/header";
 import { ServicesManager } from "@/components/business/services-manager";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { BusinessPageSkeleton } from "@/components/loading/business-page-skeleton";
 import { getBusinessSessionLoginId } from "@/lib/business-session";
 import { getBusinessOwnerProfile, listServicesForOwner } from "@/lib/business-owners";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Services" };
 export default function BusinessServicesPage() {
   return (
     <Suspense
-      fallback={<LogoSpinnerPage theme="dark" />}
+      fallback={<BusinessPageSkeleton variant="services" />}
     >
       <ServicesGate />
     </Suspense>

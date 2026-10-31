@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AdminHeader } from "@/components/admin/header";
 import { OwnerList } from "@/components/admin/owner-list";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { AdminPageSkeleton } from "@/components/loading/admin-page-skeleton";
 import { hasAdminSession } from "@/lib/admin-session";
 import { listBusinessOwners } from "@/lib/business-owners";
 import { listGuestAnalyticsForOwners, sumGuestAnalytics } from "@/lib/guest-analytics";
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Business owners" };
 export default function AdminPage() {
   return (
     <Suspense
-      fallback={<LogoSpinnerPage theme="dark" />}
+      fallback={<AdminPageSkeleton variant="owners" />}
     >
       <OwnersGate />
     </Suspense>

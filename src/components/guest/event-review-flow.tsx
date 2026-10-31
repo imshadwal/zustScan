@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { GuestDraftLoadingPanel } from "@/components/guest/guest-draft-loading";
 import { BusinessOwnerMark } from "@/components/initials-badge";
 import { trackGuestMetric } from "@/lib/guest-analytics-client";
 import {
@@ -74,10 +75,13 @@ export function EventGuestReviewFlow({ experience }: Props) {
   const [voice, setVoice] = useState<GuestVoice>("neutral");
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
+  const [draftFetchComplete, setDraftFetchComplete] = useState(false);
+  const [draftLoadKey, setDraftLoadKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const pageViewSent = useRef(false);
   const draftTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const draftPendingRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (pageViewSent.current) return;
@@ -105,8 +109,21 @@ export function EventGuestReviewFlow({ experience }: Props) {
     setError(null);
   }
 
+  const handleDraftReveal = useCallback(() => {
+    const text = draftPendingRef.current;
+    if (!text) return;
+    setDraft(text);
+    draftPendingRef.current = null;
+    setDraftFetchComplete(false);
+    setPending(false);
+    setStep((current) => (current === 1 ? 2 : current));
+  }, []);
+
   async function buildDraft() {
-    if (!tier || areaIds.length === 0) return;
+    if (!tier || areaIds.length === 0) return false;
+    setDraftLoadKey((key) => key + 1);
+    setDraftFetchComplete(false);
+    draftPendingRef.current = null;
     setPending(true);
     setError(null);
     setCopied(false);
@@ -130,14 +147,16 @@ export function EventGuestReviewFlow({ experience }: Props) {
       if (!response.ok || !body?.draft) {
         setError(body?.error ?? "The draft could not be created.");
         setPending(false);
+        setDraftFetchComplete(false);
         return false;
       }
-      setDraft(body.draft);
-      setPending(false);
+      draftPendingRef.current = body.draft;
+      setDraftFetchComplete(true);
       return true;
     } catch {
       setError("The request could not be sent.");
       setPending(false);
+      setDraftFetchComplete(false);
       return false;
     }
   }
@@ -149,8 +168,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
       return;
     }
     if (step === 1 && tier) {
-      const ok = await buildDraft();
-      if (ok) setStep(2);
+      await buildDraft();
     }
   }
 
@@ -218,8 +236,9 @@ export function EventGuestReviewFlow({ experience }: Props) {
       <div className="bg-[var(--guest-surface,white)] px-4 py-4 sm:px-5">
         <ol className="flex gap-1" aria-label="Progress">
           {STEPS.map((label, index) => {
-            const done = index < step;
-            const current = index === step;
+            const progressStep = pending && step === 1 ? 2 : step;
+            const done = index < progressStep;
+            const current = index === progressStep;
             return (
               <li key={label} className="flex-1">
                 <div
@@ -266,7 +285,15 @@ export function EventGuestReviewFlow({ experience }: Props) {
           </section>
         ) : null}
 
-        {step === 1 ? (
+        {step === 1 && pending ? (
+          <GuestDraftLoadingPanel
+            key={draftLoadKey}
+            fetchComplete={draftFetchComplete}
+            onReveal={handleDraftReveal}
+          />
+        ) : null}
+
+        {step === 1 && !pending ? (
           <section className={guestPanelClass}>
             <h2 className="text-sm font-semibold text-ink">How was it?</h2>
             <p className="mt-0.5 text-xs text-muted">
@@ -373,7 +400,15 @@ export function EventGuestReviewFlow({ experience }: Props) {
           </section>
         ) : null}
 
-        {step === 2 && draft ? (
+        {step === 2 && pending ? (
+          <GuestDraftLoadingPanel
+            key={draftLoadKey}
+            fetchComplete={draftFetchComplete}
+            onReveal={handleDraftReveal}
+          />
+        ) : null}
+
+        {step === 2 && !pending && draft ? (
           <section className={guestPanelClass}>
             <h2 className="text-sm font-semibold text-ink">Your draft</h2>
             <p className="mt-1 text-xs text-muted">Edit anything before you post on Google.</p>

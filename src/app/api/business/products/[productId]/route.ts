@@ -1,6 +1,7 @@
 import { failure, json } from "@/lib/admin-http";
 import { requireBusinessOwnerSession } from "@/lib/business-api";
 import { deleteProduct, renameProduct } from "@/lib/business-owners";
+import { revalidateGuestExperienceCache } from "@/lib/guest-cache";
 
 export async function PATCH(
   request: Request,
@@ -13,6 +14,7 @@ export async function PATCH(
   const name = typeof body?.name === "string" ? body.name : "";
   try {
     await renameProduct(session.loginId, productId, name);
+    revalidateGuestExperienceCache(session.loginId);
     return json({ ok: true });
   } catch (error) {
     return failure(error);
@@ -28,6 +30,7 @@ export async function DELETE(
   const { productId } = await params;
   try {
     await deleteProduct(session.loginId, productId);
+    revalidateGuestExperienceCache(session.loginId);
     return json({ ok: true });
   } catch (error) {
     return failure(error);

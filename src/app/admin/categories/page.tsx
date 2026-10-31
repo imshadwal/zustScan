@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AdminHeader } from "@/components/admin/header";
 import { CategoryManager } from "@/components/admin/category-manager";
-import { LogoSpinnerPage } from "@/components/loading/logo-spinner";
+import { AdminPageSkeleton } from "@/components/loading/admin-page-skeleton";
 import { hasAdminSession } from "@/lib/admin-session";
 import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { OwnerStoreError } from "@/lib/store-error";
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Categories" };
 
 export default function AdminCategoriesPage() {
   return (
-    <Suspense fallback={<LogoSpinnerPage theme="dark" />}>
+    <Suspense fallback={<AdminPageSkeleton variant="categories" />}>
       <CategoriesGate />
     </Suspense>
   );
