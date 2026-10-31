@@ -13,12 +13,12 @@ const STATUS_LINES = [
 const REVEAL_AT = 90;
 const FINISH_AT = 100;
 
-/** Natural pace — about 90% around 3–4s while the API runs. */
+/** Reaches ~90% in about 3s while OpenAI runs. */
 function progressFromElapsedMs(elapsedMs: number): number {
   const s = elapsedMs / 1000;
-  if (s <= 0.4) return (s / 0.4) * 30;
-  const t = s - 0.4;
-  return Math.min(94, 30 + 64 * (1 - Math.exp(-t / 1.25)));
+  if (s <= 0.35) return (s / 0.35) * 32;
+  const t = s - 0.35;
+  return Math.min(96, 32 + 64 * (1 - Math.exp(-t / 0.95)));
 }
 
 function statusIndexForProgress(progress: number): number {
@@ -37,15 +37,16 @@ type Props = {
 export function GuestDraftLoadingPanel({ fetchComplete = false, onReveal }: Props) {
   const [progress, setProgress] = useState(0);
   const revealedRef = useRef(false);
+  const fetchCompleteRef = useRef(fetchComplete);
+
+  fetchCompleteRef.current = fetchComplete;
+
   const displayPercent = Math.round(progress);
   const statusIndex = statusIndexForProgress(progress);
 
   useEffect(() => {
     revealedRef.current = false;
     setProgress(0);
-  }, []);
-
-  useEffect(() => {
     const started = performance.now();
     let frame = 0;
 
@@ -53,8 +54,8 @@ export function GuestDraftLoadingPanel({ fetchComplete = false, onReveal }: Prop
       const elapsed = performance.now() - started;
       setProgress((prev) => {
         let target = progressFromElapsedMs(elapsed);
-        if (fetchComplete && target < REVEAL_AT) {
-          target = Math.max(target, Math.min(REVEAL_AT + 2, prev + 3));
+        if (fetchCompleteRef.current && target < REVEAL_AT) {
+          target = Math.max(target, Math.min(REVEAL_AT + 3, prev + 4));
         }
         return Math.max(prev, target);
       });
@@ -63,7 +64,7 @@ export function GuestDraftLoadingPanel({ fetchComplete = false, onReveal }: Prop
 
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [fetchComplete]);
+  }, []);
 
   const tryReveal = useCallback(() => {
     if (revealedRef.current || !fetchComplete || !onReveal) return;
@@ -94,16 +95,20 @@ export function GuestDraftLoadingPanel({ fetchComplete = false, onReveal }: Prop
       </p>
 
       <div
-        className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200"
+        className="relative mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-300/85 shadow-inner"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={displayPercent}
         aria-valuetext={`Generating review draft, ${displayPercent} percent`}
       >
+        {/* scaleX fill — % width + Tailwind bg-[var(...,#hex)] often fails to paint on mobile */}
         <div
-          className="h-full rounded-full bg-[var(--guest-accent,#0060f0)] transition-[width] duration-150 ease-out motion-reduce:transition-none"
-          style={{ width: `${progress}%` }}
+          className="absolute inset-0 origin-left rounded-full motion-reduce:transition-none transition-transform duration-150 ease-out"
+          style={{
+            transform: `scaleX(${Math.min(1, Math.max(0.03, progress / 100))})`,
+            backgroundColor: "var(--guest-accent, #0066ff)",
+          }}
         />
       </div>
 
