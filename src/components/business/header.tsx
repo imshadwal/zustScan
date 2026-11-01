@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { OwnerIdentity } from "@/components/initials-badge";
 
@@ -16,7 +17,16 @@ export function BusinessHeader({
   logoUrl?: string | null;
   standeeType?: "table" | "event";
 }) {
+  const pathname = usePathname();
   const [pending, setPending] = useState(false);
+
+  const navLinkClass = (href: string) => {
+    const active =
+      href === "/business"
+        ? pathname === "/business"
+        : pathname === href || pathname.startsWith(`${href}/`);
+    return `rounded-full px-3 py-2 ${active ? "text-white" : "text-white/80 hover:text-white"}`;
+  };
 
   async function signOut() {
     setPending(true);
@@ -59,16 +69,19 @@ export function BusinessHeader({
               size="md"
             />
           </div>
-          <nav className="flex items-center gap-2 text-sm font-semibold">
-            <Link href="/business/profile" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
+          <nav className="flex items-center gap-2 text-sm font-semibold" aria-label="Business portal">
+            <Link href="/business" className={navLinkClass("/business")}>
+              Home
+            </Link>
+            <Link href="/business/profile" className={navLinkClass("/business/profile")}>
               Profile
             </Link>
             {standeeType === "event" ? (
-              <Link href="/business/event" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
+              <Link href="/business/event" className={navLinkClass("/business/event")}>
                 Event
               </Link>
             ) : (
-              <Link href="/business/services" className="rounded-full px-3 py-2 text-white/80 hover:text-white">
+              <Link href="/business/services" className={navLinkClass("/business/services")}>
                 Services
               </Link>
             )}
