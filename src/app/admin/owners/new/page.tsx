@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AdminHeader } from "@/components/admin/header";
-import { OwnerForm } from "@/components/admin/owner-form";
+import { OwnerFormPage } from "@/components/admin/owner-form";
 import { AdminPageSkeleton } from "@/components/loading/admin-page-skeleton";
 import { hasAdminSession } from "@/lib/admin-session";
 import { siteOrigin } from "@/lib/login-id";
@@ -25,7 +25,7 @@ async function NewOwnerGate() {
     <>
       <AdminHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <OwnerForm siteOrigin={siteOrigin()} />
+        <OwnerFormPage siteOrigin={siteOrigin()} />
       </main>
     </>
   );

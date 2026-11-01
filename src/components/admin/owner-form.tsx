@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { usePathname } from "next/navigation";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import {
   fieldClass,
   primaryButtonClass,
@@ -19,7 +20,26 @@ type Created = {
   standeeType: StandeeType;
 };
 
-export function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
+const NEW_OWNER_PATH = "/admin/owners/new";
+
+/** Remount form when navigating back to new-owner (Next.js can restore stale client state). */
+export function OwnerFormPage({ siteOrigin }: { siteOrigin: string }) {
+  const pathname = usePathname();
+  const prevPathRef = useRef<string | null>(null);
+  const [formKey, setFormKey] = useState(0);
+
+  useLayoutEffect(() => {
+    const prev = prevPathRef.current;
+    prevPathRef.current = pathname;
+    if (pathname === NEW_OWNER_PATH && prev !== null && prev !== NEW_OWNER_PATH) {
+      setFormKey((key) => key + 1);
+    }
+  }, [pathname]);
+
+  return <OwnerForm key={formKey} siteOrigin={siteOrigin} />;
+}
+
+function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
   const { success, error: toastError } = useToast();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
