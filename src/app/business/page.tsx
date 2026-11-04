@@ -29,19 +29,20 @@ async function BusinessHomeGate() {
   if (!profile) redirect("/business/login");
 
   const isEvent = profile.standeeType === "event";
-  const services = isEvent ? [] : await listServicesForOwner(loginId);
+  const [services, guestAnalytics] = await Promise.all([
+    isEvent ? Promise.resolve([]) : listServicesForOwner(loginId),
+    getGuestAnalyticsForLogin(loginId),
+  ]);
   const serviceCount = isEvent
     ? (profile.eventChecklist?.hasArea ? 1 : 0)
     : services.length;
   const productCount = isEvent ? 0 : services.reduce((sum, s) => sum + s.products.length, 0);
-  const guestAnalytics = await getGuestAnalyticsForLogin(loginId);
 
   return (
     <>
       <BusinessHeader
         businessName={profile.businessName}
         loginId={profile.loginId}
-        logoUrl={profile.logoUrl}
         standeeType={profile.standeeType}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">

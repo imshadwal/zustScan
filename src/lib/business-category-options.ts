@@ -1,5 +1,6 @@
 import "server-only";
 
+import { revalidateTag, unstable_cache } from "next/cache";
 import {
   FALLBACK_CATEGORY_OPTIONS,
   isValidCategorySlug,
@@ -83,8 +84,9 @@ async function uniqueSlug(base: string) {
   }
 }
 
-/** Ordered list for business profile and validation. Falls back to built-in seed if DB is empty. */
-export async function listBusinessCategoryOptions(): Promise<BusinessCategoryOption[]> {
+export const BUSINESS_CATEGORY_OPTIONS_CACHE_TAG = "business-category-options";
+
+async function listBusinessCategoryOptionsUncached(): Promise<BusinessCategoryOption[]> {
   try {
     const { data, error } = await database()
       .from("business_category_options")
@@ -101,6 +103,17 @@ export async function listBusinessCategoryOptions(): Promise<BusinessCategoryOpt
     }
     throw error;
   }
+}
+
+const listBusinessCategoryOptionsCached = unstable_cache(
+  listBusinessCategoryOptionsUncached,
+  ["business-category-options"],
+  { revalidate: 300, tags: [BUSINESS_CATEGORY_OPTIONS_CACHE_TAG] },
+);
+
+/** Ordered list for business profile and validation. Falls back to built-in seed if DB is empty. */
+export async function listBusinessCategoryOptions(): Promise<BusinessCategoryOption[]> {
+  return listBusinessCategoryOptionsCached();
 }
 
 export async function createBusinessCategoryOption(input: { label: string }) {
@@ -140,6 +153,7 @@ export async function createBusinessCategoryOption(input: { label: string }) {
     .select("id, label, sort_order, is_others")
     .single();
   if (error) throw mapDbError(error);
+  revalidateTag(BUSINESS_CATEGORY_OPTIONS_CACHE_TAG, "max");
   return mapRow(data as Row);
 }
 
@@ -187,6 +201,7 @@ export async function updateBusinessCategoryOption(
     .select("id, label, sort_order, is_others")
     .single();
   if (error) throw mapDbError(error);
+  revalidateTag(BUSINESS_CATEGORY_OPTIONS_CACHE_TAG, "max");
   return mapRow(data as Row);
 }
 
@@ -223,5 +238,6 @@ export async function deleteBusinessCategoryOption(id: string) {
 
   const { error } = await database().from("business_category_options").delete().eq("id", id);
   if (error) throw mapDbError(error);
+  revalidateTag(BUSINESS_CATEGORY_OPTIONS_CACHE_TAG, "max");
   return { id };
 }

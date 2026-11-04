@@ -70,22 +70,26 @@ export function OwnerIdentity({
   loginId,
   logoUrl,
   size = "md",
+  showMark = true,
 }: {
   businessName: string | null | undefined;
   loginId: string;
   logoUrl?: string | null;
   size?: keyof typeof titleSizeClass;
+  showMark?: boolean;
 }) {
   const markSize =
     size === "xl" ? "xl" : size === "lg" ? "lg" : size === "sm" ? "sm" : "md";
   return (
     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-      <BusinessOwnerMark
-        businessName={businessName}
-        loginId={loginId}
-        logoUrl={logoUrl}
-        size={markSize}
-      />
+      {showMark ? (
+        <BusinessOwnerMark
+          businessName={businessName}
+          loginId={loginId}
+          logoUrl={logoUrl}
+          size={markSize}
+        />
+      ) : null}
       <span className={`min-w-0 truncate ${titleSizeClass[size]}`}>
         {displayTitle(businessName, loginId)}
       </span>

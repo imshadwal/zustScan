@@ -14,6 +14,7 @@ import {
   type EventSetupChecklist,
 } from "@/lib/event-validation";
 import { businessLogoPublicUrl } from "@/lib/business-logos";
+import { guestFounderOrNull, type GuestFounder } from "@/lib/founder";
 import { isGuestThemeId } from "@/lib/guest-themes";
 import { normalizeLoginId, isValidLoginId } from "@/lib/login-id";
 import { normalizeStandeeType, type StandeeType } from "@/lib/standee-type";
@@ -35,6 +36,12 @@ function mapDbError(error: { code?: string; message?: string }) {
     error.code === "PGRST205" ||
     /does not exist|schema cache/i.test(error.message ?? "")
   ) {
+    if (/founder_/i.test(error.message ?? "")) {
+      return new OwnerStoreError(
+        "Database schema is out of date. Run supabase/business-founder.sql in the Supabase SQL editor, then reload the API schema.",
+        503,
+      );
+    }
     return new OwnerStoreError(
       "Event standee tables are missing. Run supabase/business-event-standee.sql in Supabase.",
       503,
@@ -43,15 +50,34 @@ function mapDbError(error: { code?: string; message?: string }) {
   return new OwnerStoreError("Could not save event details.", 500);
 }
 
+function missingFounderColumn(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  return (
+    (error.code === "42703" ||
+      error.code === "PGRST204" ||
+      /schema cache|does not exist/i.test(error.message ?? "")) &&
+    /founder_/i.test(error.message ?? "")
+  );
+}
+
 async function ownerRowByLogin(loginId: string) {
   const id = normalizeLoginId(loginId);
-  const { data, error } = await database()
+  const base =
+    "id, login_id, standee_type, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, setup_complete, qr_active, guest_theme_id, logo_path";
+  let { data, error } = await database()
     .from("business_owners")
     .select(
-      "id, login_id, standee_type, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, setup_complete, qr_active, guest_theme_id, logo_path",
+      `${base}, founder_visible, founder_name, founder_role, founder_phone, founder_email, founder_note, founder_photo_path`,
     )
     .eq("login_id", id)
     .maybeSingle();
+  if (missingFounderColumn(error)) {
+    ({ data, error } = await database()
+      .from("business_owners")
+      .select(base)
+      .eq("login_id", id)
+      .maybeSingle());
+  }
   if (error) throw mapDbError(error);
   return data as
     | {
@@ -70,6 +96,13 @@ async function ownerRowByLogin(loginId: string) {
         qr_active: boolean;
         guest_theme_id: string | null;
         logo_path: string | null;
+        founder_visible?: boolean | null;
+        founder_name?: string | null;
+        founder_role?: string | null;
+        founder_phone?: string | null;
+        founder_email?: string | null;
+        founder_note?: string | null;
+        founder_photo_path?: string | null;
       }
     | null;
 }
@@ -94,6 +127,7 @@ export type EventGuestExperience = {
   brief: string;
   guestThemeId: string;
   logoUrl: string | null;
+  founder: GuestFounder | null;
   eventName: string | null;
   eventDate: string | null;
   areas: EventAreaRecord[];
@@ -399,6 +433,10 @@ async function loadEventGuestExperienceUncached(
     brief,
     guestThemeId,
     logoUrl: businessLogoPublicUrl(row.logo_path ?? null),
+    founder:
+      row.founder_visible === true
+        ? guestFounderOrNull(row, businessLogoPublicUrl(row.founder_photo_path ?? null))
+        : null,
     eventName: profile?.event_name?.trim() || null,
     eventDate: profile?.event_date ?? null,
     areas,

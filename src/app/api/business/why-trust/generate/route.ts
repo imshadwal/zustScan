@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const categoryOther = typeof body?.categoryOther === "string" ? body.categoryOther : "";
 
   try {
-    const profile = await getBusinessOwnerProfile(session.loginId);
+    const profile = await getBusinessOwnerProfile(session.loginId, { refreshChecklist: false });
     const isEventStandee = profile?.standeeType === "event";
     const options = await listBusinessCategoryOptions();
     if (!isEventStandee) {

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FounderFlip } from "@/components/guest/founder-flip";
+import { WhyTrustUsInfo } from "@/components/guest/why-trust-us";
 import { GuestDraftLoadingPanel } from "@/components/guest/guest-draft-loading";
 import { BusinessOwnerMark } from "@/components/initials-badge";
 import { trackGuestMetric } from "@/lib/guest-analytics-client";
@@ -208,12 +210,15 @@ export function EventGuestReviewFlow({ experience }: Props) {
             size="xl"
           />
           <div className="min-w-0 flex-1 pt-0.5">
-            <p
-              className="text-[11px] font-semibold tracking-[0.16em] uppercase sm:text-xs"
-              style={{ color: theme.headerEyebrow }}
-            >
-              Share your experience
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p
+                className="text-[11px] font-semibold tracking-[0.16em] uppercase sm:text-xs"
+                style={{ color: theme.headerEyebrow }}
+              >
+                Share your experience
+              </p>
+              {experience.whyTrustUs ? <WhyTrustUsInfo text={experience.whyTrustUs} /> : null}
+            </div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
             {eventSubtitle ? (
               <p className="mt-2 text-sm font-medium text-white/90">{eventSubtitle}</p>
@@ -233,6 +238,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
         </div>
       </div>
 
+      <FounderFlip founder={experience.founder}>
       <div className="bg-[var(--guest-surface,white)] px-4 py-4 sm:px-5">
         <ol className="flex gap-1" aria-label="Progress">
           {STEPS.map((label, index) => {
@@ -479,13 +485,8 @@ export function EventGuestReviewFlow({ experience }: Props) {
           </div>
         )}
 
-        {step === 0 && experience.whyTrustUs ? (
-          <section className={`${guestPanelClass} mt-4`}>
-            <p className="text-xs font-semibold tracking-wide text-muted uppercase">Why trust us</p>
-            <p className="mt-2 text-sm leading-6 text-ink">{experience.whyTrustUs}</p>
-          </section>
-        ) : null}
       </div>
+      </FounderFlip>
     </div>
   );
 }

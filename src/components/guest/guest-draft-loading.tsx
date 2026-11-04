@@ -102,7 +102,7 @@ export function GuestDraftLoadingPanel({ fetchComplete = false, onReveal }: Prop
         aria-valuenow={displayPercent}
         aria-valuetext={`Generating review draft, ${displayPercent} percent`}
       >
-        {/* scaleX fill — % width + Tailwind bg-[var(...,#hex)] often fails to paint on mobile */}
+        {/* scaleX fill: a percentage width plus an arbitrary Tailwind background often fails to paint on mobile */}
         <div
           className="absolute inset-0 origin-left rounded-full motion-reduce:transition-none transition-transform duration-150 ease-out"
           style={{

@@ -38,6 +38,7 @@ import {
 } from "@/lib/business-categories";
 import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { businessLogoPublicUrl } from "@/lib/business-logos";
+import { guestFounderOrNull, type GuestFounder } from "@/lib/founder";
 import { isGuestThemeId } from "@/lib/guest-themes";
 import {
   getEventPortalStateForOwnerRow,
@@ -80,6 +81,13 @@ export type BusinessOwnerProfile = {
   whyTrustUs: string | null;
   guestThemeId: string;
   logoUrl: string | null;
+  founderVisible: boolean;
+  founderName: string | null;
+  founderRole: string | null;
+  founderPhone: string | null;
+  founderEmail: string | null;
+  founderNote: string | null;
+  founderPhotoUrl: string | null;
   setupComplete: boolean;
   standeeType: StandeeType;
   checklist: SetupChecklist;
@@ -91,7 +99,10 @@ export type BusinessOwnerProfile = {
 
 function notReadyMessage(error: { code?: string; message?: string }) {
   if (error.code === "42703" || error.code === "PGRST204") {
-    const detail = error.message?.trim();
+    const detail = error.message?.trim() ?? "";
+    if (/founder_/i.test(detail)) {
+      return "Database schema is out of date. Run supabase/business-founder.sql in the Supabase SQL editor, then reload the API schema.";
+    }
     return detail
       ? `Database schema is out of date (${detail}). Run supabase/business-owners-upgrade.sql in the Supabase SQL editor, then reload the API schema.`
       : "Database schema is out of date. Run supabase/business-owners-upgrade.sql in the Supabase SQL editor, then reload the API schema.";
@@ -110,6 +121,16 @@ function database() {
     }
     throw error;
   }
+}
+
+function missingFounderColumn(error: { code?: string; message?: string } | null) {
+  if (!error) return false;
+  return (
+    (error.code === "42703" ||
+      error.code === "PGRST204" ||
+      /schema cache|does not exist/i.test(error.message ?? "")) &&
+    /founder_/i.test(error.message ?? "")
+  );
 }
 
 function mapDbError(error: { code?: string; message?: string }) {
@@ -147,8 +168,35 @@ type OwnerRow = {
   guest_theme_id: string;
   standee_type: string | null;
   logo_path: string | null;
+  founder_visible?: boolean | null;
+  founder_name?: string | null;
+  founder_role?: string | null;
+  founder_phone?: string | null;
+  founder_email?: string | null;
+  founder_note?: string | null;
+  founder_photo_path?: string | null;
   created_at: string;
 };
+
+const founderColumns =
+  "founder_visible, founder_name, founder_role, founder_phone, founder_email, founder_note, founder_photo_path";
+
+function founderProfileFields(row: OwnerRow) {
+  return {
+    founderVisible: row.founder_visible === true,
+    founderName: row.founder_name?.trim() || null,
+    founderRole: row.founder_role?.trim() || null,
+    founderPhone: row.founder_phone?.trim() || null,
+    founderEmail: row.founder_email?.trim() || null,
+    founderNote: row.founder_note?.trim() || null,
+    founderPhotoUrl: businessLogoPublicUrl(row.founder_photo_path ?? null),
+  };
+}
+
+function founderForGuest(row: OwnerRow): GuestFounder | null {
+  if (row.founder_visible !== true) return null;
+  return guestFounderOrNull(row, businessLogoPublicUrl(row.founder_photo_path ?? null));
+}
 
 function mapBrandingFields(row: {
   guest_theme_id?: string | null;
@@ -268,8 +316,10 @@ async function recomputeSetupComplete(ownerId: string, row: OwnerRow) {
     return setupChecklistFromEvent(eventChecklist);
   }
 
-  const services = await productCountsForOwner(ownerId);
-  const categoryOptions = await listBusinessCategoryOptions();
+  const [services, categoryOptions] = await Promise.all([
+    productCountsForOwner(ownerId),
+    listBusinessCategoryOptions(),
+  ]);
   const checklist = evaluateSetup({
     businessName: row.business_name,
     city: row.city ?? null,
@@ -360,20 +410,32 @@ export type GuestExperience = {
   brief: string;
   guestThemeId: string;
   logoUrl: string | null;
+  founder: GuestFounder | null;
   services: ServiceRecord[];
 };
 
-const guestOwnerSelect =
+const guestOwnerSelectBase =
   "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, logo_path, standee_type, password_hash, sold_price, created_at";
+const guestOwnerSelect = `${guestOwnerSelectBase}, ${founderColumns}`;
+
+async function selectGuestOwner(loginId: string) {
+  const first = await database()
+    .from("business_owners")
+    .select(guestOwnerSelect)
+    .eq("login_id", loginId)
+    .maybeSingle();
+  if (!missingFounderColumn(first.error)) return first;
+  return database()
+    .from("business_owners")
+    .select(guestOwnerSelectBase)
+    .eq("login_id", loginId)
+    .maybeSingle();
+}
 
 async function loadGuestExperienceUncached(loginId: string): Promise<GuestExperience | null> {
   const id = normalizeLoginId(loginId);
   if (!isValidLoginId(id)) return null;
-  const { data, error } = await database()
-    .from("business_owners")
-    .select(guestOwnerSelect)
-    .eq("login_id", id)
-    .maybeSingle();
+  const { data, error } = await selectGuestOwner(id);
   if (error) throw mapDbError(error);
   if (!data) return null;
   if (normalizeStandeeType(data.standee_type) === "event") return null;
@@ -406,6 +468,7 @@ async function loadGuestExperienceUncached(loginId: string): Promise<GuestExperi
     brief: draftContext,
     guestThemeId: branding.guestThemeId,
     logoUrl: branding.logoUrl,
+    founder: founderForGuest(row),
     services,
   };
 }
@@ -433,11 +496,7 @@ export async function loadTableGuestPage(loginId: string): Promise<TableGuestPag
   const id = normalizeLoginId(loginId);
   if (!isValidLoginId(id)) return { status: "not_found" };
 
-  const { data, error } = await database()
-    .from("business_owners")
-    .select(guestOwnerSelect)
-    .eq("login_id", id)
-    .maybeSingle();
+  const { data, error } = await selectGuestOwner(id);
   if (error) throw mapDbError(error);
   if (!data) return { status: "not_found" };
 
@@ -501,6 +560,7 @@ export async function loadTableGuestPage(loginId: string): Promise<TableGuestPag
       brief: draftContext,
       guestThemeId: branding.guestThemeId,
       logoUrl: branding.logoUrl,
+      founder: founderForGuest(row),
       services,
     },
   };
@@ -704,17 +764,57 @@ export async function resetBusinessOwnerPassword(loginId: string, password: stri
   return { loginId: id, password };
 }
 
+export type GetBusinessOwnerProfileOptions = {
+  /** Skip services/products scan — use on profile & services pages (dashboard still refreshes). */
+  refreshChecklist?: boolean;
+};
+
+function resolveBusinessCategory(
+  row: OwnerRow,
+  categoryOptions: BusinessCategoryOption[],
+): string | null {
+  const categoryRaw = row.business_category?.trim();
+  return categoryRaw && isBusinessCategoryId(categoryRaw, categoryOptions) ? categoryRaw : null;
+}
+
+function portalChecklistFromRow(
+  row: OwnerRow,
+  categoryOptions: BusinessCategoryOption[],
+): SetupChecklist {
+  if (row.setup_complete === true) return fastCompleteChecklist(row);
+  return evaluateSetup({
+    businessName: row.business_name,
+    city: row.city ?? null,
+    businessCategory: row.business_category ?? null,
+    businessCategoryOther: row.business_category_other ?? null,
+    phone: row.phone,
+    mapLink: row.map_link,
+    services: [],
+    isBusinessCategoryId: (value) => isBusinessCategoryId(value, categoryOptions),
+    isValidCategoryOther,
+  });
+}
+
 export async function getBusinessOwnerProfile(
   loginId: string,
+  options: GetBusinessOwnerProfileOptions = {},
 ): Promise<BusinessOwnerProfile | null> {
+  const refreshChecklist = options.refreshChecklist !== false;
   const id = normalizeLoginId(loginId);
-  const { data, error } = await database()
+  const profileSelectBase =
+    "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, standee_type, logo_path, password_hash";
+  let { data, error } = await database()
     .from("business_owners")
-    .select(
-      "id, login_id, business_name, city, business_category, business_category_other, address, why_trust_us, phone, map_link, brief, setup_complete, qr_active, guest_theme_id, standee_type, logo_path, password_hash",
-    )
+    .select(`${profileSelectBase}, ${founderColumns}`)
     .eq("login_id", id)
     .maybeSingle();
+  if (missingFounderColumn(error)) {
+    ({ data, error } = await database()
+      .from("business_owners")
+      .select(profileSelectBase)
+      .eq("login_id", id)
+      .maybeSingle());
+  }
   if (error) throw mapDbError(error);
   if (!data) return null;
   const ownerId = data.id as string;
@@ -755,6 +855,7 @@ export async function getBusinessOwnerProfile(
       whyTrustUs: row.why_trust_us,
       guestThemeId: branding.guestThemeId,
       logoUrl: branding.logoUrl,
+      ...founderProfileFields(row),
       setupComplete: checklist.complete,
       standeeType,
       checklist,
@@ -765,13 +866,11 @@ export async function getBusinessOwnerProfile(
     };
   }
 
-  const checklist = await recomputeSetupComplete(ownerId, row);
   const categoryOptions = await listBusinessCategoryOptions();
-  const categoryRaw = row.business_category?.trim();
-  const businessCategory =
-    categoryRaw && isBusinessCategoryId(categoryRaw, categoryOptions)
-      ? categoryRaw
-      : null;
+  const checklist = refreshChecklist
+    ? await recomputeSetupComplete(ownerId, row)
+    : portalChecklistFromRow(row, categoryOptions);
+  const businessCategory = resolveBusinessCategory(row, categoryOptions);
 
   return {
     loginId: row.login_id,
@@ -785,7 +884,8 @@ export async function getBusinessOwnerProfile(
     whyTrustUs: row.why_trust_us,
     guestThemeId: branding.guestThemeId,
     logoUrl: branding.logoUrl,
-    setupComplete: checklist.complete,
+    ...founderProfileFields(row),
+    setupComplete: refreshChecklist ? checklist.complete : row.setup_complete === true,
     standeeType,
     checklist,
     eventChecklist: null,

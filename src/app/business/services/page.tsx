@@ -23,18 +23,18 @@ async function ServicesGate() {
   const loginId = await getBusinessSessionLoginId();
   if (!loginId) redirect("/business/login");
 
-  const profile = await getBusinessOwnerProfile(loginId);
+  const [profile, services] = await Promise.all([
+    getBusinessOwnerProfile(loginId, { refreshChecklist: false }),
+    listServicesForOwner(loginId),
+  ]);
   if (!profile) redirect("/business/login");
   if (profile.standeeType === "event") redirect("/business/event");
-
-  const services = await listServicesForOwner(loginId);
 
   return (
     <>
       <BusinessHeader
         businessName={profile.businessName}
         loginId={profile.loginId}
-        logoUrl={profile.logoUrl}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-2xl font-semibold text-white">Services & products</h1>

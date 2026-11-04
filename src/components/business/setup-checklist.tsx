@@ -51,7 +51,7 @@ export function SetupChecklistCard({ checklist }: { checklist: SetupChecklist })
       </ul>
       <div className="mt-6 flex flex-wrap gap-3">
         <Link href="/business/profile" className={primaryButtonClass}>
-          Edit profile
+          Edit business
         </Link>
         <Link href="/business/services" className={primaryButtonClass}>
           Manage services

@@ -9,7 +9,7 @@ import { listBusinessCategoryOptions } from "@/lib/business-category-options";
 import { getBusinessOwnerProfile } from "@/lib/business-owners";
 import { resolveGuestTheme } from "@/lib/guest-themes";
 
-export const metadata: Metadata = { title: "Profile" };
+export const metadata: Metadata = { title: "Business" };
 
 export default function BusinessProfilePage() {
   return (
@@ -26,7 +26,7 @@ async function ProfileGate() {
   if (!loginId) redirect("/business/login");
 
   const [profile, categories] = await Promise.all([
-    getBusinessOwnerProfile(loginId),
+    getBusinessOwnerProfile(loginId, { refreshChecklist: false }),
     listBusinessCategoryOptions(),
   ]);
   if (!profile) redirect("/business/login");
@@ -36,11 +36,10 @@ async function ProfileGate() {
       <BusinessHeader
         businessName={profile.businessName}
         loginId={profile.loginId}
-        logoUrl={profile.logoUrl}
         standeeType={profile.standeeType}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold text-white">Business profile</h1>
+        <h1 className="text-2xl font-semibold text-white">Business</h1>
         <p className="mt-2 text-sm text-white/70">
           {profile.standeeType === "event"
             ? "Venue name, contact, and Google review link for your event standee. Event name, date, and guest areas are on Event setup."

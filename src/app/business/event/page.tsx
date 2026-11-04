@@ -30,7 +30,6 @@ async function EventGate() {
       <BusinessHeader
         businessName={profile.businessName}
         loginId={profile.loginId}
-        logoUrl={profile.logoUrl}
         standeeType="event"
       />
       <main className="mx-auto max-w-5xl px-4 py-8">

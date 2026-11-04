@@ -210,7 +210,7 @@ export function DashboardHome({
             <h2 className="text-sm font-semibold text-muted">Quick actions</h2>
             <div className="mt-4 flex flex-col gap-2">
               <Link href="/business/profile" className={primaryButtonClass}>
-                Business profile
+                Business
               </Link>
               {isEvent ? (
                 <Link href="/business/event" className={primaryButtonClass}>

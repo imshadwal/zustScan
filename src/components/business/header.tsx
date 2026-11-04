@@ -9,12 +9,10 @@ import { OwnerIdentity } from "@/components/initials-badge";
 export function BusinessHeader({
   businessName,
   loginId,
-  logoUrl,
   standeeType = "table",
 }: {
   businessName: string | null;
   loginId: string;
-  logoUrl?: string | null;
   standeeType?: "table" | "event";
 }) {
   const pathname = usePathname();
@@ -52,36 +50,29 @@ export function BusinessHeader({
             />
           </Link>
           <div className="hidden min-w-0 text-white sm:block">
-            <OwnerIdentity
-              businessName={businessName}
-              loginId={loginId}
-              logoUrl={logoUrl}
-              size="lg"
-            />
+            <OwnerIdentity businessName={businessName} loginId={loginId} size="lg" showMark={false} />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="min-w-0 text-white sm:hidden">
-            <OwnerIdentity
-              businessName={businessName}
-              loginId={loginId}
-              logoUrl={logoUrl}
-              size="md"
-            />
+            <OwnerIdentity businessName={businessName} loginId={loginId} size="md" showMark={false} />
           </div>
           <nav className="flex items-center gap-2 text-sm font-semibold" aria-label="Business portal">
-            <Link href="/business" className={navLinkClass("/business")}>
+            <Link href="/business" prefetch={false} className={navLinkClass("/business")}>
               Home
             </Link>
-            <Link href="/business/profile" className={navLinkClass("/business/profile")}>
-              Profile
+            <Link href="/business/profile" prefetch={false} className={navLinkClass("/business/profile")}>
+              Business
+            </Link>
+            <Link href="/business/founder" prefetch={false} className={navLinkClass("/business/founder")}>
+              Founder
             </Link>
             {standeeType === "event" ? (
-              <Link href="/business/event" className={navLinkClass("/business/event")}>
+              <Link href="/business/event" prefetch={false} className={navLinkClass("/business/event")}>
                 Event
               </Link>
             ) : (
-              <Link href="/business/services" className={navLinkClass("/business/services")}>
+              <Link href="/business/services" prefetch={false} className={navLinkClass("/business/services")}>
                 Services
               </Link>
             )}
