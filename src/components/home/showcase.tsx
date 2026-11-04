@@ -1,7 +1,7 @@
 import { homeCardClass, homeCardsSection } from "@/components/home/styles";
 
 const checklist = [
-  "Your name, address, contact, and Why trust us on the first screen",
+  "Your name, address, and contact, plus an optional Founder card guests can tap open",
   "One or more services and products",
   "Good, Great, or Exceptional (stars follow automatically)",
   "AI-powered draft they can change — English, Hindi, or Hinglish",
@@ -41,9 +41,18 @@ function GuestFlowMock() {
         <p className="mt-0.5 text-[7px] leading-snug text-white/70">
           MG Road, Varanasi
         </p>
-        <p className="mt-1 text-[7px] leading-snug text-white/80">
-          Why trust us · Real guest reviews — you post on Google yourself.
-        </p>
+      </div>
+      <div className="mx-1.5 mt-1.5 flex items-center gap-1 rounded-md border border-blue/40 bg-mist/60 px-1 py-1">
+        <span className="h-3.5 w-3.5 shrink-0 rounded-full bg-blue" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-[6px] font-semibold tracking-wide text-blue uppercase">
+            Meet the founder
+          </span>
+          <span className="block text-[8px] font-semibold text-ink">Founder</span>
+        </span>
+        <span className="text-[8px] font-semibold text-blue" aria-hidden="true">
+          →
+        </span>
       </div>
 
       <div className="px-2 py-1.5">

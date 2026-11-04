@@ -183,8 +183,8 @@ export const whyDifferent = [
     id: "branding",
     step: "06",
     title: "Your brand on the guest page",
-    body: "Logo upload, six colour themes, and a proper first screen — business name, city, address, contact, and Why trust us before guests pick services.",
-    chips: ["Logo", "6 themes", "Trust line"],
+    body: "Logo upload, six colour themes, and a proper first screen — business name, city, address, and contact. Why trust us opens from an info icon. Turn on a Founder card when you want guests to meet the person behind the business.",
+    chips: ["Logo", "6 themes", "Founder card"],
   },
   {
     id: "category",
@@ -223,6 +223,7 @@ export const businessSets = [
   "Category (Hotels, Cafe, Hospitality, and more — or Others with your own type)",
   "Business name, city, address, phone, and Google review link",
   "Why trust us — AI Generate from your category, then edit (also used for review drafts)",
+  "Optional Founder card — photo, name, role, and contact guests can tap to view",
   "Guest page look: logo upload and one of six colour themes",
 ] as const;
 
@@ -260,7 +261,7 @@ export const eventStandeeHeroHighlights = [
 ] as const;
 export const eventStandeeIncludes = [
   "Customised QR and standee print",
-  "Branded guest page for the function",
+  "Branded guest page for the function, with an optional Founder card",
   "Setup, delivery, and placement guide",
 ] as const;
 export const additionalOutletPrice = "₹2,499";
@@ -269,11 +270,19 @@ export const referralProgramSummary =
   "Refer another business: when their setup goes live, you both get ₹500 off your next invoice or add-on.";
 export const multiLocationSummary = `Second outlet (same brand): ${additionalOutletPrice} add-on — separate QR and guest page, one shared setup call.`;
 
-/** Illustrative funnel numbers for marketing / brochure (not live data). */
+/** Illustrative funnel numbers for the home-page sample dashboard (not live data). */
 export const marketingAnalyticsDemo = {
   pageViews: 2,
   draftsGenerated: 2,
   copyContinueTaps: 2,
+} as const;
+
+/** Live totals for the customer brochure. */
+export const brochureProof = {
+  businesses: "10+",
+  scans: 200,
+  drafts: 100,
+  copyContinue: 80,
 } as const;
 
 export const ownerAnalyticsTitle = "See the funnel in your portal";
@@ -284,7 +293,7 @@ export const roiPricingPoints = [
   {
     title: "One-time setup",
     amount: price,
-    body: "Includes standee delivery, branded guest page (category, trust line, theme), services/products, and AI drafts in English, Hindi, or Hinglish.",
+    body: "Includes standee delivery, branded guest page (category, trust line, theme, optional Founder card), services/products, and AI drafts in English, Hindi, or Hinglish.",
   },
   {
     title: "Compare to ads",
@@ -376,7 +385,7 @@ export const pricingFaq = [
   {
     question: "What do you need from us?",
     answer:
-      "Business name, category, phone, Google review link (g.page), address, a Why trust us line (AI Generate in your portal), and services/products for guests to pick. Logo and guest page theme are optional extras.",
+      "Business name, category, phone, Google review link (g.page), address, a Why trust us line (AI Generate in your portal), and services/products for guests to pick. Logo, guest page theme, and a Founder card are optional extras.",
   },
   {
     question: "Hidden fees or monthly rent?",
@@ -393,7 +402,7 @@ export const planIncludes = [
   "Complete setup and QR standee delivered to your address",
   "One QR for the business",
   "Services and the products under each service",
-  "Branded guest page: city, address, contact, Why trust us, logo, theme",
+  "Branded guest page: city, address, contact, Why trust us, logo, theme, optional Founder card",
   "Category-aware profile with optional Others and generated trust copy",
   "Guest path from scan to stars, language, and AI draft with Copy & Continue",
   "Owner dashboard with scan, draft, and Copy & Continue counts",

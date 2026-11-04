@@ -6,12 +6,25 @@ import { siteOrigin } from "@/lib/login-id";
 export const metadata: Metadata = {
   title: "Product brochure",
   description:
-    "Product PDF: QR guest reviews, Hindi/Hinglish drafts, launch pricing, FAQ, referral, and multi-outlet add-ons.",
+    "Customer brochure: everyday QR standee and event standee, guest review flow, founder card, and live totals.",
 };
 
 export default function BrochurePage() {
   return (
     <div className="min-h-dvh bg-mist-deep print:bg-white">
+      <style>{`
+        @media print {
+          .brochure-section {
+            margin-top: 1rem !important;
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+          }
+          .brochure-keep {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+        }
+      `}</style>
       <BrochurePrintBar />
       <ProductBrochure siteUrl={siteOrigin()} />
     </div>

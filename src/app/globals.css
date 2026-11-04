@@ -92,10 +92,19 @@ a[href] {
     max-width: none !important;
     padding: 0 !important;
     box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .brochure-section {
-    break-inside: avoid;
+    margin-top: 1rem !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .brochure-keep {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .brochure-print-only {
