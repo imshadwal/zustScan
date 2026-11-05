@@ -23,6 +23,8 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
   const [productNames, setProductNames] = useState<Record<string, string>>({});
   const [draftProducts, setDraftProducts] = useState<Record<string, string[]>>({});
   const [addingToServiceId, setAddingToServiceId] = useState<string | null>(null);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
   const productTotal = services.reduce((sum, service) => sum + service.products.length, 0);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -61,6 +63,46 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
       ]);
       success("Service saved.");
       setAddingToServiceId(body.service.id);
+      setPending(false);
+    } catch {
+      const message = "The request could not be sent.";
+      setError(message);
+      toastError(message);
+      setPending(false);
+    }
+  }
+
+  function startEdit(service: Service) {
+    setEditingServiceId(service.id);
+    setEditName(service.name);
+    setError(null);
+  }
+
+  async function saveServiceName(serviceId: string) {
+    const name = editName.trim();
+    if (!name) return;
+    setError(null);
+    setPending(true);
+    try {
+      const response = await fetch(`/api/business/services/${serviceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ name }),
+      });
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        const message = body?.error ?? "The service name could not be saved.";
+        setError(message);
+        toastError(message);
+        setPending(false);
+        return;
+      }
+      setServices((prev) =>
+        prev.map((service) => (service.id === serviceId ? { ...service, name } : service)),
+      );
+      setEditingServiceId(null);
+      success("Service name saved.");
       setPending(false);
     } catch {
       const message = "The request could not be sent.";
@@ -231,21 +273,69 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-semibold leading-snug">{service.name}</h3>
-                    <p className="mt-1 text-xs text-muted">
-                      {service.products.length} product{service.products.length === 1 ? "" : "s"}
-                      {needsProducts ? " · add at least one" : ""}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeService(service.id, service.name)}
-                    disabled={pending}
-                    className="shrink-0 cursor-pointer text-xs font-semibold text-muted hover:text-red-700 disabled:opacity-60"
-                  >
-                    Delete
-                  </button>
+                  {editingServiceId === service.id ? (
+                    <form
+                      className="min-w-0 flex-1"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        void saveServiceName(service.id);
+                      }}
+                    >
+                      <input
+                        value={editName}
+                        onChange={(event) => setEditName(event.target.value)}
+                        className={fieldClass}
+                        disabled={pending}
+                        autoFocus
+                        aria-label="Service name"
+                      />
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={pending || !editName.trim()}
+                          className={`${primaryButtonClass} px-4 py-2`}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingServiceId(null)}
+                          disabled={pending}
+                          className={quietButtonClass}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-semibold leading-snug">{service.name}</h3>
+                        <p className="mt-1 text-xs text-muted">
+                          {service.products.length} product{service.products.length === 1 ? "" : "s"}
+                          {needsProducts ? " · add at least one" : ""}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(service)}
+                          disabled={pending}
+                          className="cursor-pointer text-xs font-semibold text-blue hover:underline disabled:opacity-60"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeService(service.id, service.name)}
+                          disabled={pending}
+                          className="cursor-pointer text-xs font-semibold text-muted hover:text-red-700 disabled:opacity-60"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-4 min-h-[2.5rem] flex-1">
