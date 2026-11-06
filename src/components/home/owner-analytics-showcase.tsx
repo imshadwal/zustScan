@@ -17,11 +17,11 @@ export function OwnerAnalyticsShowcase({ className = "" }: { className?: string 
             <p className="caption-1 text-muted">
               Owner portal
             </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            <h2 className="heading-3 mt-3 text-ink">
               {ownerAnalyticsTitle}
             </h2>
-            <p className="mt-4 text-lg leading-8 text-muted">{ownerAnalyticsBody}</p>
-            <ul className="mt-6 space-y-2 text-sm leading-6 text-muted">
+            <p className="body-1 mt-4 text-muted">{ownerAnalyticsBody}</p>
+            <ul className="body-3 mt-6 space-y-2 text-muted">
               <li className="flex gap-2">
                 <span className="font-semibold text-blue">Scans</span>
                 <span>— guest opened your page from the QR</span>
@@ -35,25 +35,25 @@ export function OwnerAnalyticsShowcase({ className = "" }: { className?: string 
                 <span>— copied draft and opened Google</span>
               </li>
             </ul>
-            <Link href="/pricing" className={`${quietButtonClass} mt-8 inline-flex`}>
+            <Link href="/pricing" className={`${quietButtonClass} mt-4 inline-flex`}>
               See pricing &amp; FAQ
             </Link>
           </div>
 
           <div
-            className={`overflow-hidden ${homeCardClass} !rounded-[28px] !border-slate-300 !p-0`}
+            className={`overflow-hidden ${homeCardClass} !p-0`}
           >
             <div className="bg-navy px-5 py-4 text-white sm:px-6">
-              <p className="text-xs font-semibold tracking-wide text-white/70 uppercase">
+              <p className="caption-5 text-white/80">
                 Business dashboard
               </p>
-              <p className="mt-1 text-lg font-semibold">Guest activity</p>
-              <p className="mt-1 text-xs text-white/60">Sample week — illustrative only</p>
+              <p className="body-1 mt-1 font-semibold">Guest activity</p>
+              <p className="caption-5 mt-1 text-white/80">Sample week — illustrative only</p>
             </div>
-            <div className="bg-gradient-to-b from-navy/95 to-[#0a1a32] px-5 py-6 sm:px-6">
+            <div className="bg-navy px-5 py-6 sm:px-6">
               <GuestAnalyticsStats variant="dark" counts={marketingAnalyticsDemo} />
             </div>
-            <p className="border-t border-slate-200 bg-mist px-5 py-3 text-center text-xs text-muted">
+            <p className="caption-5 border-t border-slate-200 bg-mist px-5 py-3 text-muted">
               Same metrics appear in your portal after setup — no guest PII stored.
             </p>
           </div>

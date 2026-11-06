@@ -20,30 +20,42 @@ export function Pricing() {
         </p>
         <SetupStandeeCallout className="mt-6 max-w-xl" />
         <div
-          className={`mt-12 grid overflow-hidden lg:grid-cols-[0.86fr_1.14fr] ${homeCardClass} !rounded-[32px] !p-0`}
+          className={`mt-12 grid overflow-hidden lg:grid-cols-[0.86fr_1.14fr] ${homeCardClass} !p-0`}
         >
           <div className="border-b border-slate-200 bg-navy p-8 text-white sm:p-10 lg:border-r lg:border-b-0 lg:border-slate-700/80">
             <LaunchOfferNote variant="onBlue" />
-            <p className="mt-6 text-sm font-semibold text-white/80">Zust Scan</p>
-            <p className="mt-2 text-5xl font-semibold tracking-tight text-white sm:text-6xl">
+            <p className="caption-1 mt-6 text-white">Zust Scan</p>
+            <p className="heading-2 mt-2 text-white">
               {price}
             </p>
-            <p className="mt-4 max-w-sm text-base leading-7 text-white/75">
+            <p className="body-2 mt-4 max-w-sm text-white/80">
               For one business. Your details go to WhatsApp so we can set it up
               with you.
             </p>
-            <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <EnquiryButton className="btn-primary">Send an enquiry</EnquiryButton>
-              <Link href={productBrochurePath} className="caption-1 text-white/80 underline">
+              <Link
+                href={productBrochurePath}
+                className="caption-1 inline-flex items-center justify-center rounded-full border-2 border-white/50 px-3 py-2 text-white transition-colors hover:bg-white/10"
+              >
                 Product PDF
               </Link>
             </div>
           </div>
           <ul className="space-y-4 bg-mist/70 p-8 text-ink sm:p-10">
             {planIncludes.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-base leading-7">
-                <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue text-xs text-white">
-                  ✓
+              <li key={item} className="body-2 flex items-start gap-3">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue text-white">
+                  <svg viewBox="0 0 20 20" className="h-3 w-3" aria-hidden="true">
+                    <path
+                      d="M5 10.5l3 3 7-7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
                 <span>{item}</span>
               </li>

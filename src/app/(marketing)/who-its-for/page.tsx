@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Audiences } from "@/components/home/audiences";
 import { PageIntro } from "@/components/home/page-intro";
-import { whoItsForPage } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
+import { whoItsForPage, whoItsForPagePath } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: `${whoItsForPage.eyebrow} | Zust Scan`,
+export const metadata: Metadata = pageMetadata({
+  title: whoItsForPage.eyebrow,
   description: whoItsForPage.description,
-};
+  path: whoItsForPagePath,
+});
 
 export default function WhoItsForPage() {
   return (

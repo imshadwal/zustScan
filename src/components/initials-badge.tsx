@@ -9,7 +9,7 @@ const badgeSizeClass = {
 } as const;
 
 const markSizeClass = {
-  sm: "h-9 w-9 rounded-full",
+  sm: "h-12 w-12 rounded-lg",
   md: "h-14 w-14 rounded-2xl",
   lg: "h-20 w-20 rounded-2xl",
   xl: "h-24 w-24 rounded-3xl sm:h-28 sm:w-28",
@@ -51,7 +51,7 @@ export function BusinessOwnerMark({
       <div
         className={`relative shrink-0 overflow-hidden border border-white/25 bg-white shadow-sm ${markSizeClass[size]}`}
       >
-        <Image src={logoUrl} alt="" fill className="object-contain p-1.5" unoptimized />
+        <Image src={logoUrl} alt="" fill className="object-contain p-1" unoptimized />
       </div>
     );
   }

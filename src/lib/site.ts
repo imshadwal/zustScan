@@ -16,6 +16,11 @@ export const instagramHandle = "@zustscan";
 export const facebookUrl = "https://www.facebook.com/profile.php?id=61595962884025";
 export const facebookLabel = "Facebook";
 
+export const siteName = "Zust Scan";
+export const siteTitle = "Zust Scan | One scan. A better review.";
+export const siteDescription =
+  "Guests scan a QR where the visit happens, pick what they used, and edit a draft in English, Hindi, or Hinglish. They post the review themselves on Google.";
+
 /** Shown on /c/[loginId] when admin has paused the guest QR. */
 export const guestQrPausedCopy = {
   eyebrow: "Account paused",
@@ -36,7 +41,7 @@ export const eventsPagePath = "/events" as const;
 /** Nav / headings for event & function standees (/events). */
 export const forEventsLabel = "For events" as const;
 
-export const otherNavLabel = "Other" as const;
+export const otherNavLabel = "Learn" as const;
 
 export const otherNavLinks = [
   {
@@ -241,12 +246,12 @@ export const trustedPartnersSubline =
 export const listPrice = "₹5,499";
 export const price = "₹3,499";
 export const launchOfferSavings = "₹2,000";
-export const launchOfferHeadline = "Festive Offer — save ₹2,000";
+export const launchOfferHeadline = "Festive Offer · save ₹2,000";
 export const launchOfferEndsLabel = "31 December 2026";
 export const launchOfferFinePrint =
   "Festive price for new businesses while offer slots last in your city. Standard price returns to ₹5,499 after the offer ends.";
 
-export const eventStandeePrice = "₹5,999/-";
+export const eventStandeePrice = "₹5,999";
 export const eventStandeeImagePath = "/images/event-standee-sign.jpg";
 export const eventStandeeCaption =
   "Customised QR on a wooden easel standee — floor display and delivery included";

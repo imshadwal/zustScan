@@ -10,21 +10,21 @@ export function PricingAddons({ className = "" }: { className?: string }) {
   return (
     <div className={`mt-10 grid gap-4 sm:grid-cols-2 ${className}`}>
       <div className={`p-6 sm:p-8 ${homeCardClass}`}>
-        <p className="text-xs font-semibold tracking-[0.14em] text-blue uppercase">Referral</p>
-        <p className="mt-2 text-xl font-semibold text-ink">{referralDiscountAmount} off each</p>
-        <p className="mt-3 text-sm leading-7 text-muted">{referralProgramSummary}</p>
-        <p className="mt-3 text-xs text-muted">
+        <p className="caption-1 text-blue">Referral</p>
+        <p className="subheading-2 mt-2 text-ink">{referralDiscountAmount} off each</p>
+        <p className="body-3 mt-3 text-muted">{referralProgramSummary}</p>
+        <p className="body-3 mt-3 text-muted">
           Mention the business you referred in your enquiry — we apply credit when both setups are
           live.
         </p>
       </div>
       <div className={`p-6 sm:p-8 ${homeCardClass}`}>
-        <p className="text-xs font-semibold tracking-[0.14em] text-blue uppercase">
+        <p className="caption-1 text-blue">
           Multi-location
         </p>
-        <p className="mt-2 text-xl font-semibold text-ink">From {additionalOutletPrice}</p>
-        <p className="mt-3 text-sm leading-7 text-muted">{multiLocationSummary}</p>
-        <p className="mt-3 text-xs text-muted">
+        <p className="subheading-2 mt-2 text-ink">From {additionalOutletPrice}</p>
+        <p className="body-3 mt-3 text-muted">{multiLocationSummary}</p>
+        <p className="body-3 mt-3 text-muted">
           Tell us how many outlets in the enquiry — we quote each add-on clearly on WhatsApp.
         </p>
       </div>

@@ -10,7 +10,7 @@ import { findBusinessOwnerPublic } from "@/lib/business-owners";
 import { displayGuestBusinessTitle } from "@/lib/initials";
 
 export const metadata: Metadata = {
-  title: "Event guest page | Zust Scan",
+  title: "Event guest page",
   robots: { index: false, follow: false },
 };
 

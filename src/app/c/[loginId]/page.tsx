@@ -9,7 +9,7 @@ import { GuestReviewFlow } from "@/components/guest/review-flow";
 import { loadTableGuestPage } from "@/lib/business-owners";
 
 export const metadata: Metadata = {
-  title: "Guest page | Zust Scan",
+  title: "Guest page",
   robots: { index: false, follow: false },
 };
 

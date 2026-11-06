@@ -10,7 +10,7 @@ import { navLinks } from "@/lib/site";
 
 function navLinkClass(active: boolean) {
   return active
-    ? "font-semibold text-blue"
+    ? "font-semibold text-blue underline decoration-2 underline-offset-4"
     : "font-medium text-ink transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-blue";
 }
 
@@ -28,7 +28,7 @@ export function Navbar() {
       >
         Skip to content
       </a>
-      <div className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-full border border-black/5 bg-white/80 px-3 py-2 backdrop-blur-md">
+      <div className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-full border border-black/5 bg-white/80 px-5 py-2 backdrop-blur-md">
         <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Image
             src="/LOGO ZS.png"
@@ -46,14 +46,19 @@ export function Navbar() {
                 ? pathname === "/"
                 : pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (
-              <Link key={link.href} href={link.href} className={`body-2 ${navLinkClass(active)}`}>
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={`body-2 ${navLinkClass(active)}`}
+              >
                 {link.label}
               </Link>
             );
           })}
           <NavOtherMenuDesktop />
         </nav>
-        <EnquiryButton className="btn-primary hidden md:inline-flex">Enquire</EnquiryButton>
+        <EnquiryButton className="btn-primary hidden md:inline-flex">Send an enquiry</EnquiryButton>
         <button
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-full text-ink md:hidden"
@@ -95,6 +100,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={active ? "page" : undefined}
                 className={`menu-link-in heading-3 ${navLinkClass(active)}`}
                 style={{ animationDelay: `${Math.min(index * 60, 400)}ms` }}
                 onClick={() => setOpen(false)}
@@ -115,7 +121,7 @@ export function Navbar() {
               openEnquiry();
             }}
           >
-            Enquire
+            Send an enquiry
           </button>
         </nav>
       ) : null}

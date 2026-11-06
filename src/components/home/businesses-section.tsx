@@ -29,7 +29,7 @@ async function BusinessesList() {
                     ? `/e/${business.loginId}`
                     : `/c/${business.loginId}`
                 }
-                className={`group flex items-center gap-3 p-4 transition-all hover:border-blue/35 hover:shadow-[0_8px_28px_rgba(7,20,40,0.1)] ${homeCardClass}`}
+                className={`group flex items-center gap-4 p-6 ${homeCardClass}`}
               >
                 <BusinessOwnerMark
                   businessName={business.businessName}
@@ -37,8 +37,8 @@ async function BusinessesList() {
                   logoUrl={business.logoUrl}
                   size="sm"
                 />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+                <div className="flex min-w-0 flex-1 flex-col justify-center">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-ink">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#3dde7a]"
                       aria-hidden="true"
@@ -47,12 +47,20 @@ async function BusinessesList() {
                   </p>
                   <p className="mt-0.5 text-xs text-muted">Live · guest page</p>
                 </div>
-                <span
-                  className="shrink-0 text-base font-semibold text-blue transition-transform group-hover:translate-x-0.5"
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6 shrink-0 text-blue"
                   aria-hidden="true"
                 >
-                  →
-                </span>
+                  <path
+                    d="M5 12h12M13 6l6 6-6 6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
                 <span className="sr-only">View {business.businessName} guest page</span>
               </Link>
             </li>

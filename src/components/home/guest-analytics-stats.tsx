@@ -33,10 +33,10 @@ export function GuestAnalyticsStats({
             key={item.label}
             className={`rounded-2xl bg-white/10 px-3 py-3 text-center ${cellClass(index)}`}
           >
-            <dt className="text-[10px] font-semibold tracking-wide text-white/65 uppercase sm:text-[11px]">
+            <dt className="caption-5 text-white/80">
               {item.label}
             </dt>
-            <dd className="mt-1 text-xl font-semibold tabular-nums text-white">{item.value}</dd>
+            <dd className="subheading-2 mt-1 tabular-nums text-white">{item.value}</dd>
           </div>
         ))}
       </dl>
@@ -64,11 +64,11 @@ export function GuestAnalyticsStats({
           key={item.label}
           className={`rounded-2xl border border-slate-200 bg-white px-3 py-3 ${cellClass(index)}`}
         >
-          <dt className="text-[10px] font-semibold tracking-wide text-muted uppercase">
+          <dt className="caption-5 text-muted">
             {item.label}
           </dt>
-          <dd className="mt-1 text-2xl font-semibold tabular-nums text-ink">{item.value}</dd>
-          <dd className="mt-0.5 text-[10px] leading-snug text-muted">{item.hint}</dd>
+          <dd className="subheading-2 mt-1 tabular-nums text-ink">{item.value}</dd>
+          <dd className="caption-5 mt-0.5 text-muted">{item.hint}</dd>
         </div>
       ))}
     </dl>

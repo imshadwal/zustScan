@@ -25,7 +25,7 @@ export function Hero() {
             edit a draft in English, Hindi, or Hinglish. They post it themselves
             on your Google page.
           </p>
-          <div className="mt-8">
+          <div className="mt-4">
             <EnquiryButton className="btn-primary">Send an enquiry</EnquiryButton>
           </div>
           <p className="caption-1 mt-8 text-muted">

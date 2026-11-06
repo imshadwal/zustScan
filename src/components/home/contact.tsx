@@ -19,10 +19,10 @@ export function Contact() {
   return (
     <footer id="contact" className="scroll-mt-28 bg-navy text-white">
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="caption-1 text-white/60">Contact</p>
+        <p className="caption-1 text-white/80">Contact</p>
         <a
           href={emailHref}
-          className="heading-2 mt-4 block break-all text-white transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-blue"
+          className="body-1 mt-4 block break-all font-semibold text-white transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-blue"
         >
           {email}
         </a>
@@ -64,22 +64,24 @@ export function Contact() {
           </a>
         </div>
 
-        <div className="mt-16 grid gap-10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-10 pt-10 sm:grid-cols-2 lg:grid-cols-5">
             <Link href="/" className="inline-flex w-fit">
             <Image
               src="/logo-on-dark.png"
               alt="Zust Scan"
               width={1493}
               height={675}
-              className="h-16 w-auto sm:h-20"
+              className="h-10 w-auto"
             />
           </Link>
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
+            <p className="caption-1 text-white/80">
               Site
             </p>
             <ul className="mt-4 space-y-2 text-sm">
-              {navLinks.map((link) => (
+              {navLinks
+                .filter((link) => link.href !== "/contact")
+                .map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-white/80 hover:text-white">
                     {link.label}
@@ -87,10 +89,12 @@ export function Contact() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
+          </div>
+          <div>
+            <p className="caption-1 text-white/80">
               {otherNavLabel}
             </p>
-            <ul className="mt-3 space-y-2 text-sm">
+            <ul className="mt-4 space-y-2 text-sm">
               {otherNavLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-white/80 hover:text-white">
@@ -101,7 +105,7 @@ export function Contact() {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
+            <p className="caption-1 text-white/80">
               Journey
             </p>
             <ul className="mt-4 space-y-2 text-sm">
@@ -118,7 +122,7 @@ export function Contact() {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
+            <p className="caption-1 text-white/80">
               Contact
             </p>
             <ul className="mt-4 space-y-2 text-sm">
@@ -155,9 +159,6 @@ export function Contact() {
             </ul>
           </div>
         </div>
-        <p className="mt-12 text-sm text-white/40">
-          Scan to share, review to care.
-        </p>
       </div>
     </footer>
   );

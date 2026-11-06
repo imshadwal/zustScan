@@ -7,7 +7,7 @@ export const primaryButtonClass =
   "btn-primary disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
 
 export const quietButtonClass =
-  "inline-flex cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-3 py-2 text-base font-semibold text-ink transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-blue hover:text-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex cursor-pointer items-center justify-center rounded-full border-2 border-slate-300 bg-white px-3 py-2 text-base font-semibold text-ink transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-blue hover:bg-mist hover:text-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-60";
 
 export const dangerButtonClass =
   "inline-flex cursor-pointer items-center justify-center rounded-full border border-red-200 bg-white px-3 py-2 text-base font-semibold text-red-800 transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-red-400 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60";

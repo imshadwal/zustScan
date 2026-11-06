@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { siteOrigin } from "@/lib/login-id";
+import { siteDescription, siteName, siteTitle } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +16,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zust Scan | One scan. A better review.",
-  description:
-    "Zust Scan turns a QR code into a review guests can edit and post themselves. Scan to share, review to care.",
+  metadataBase: new URL(siteOrigin()),
+  title: {
+    default: siteTitle,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  applicationName: siteName,
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    siteName,
+    title: siteTitle,
+    description: siteDescription,
+    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: siteName }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    images: ["/icon-512.png"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

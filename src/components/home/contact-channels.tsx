@@ -111,12 +111,12 @@ export function ContactChannels() {
                 {channel.icon}
               </svg>
             </span>
-            <p className="mt-5 text-xs font-semibold tracking-[0.14em] text-blue uppercase">
+            <p className="caption-1 mt-5 text-blue">
               {channel.label}
             </p>
-            <p className="mt-2 text-lg font-semibold text-ink break-all">{channel.value}</p>
-            <p className="mt-2 flex-1 text-sm leading-6 text-muted">{channel.hint}</p>
-            <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-blue">
+            <p className="body-1 mt-2 font-semibold text-ink break-all">{channel.value}</p>
+            <p className="body-3 mt-2 flex-1 text-muted">{channel.hint}</p>
+            <span className="caption-1 mt-4 inline-flex items-center gap-1.5 text-blue">
               {channel.key === "email"
                 ? "Send email"
                 : channel.key === "phone"

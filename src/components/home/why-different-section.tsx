@@ -18,59 +18,46 @@ const extraItems = whyDifferent.filter(
 function CardShell({
   children,
   className = "",
-  dark = false,
 }: {
   children: React.ReactNode;
   className?: string;
-  dark?: boolean;
 }) {
   return (
-    <article
-      className={`relative flex h-full min-h-[14rem] flex-col overflow-hidden p-8 sm:min-h-[15rem] sm:p-9 lg:min-h-[16rem] lg:p-10 ${
-        dark
-          ? "rounded-[32px] border border-white/10 bg-navy text-white shadow-[0_24px_72px_rgba(7,20,40,0.4)]"
-          : `${homeCardClass} !rounded-[32px]`
-      } ${className}`}
-    >
+    <article className={`flex h-full flex-col p-6 sm:p-8 ${homeCardClass} ${className}`}>
       {children}
     </article>
   );
 }
 
 function StepBadge({ step }: { step: string }) {
+  return <span className="caption-1 text-blue">{step}</span>;
+}
+
+function StaticChip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-sm font-bold tracking-wider text-blue lg:text-base">{step}</span>
+    <span className="caption-1 rounded-full border border-slate-200 bg-mist px-3 py-1 text-ink">
+      {children}
+    </span>
   );
 }
 
 function ChipsCard({
   item,
-  primaryChip = false,
   className = "",
 }: {
   item: WhyItem & { chips: readonly string[] };
-  primaryChip?: boolean;
   className?: string;
 }) {
   return (
     <CardShell className={className}>
       <StepBadge step={item.step} />
-      <h3 className="mt-5 text-2xl font-semibold text-ink sm:text-3xl lg:text-[2rem] lg:leading-tight">
+      <h2 className="heading-3 mt-5 text-ink">
         {item.title}
-      </h3>
-      <p className="mt-3 text-base leading-7 text-muted sm:text-lg sm:leading-8">{item.body}</p>
-      <div className="mt-auto flex flex-wrap gap-3 pt-10">
-        {item.chips.map((chip, index) => (
-          <span
-            key={chip}
-            className={`rounded-full px-4 py-2 text-sm font-semibold sm:text-base ${
-              primaryChip && index === 0
-                ? "bg-blue text-white shadow-sm"
-                : "border border-slate-200 bg-white text-ink"
-            }`}
-          >
-            {chip}
-          </span>
+      </h2>
+      <p className="body-1 mt-3 text-muted">{item.body}</p>
+      <div className="mt-6 flex flex-wrap gap-2">
+        {item.chips.map((chip) => (
+          <StaticChip key={chip}>{chip}</StaticChip>
         ))}
       </div>
     </CardShell>
@@ -80,31 +67,22 @@ function ChipsCard({
 function LanguagesCard() {
   const item = languagesItem;
   return (
-    <CardShell className="lg:min-h-[18rem]">
+    <CardShell>
       <div className="flex items-start justify-between gap-4">
         <StepBadge step={item.step} />
-        <span className="rounded-full bg-blue/10 px-3 py-1.5 text-xs font-semibold tracking-wide text-blue uppercase">
+        <span className="caption-1 rounded-full bg-blue/10 px-3 py-1 text-blue">
           Multilingual
         </span>
       </div>
-      <h3 className="mt-5 text-2xl font-semibold text-ink sm:text-3xl lg:text-[2rem] lg:leading-tight">
+      <h2 className="heading-3 mt-5 text-ink">
         {item.title}
-      </h3>
-      <p className="mt-3 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
+      </h2>
+      <p className="body-1 mt-3 max-w-xl text-muted">
         {item.body}
       </p>
-      <div className="mt-auto flex flex-wrap gap-3 pt-10">
-        {item.chips.map((chip, index) => (
-          <span
-            key={chip}
-            className={`rounded-full px-5 py-2.5 text-base font-semibold ${
-              index === 0
-                ? "bg-blue text-white shadow-sm"
-                : "border border-slate-200 bg-mist text-ink"
-            }`}
-          >
-            {chip}
-          </span>
+      <div className="mt-6 flex flex-wrap gap-2">
+        {item.chips.map((chip) => (
+          <StaticChip key={chip}>{chip}</StaticChip>
         ))}
       </div>
     </CardShell>
@@ -114,55 +92,42 @@ function LanguagesCard() {
 function AnalyticsCard() {
   const item = analyticsItem;
   return (
-    <CardShell dark className="min-h-[22rem] lg:min-h-full">
-      <div
-        className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-blue/25 blur-3xl"
-        aria-hidden="true"
-      />
-      <div className="relative flex flex-1 flex-col">
-        <StepBadge step={item.step} />
-        <h3 className="mt-5 text-2xl font-semibold sm:text-3xl lg:text-[2rem] lg:leading-tight">
-          {item.title}
-        </h3>
-        <p className="mt-3 text-base leading-7 text-white/65 sm:text-lg sm:leading-8">
-          {item.body}
+    <CardShell>
+      <StepBadge step={item.step} />
+      <h2 className="heading-3 mt-5 text-ink">
+        {item.title}
+      </h2>
+      <p className="body-1 mt-3 text-muted">
+        {item.body}
+      </p>
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-mist p-5">
+        <p className="caption-1 text-muted">
+          Owner portal · sample
         </p>
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm sm:p-6">
-          <p className="text-xs font-semibold tracking-[0.14em] text-white/50 uppercase">
-            Owner portal · sample
-          </p>
-          <div className="mt-4 [&_dd]:text-3xl [&_div]:px-4 [&_div]:py-5 [&_dt]:text-xs">
-            <GuestAnalyticsStats variant="dark" counts={marketingAnalyticsDemo} />
-          </div>
+        <div className="mt-4">
+          <GuestAnalyticsStats counts={marketingAnalyticsDemo} />
         </div>
-        {"chips" in item ? (
-          <ul className="mt-5 grid grid-cols-2 gap-2.5">
-            {item.chips.map((chip, index) => (
-              <li
-                key={chip}
-                className={`rounded-md border border-blue/40 bg-blue/15 px-2.5 py-1.5 text-xs font-semibold tracking-wide text-blue uppercase ${
-                  index === item.chips.length - 1 && item.chips.length % 2 === 1 ? "col-span-2" : ""
-                }`}
-              >
-                {chip}
-              </li>
-            ))}
-          </ul>
-        ) : null}
       </div>
+      {"chips" in item ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {item.chips.map((chip) => (
+            <StaticChip key={chip}>{chip}</StaticChip>
+          ))}
+        </div>
+      ) : null}
     </CardShell>
   );
 }
 
 function HighlightCard({ item }: { item: WhyItem & { highlight: string } }) {
   return (
-    <CardShell className="lg:min-h-[14rem]">
+    <CardShell>
       <StepBadge step={item.step} />
-      <p className="mt-4 text-6xl font-semibold tracking-tight text-blue sm:text-7xl lg:text-8xl">
+      <p className="heading-1 mt-4 text-blue">
         {item.highlight}
       </p>
-      <h3 className="mt-3 text-xl font-semibold text-ink sm:text-2xl">{item.title}</h3>
-      <p className="mt-3 text-base leading-7 text-muted sm:text-lg">{item.body}</p>
+      <h2 className="heading-3 mt-3 text-ink">{item.title}</h2>
+      <p className="body-1 mt-3 text-muted">{item.body}</p>
     </CardShell>
   );
 }
@@ -170,15 +135,15 @@ function HighlightCard({ item }: { item: WhyItem & { highlight: string } }) {
 function NoAppCard() {
   const item = noAppItem;
   return (
-    <CardShell className="lg:min-h-[14rem]">
+    <CardShell>
       <StepBadge step={item.step} />
-      <p className="mt-4 text-6xl font-semibold tracking-tight text-ink sm:text-7xl lg:text-8xl">
+      <p className="heading-1 mt-4 text-ink">
         {item.highlight}
       </p>
-      <h3 className="mt-3 text-xl font-semibold text-ink sm:text-2xl">{item.title}</h3>
-      <p className="mt-3 text-base leading-7 text-muted sm:text-lg">{item.body}</p>
-      <p className="mt-auto pt-8 text-sm font-semibold tracking-wide text-blue uppercase">
-        Browser · QR · Done
+      <h2 className="heading-3 mt-3 text-ink">{item.title}</h2>
+      <p className="body-1 mt-3 text-muted">{item.body}</p>
+      <p className="caption-1 mt-6 text-blue">
+        Browser · QR · done
       </p>
     </CardShell>
   );
@@ -192,8 +157,8 @@ export function WhyDifferentSection({ showPageIntro = false }: { showPageIntro?:
         aria-hidden="true"
       />
       <div
-        className={`relative mx-auto max-w-7xl px-5 sm:px-8 xl:px-10 ${
-          showPageIntro ? "pb-24 pt-8 lg:pb-32 lg:pt-10" : "py-24 lg:py-32"
+        className={`relative mx-auto max-w-6xl px-5 sm:px-6 ${
+          showPageIntro ? "pt-8 pb-10 lg:pt-10 lg:pb-12" : "py-16 lg:py-20"
         }`}
       >
         {!showPageIntro ? (
@@ -214,31 +179,28 @@ export function WhyDifferentSection({ showPageIntro = false }: { showPageIntro?:
         ) : null}
 
         <ul
-          className={`grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-12 lg:grid-rows-[auto_auto_auto_auto] lg:gap-7 ${
-            showPageIntro ? "mt-0" : "mt-14 lg:mt-20"
+          className={`grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 ${
+            showPageIntro ? "mt-0" : "mt-10"
           }`}
         >
-          <li className="sm:col-span-2 lg:col-span-8 lg:row-start-1">
+          <li className="sm:col-span-2">
             <LanguagesCard />
           </li>
-          <li className="sm:col-span-2 lg:col-span-8 lg:row-start-2">
-            <ChipsCard item={voiceItem} className="lg:min-h-[18rem]" />
-          </li>
-          <li className="sm:col-span-2 lg:col-span-4 lg:row-span-3 lg:col-start-9 lg:row-start-1">
+          <li>
             <AnalyticsCard />
           </li>
-          <li className="lg:col-span-4 lg:row-start-3">
+          <li className="sm:col-span-2">
+            <ChipsCard item={voiceItem} />
+          </li>
+          <li>
             <HighlightCard item={speedItem} />
           </li>
-          <li className="lg:col-span-4 lg:col-start-5 lg:row-start-3">
+          <li>
             <NoAppCard />
           </li>
           {extraItems.map((item) => (
-            <li
-              key={item.id}
-              className="sm:col-span-1 lg:col-span-4 lg:row-start-4"
-            >
-              <ChipsCard item={item} primaryChip className="lg:min-h-[16rem]" />
+            <li key={item.id}>
+              <ChipsCard item={item} />
             </li>
           ))}
         </ul>

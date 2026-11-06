@@ -1,3 +1,4 @@
+import { homeCardClass } from "@/components/home/styles";
 import { setupStandeeLine, setupStandeeTitle } from "@/lib/site";
 
 export function SetupStandeeCallout({
@@ -42,14 +43,11 @@ export function SetupStandeeCallout({
   }
 
   return (
-    <div
-      className={`rounded-2xl border-2 border-blue/30 bg-gradient-to-br from-blue/[0.08] to-white px-4 py-3.5 sm:px-5 sm:py-4 ${className}`}
-      role="note"
-    >
-      <p className="text-xs font-semibold tracking-[0.12em] text-blue uppercase">
+    <div className={`p-6 sm:p-8 ${homeCardClass} ${className}`} role="note">
+      <p className="caption-1 text-blue">
         {setupStandeeTitle}
       </p>
-      <p className="mt-1.5 text-sm leading-6 text-ink">{setupStandeeLine}</p>
+      <p className="body-3 mt-1.5 text-ink">{setupStandeeLine}</p>
     </div>
   );
 }

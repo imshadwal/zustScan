@@ -30,8 +30,8 @@ export function TaglineReveal({ lines }: { lines: string[] }) {
 
   return (
     <section ref={rootRef} className="bg-mist-deep">
-      <div className="mx-auto max-w-[680px] px-4 py-24 sm:py-32">
-        <p className="heading-2 text-ink">
+      <div className="mx-auto max-w-6xl px-4 py-8 text-left">
+        <p className="heading-3 max-w-[680px] text-left text-ink">
           {lines.map((line) => (
             <span key={line} className="block">
               {line.split(" ").map((word) => {
@@ -41,7 +41,7 @@ export function TaglineReveal({ lines }: { lines: string[] }) {
                   <span
                     key={`${line}-${word}-${index}`}
                     className={`mr-[0.3em] inline-block transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      shown ? "text-ink" : "text-ink/25"
+                      shown ? "text-ink" : "text-muted"
                     }`}
                     style={{ transitionDelay: shown ? `${index * 80}ms` : "0ms" }}
                   >

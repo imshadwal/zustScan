@@ -26,7 +26,7 @@ function MockPanel({
   );
 }
 
-const MOCK_WIDTH = "w-[168px]";
+const MOCK_WIDTH = "w-full";
 
 function GuestFlowMock() {
   return (
@@ -34,23 +34,17 @@ function GuestFlowMock() {
       className={`${MOCK_WIDTH} mx-auto overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm`}
     >
       <div className="bg-navy px-2.5 py-2.5 text-white">
-        <p className="text-[7px] font-semibold tracking-[0.12em] text-blue-200 uppercase">
-          Your visit
-        </p>
-        <p className="mt-0.5 text-[11px] font-semibold leading-tight">Lakeview Hotel</p>
-        <p className="mt-0.5 text-[7px] leading-snug text-white/70">
-          MG Road, Varanasi
-        </p>
+        <p className="text-xs font-semibold text-white/80">Your visit</p>
+        <p className="mt-1 text-sm font-semibold leading-tight">Lakeview Hotel</p>
+        <p className="mt-1 text-xs leading-snug text-white/80">MG Road, Varanasi</p>
       </div>
       <div className="mx-1.5 mt-1.5 flex items-center gap-1 rounded-md border border-blue/40 bg-mist/60 px-1 py-1">
         <span className="h-3.5 w-3.5 shrink-0 rounded-full bg-blue" aria-hidden="true" />
         <span className="min-w-0 flex-1">
-          <span className="block text-[6px] font-semibold tracking-wide text-blue uppercase">
-            Meet the founder
-          </span>
-          <span className="block text-[8px] font-semibold text-ink">Founder</span>
+          <span className="block text-xs font-semibold text-blue">Meet the founder</span>
+          <span className="block text-xs font-semibold text-ink">Founder</span>
         </span>
-        <span className="text-[8px] font-semibold text-blue" aria-hidden="true">
+        <span className="text-xs font-semibold text-blue" aria-hidden="true">
           →
         </span>
       </div>
@@ -68,7 +62,7 @@ function GuestFlowMock() {
                   } ${current ? "ring-1 ring-blue/25" : ""}`}
                 />
                 <p
-                  className={`mt-1 truncate text-center text-[7px] font-semibold uppercase tracking-wide ${
+                  className={`mt-1 truncate text-center text-xs font-semibold ${
                     current ? "text-blue" : "text-muted"
                   }`}
                 >
@@ -82,39 +76,39 @@ function GuestFlowMock() {
 
       <div className="space-y-1.5 px-2 pb-2">
         <MockPanel>
-          <p className="text-[10px] font-semibold text-ink">Choose services</p>
-          <p className="text-[8px] text-muted">Pick one or more</p>
+          <p className="text-sm font-semibold text-ink">Choose services</p>
+          <p className="text-xs text-muted">Pick one or more</p>
           <ul className="mt-1.5 space-y-1">
-            <li className="rounded-md bg-blue px-1.5 py-1 text-[9px] font-semibold text-white shadow-sm">
+            <li className="rounded-md bg-blue px-1.5 py-1 text-xs font-semibold text-white">
               Food
             </li>
-            <li className="rounded-md border border-slate-200 bg-white px-1.5 py-1 text-[9px] font-semibold text-ink">
+            <li className="rounded-md border border-slate-200 bg-white px-1.5 py-1 text-xs font-semibold text-ink">
               Room
             </li>
           </ul>
         </MockPanel>
 
         <MockPanel>
-          <p className="text-[10px] font-semibold text-ink">Choose products</p>
-          <p className="text-[8px] text-muted">Food · pick one or more</p>
+          <p className="text-sm font-semibold text-ink">Choose products</p>
+          <p className="text-xs text-muted">Food · pick one or more</p>
           <ul className="mt-1.5 space-y-1">
-            <li className="rounded-md bg-white px-1.5 py-1 text-[9px] font-medium text-blue ring-2 ring-blue">
+            <li className="rounded-md bg-white px-1.5 py-1 text-xs font-medium text-blue ring-2 ring-blue">
               Biryani
             </li>
-            <li className="rounded-md border border-slate-200/80 bg-white px-1.5 py-1 text-[9px] font-medium text-ink">
+            <li className="rounded-md border border-slate-200/80 bg-white px-1.5 py-1 text-xs font-medium text-ink">
               Paneer tikka
             </li>
           </ul>
         </MockPanel>
 
         <MockPanel>
-          <p className="text-[10px] font-semibold text-ink">How was it?</p>
-          <p className="text-[8px] text-muted">Biryani · tap Good, Great, or Exceptional</p>
+          <p className="text-sm font-semibold text-ink">How was it?</p>
+          <p className="text-xs text-muted">Biryani · tap Good, Great, or Exceptional</p>
           <div className="mt-2 grid grid-cols-3 gap-1">
             {(["Good", "Great", "Exceptional"] as const).map((label) => (
               <span
                 key={label}
-                className={`rounded-md py-1 text-center text-[8px] font-semibold ${
+                className={`rounded-md py-1 text-center text-xs font-semibold ${
                   label === "Great"
                     ? "bg-blue text-white"
                     : "border border-slate-200 bg-white text-ink"
@@ -125,13 +119,13 @@ function GuestFlowMock() {
             ))}
           </div>
           <div className="mt-1.5 rounded-md border border-slate-200 bg-white px-1.5 py-1">
-            <p className="text-[7px] font-semibold text-muted">Star rating</p>
+            <p className="text-xs font-semibold text-muted">Star rating</p>
             <div className="mt-0.5 flex justify-center gap-px" aria-hidden="true">
               {[1, 2, 3, 4, 5].map((value) => (
                 <span
                   key={value}
-                  className={`flex h-5 w-5 items-center justify-center rounded text-[9px] ${
-                    value <= 4 ? "bg-[#fff8e6] text-[#e5a100]" : "bg-mist text-slate-300"
+                  className={`flex h-5 w-5 items-center justify-center rounded text-xs ${
+                    value <= 4 ? "bg-mist text-blue" : "bg-mist text-slate-300"
                   }`}
                 >
                   ★
@@ -139,7 +133,7 @@ function GuestFlowMock() {
               ))}
             </div>
           </div>
-          <p className="mt-2 text-[10px] font-semibold text-ink">Review language</p>
+          <p className="mt-2 text-sm font-semibold text-ink">Review language</p>
           <div className="mt-1 grid grid-cols-3 gap-1">
             {(
               [
@@ -150,7 +144,7 @@ function GuestFlowMock() {
             ).map(({ label, selected }) => (
               <span
                 key={label}
-                className={`rounded-md py-1 text-center text-[7px] font-semibold ${
+                className={`rounded-md py-1 text-center text-xs font-semibold ${
                   selected
                     ? "bg-blue text-white"
                     : "border border-slate-200 bg-white text-ink"
@@ -162,7 +156,7 @@ function GuestFlowMock() {
           </div>
         </MockPanel>
 
-        <div className="rounded-full bg-blue py-1.5 text-center text-[9px] font-semibold text-white shadow-[0_4px_12px_rgba(0,96,240,0.3)]">
+        <div className="rounded-full bg-blue py-1.5 text-center text-xs font-semibold text-white">
           Get review draft
         </div>
       </div>
@@ -173,25 +167,25 @@ function GuestFlowMock() {
 function DraftMock() {
   return (
     <MockPanel
-      className={`${MOCK_WIDTH} border-blue/20 bg-gradient-to-b from-blue/[0.06] to-white p-2.5`}
+      className={`${MOCK_WIDTH} border-blue/20 bg-white p-2.5`}
     >
-      <p className="text-[9px] font-semibold text-ink">Your draft</p>
-      <p className="text-[7px] text-muted">Edit before you post on Google.</p>
-      <p className="mt-1.5 text-center text-xs tracking-wide text-[#e5a100]" aria-hidden="true">
+      <p className="text-sm font-semibold text-ink">Your draft</p>
+      <p className="text-xs text-muted">Edit before you post on Google.</p>
+      <p className="mt-1.5 text-center text-sm tracking-wide text-blue" aria-hidden="true">
         ★★★★<span className="text-slate-200">★</span>
       </p>
-      <div className="mt-1.5 rounded-lg border-2 border-slate-300 bg-white px-2 py-1.5 text-[9px] leading-4 text-ink">
+      <div className="mt-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs leading-4 text-ink">
         The biryani arrived hot and well seasoned. Solid experience — 4 stars.
       </div>
       <div className="mt-2 space-y-1">
-        <div className="rounded-full bg-blue py-1.5 text-center text-[9px] font-semibold text-white shadow-[0_4px_12px_rgba(0,96,240,0.3)]">
+        <div className="rounded-full bg-blue py-1.5 text-center text-xs font-semibold text-white">
           Copy & Continue
         </div>
-        <div className="rounded-full border border-slate-200 bg-white py-1.5 text-center text-[8px] font-semibold text-ink">
+        <div className="rounded-full border border-slate-200 bg-white py-1.5 text-center text-xs font-semibold text-ink">
           Regenerate draft
         </div>
       </div>
-      <p className="mt-2 text-center text-[8px] leading-4 text-muted">
+      <p className="mt-2 text-center text-xs leading-4 text-muted">
         Paste on Google, match the stars, and tap Post yourself.
       </p>
     </MockPanel>
@@ -248,24 +242,22 @@ export function Showcase() {
               →
             </p>
             <div className="relative z-[1] shrink-0">
-              <div className="flex w-[12.75rem] flex-col rounded-[1.6rem] border-[8px] border-[#101828] bg-[#101828] shadow-[0_16px_40px_rgba(16,24,40,0.2)]">
-                <div className="overflow-hidden rounded-[1rem] bg-mist-deep px-0.5 pt-0.5 pb-1">
-                  <div className="flex items-center justify-between px-2 pt-1 pb-0.5 text-[7px] font-medium text-muted">
+              <div className="flex w-64 flex-col rounded-3xl border-8 border-ink bg-ink">
+                <div className="overflow-hidden rounded-2xl bg-mist-deep px-0.5 pt-0.5 pb-1">
+                  <div className="flex items-center justify-between px-2 pt-1 pb-0.5 text-xs font-medium text-muted">
                     <span>9:41</span>
                     <span className="h-2.5 w-10 rounded-full bg-black/80" />
                     <span>5G</span>
                   </div>
-                  <div className="max-h-[22.05rem] overflow-hidden">
+                  <div className="max-h-96 overflow-hidden">
                     <GuestFlowMock />
                   </div>
                 </div>
               </div>
-              <p className="mt-3 text-center text-xs font-semibold tracking-wide text-muted uppercase">
-                Guest review flow
-              </p>
+              <p className="caption-1 mt-3 text-center text-muted">Guest review flow</p>
             </div>
 
-            <div className="relative z-[1] w-[12.75rem] shrink-0">
+            <div className="relative z-[1] w-64 shrink-0">
               <p className="caption-1 text-muted">
                 AI-powered draft
               </p>

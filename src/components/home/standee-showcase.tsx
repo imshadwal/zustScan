@@ -41,7 +41,7 @@ export function StandeeShowcase({
         priority={!compact}
       />
       {caption !== "" ? (
-        <figcaption className="border-t border-slate-200 bg-white px-2.5 py-2 text-center text-[11px] leading-4 text-muted sm:text-xs sm:leading-5">
+        <figcaption className="caption-5 border-t border-slate-200 bg-white px-3 py-2 text-center text-muted">
           {caption ?? defaultCaption}
         </figcaption>
       ) : null}

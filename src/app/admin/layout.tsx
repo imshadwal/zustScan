@@ -3,7 +3,7 @@ import { PortalProviders } from "@/components/portal-providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Admin | Zust Scan",
+    default: "Admin",
     template: "%s | Zust Scan",
   },
   robots: { index: false, follow: false },

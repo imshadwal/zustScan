@@ -84,11 +84,11 @@ export function NavOtherMenuDesktop() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`block rounded-xl px-4 py-3 transition-colors hover:bg-mist ${active ? "bg-mist/80" : ""}`}
+                  className={`block rounded-2xl px-4 py-3 transition-colors hover:bg-mist ${active ? "bg-mist/80" : ""}`}
                   onClick={() => setOpen(false)}
                 >
                   <span className={`block text-sm ${linkClass(active)}`}>{link.label}</span>
-                  <span className="mt-1 block text-xs leading-5 text-muted">{link.description}</span>
+                  <span className="body-3 mt-1 block text-muted">{link.description}</span>
                 </Link>
               </li>
             );
@@ -114,7 +114,7 @@ export function NavOtherMenuMobile({ onNavigate }: { onNavigate: () => void }) {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`block rounded-xl px-4 py-3 text-lg hover:bg-white ${linkClass(active)}`}
+                className={`body-1 block rounded-2xl px-4 py-3 hover:bg-white ${linkClass(active)}`}
                 onClick={onNavigate}
               >
                 {link.label}
