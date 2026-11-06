@@ -81,7 +81,7 @@ export function EventSetupManager({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
+      <section className="rounded-2xl border border-black/5 bg-white p-5 text-ink sm:p-6">
         <h2 className="text-sm font-semibold text-muted">Event details</h2>
         <p className="mt-1 text-sm text-muted">
           Optional — leave blank if you do not want a name or date on the guest page. Venue name stays
@@ -125,7 +125,7 @@ export function EventSetupManager({
         </div>
       </section>
 
-      <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
+      <section className="rounded-2xl border border-black/5 bg-white p-5 text-ink sm:p-6">
         <h2 className="text-sm font-semibold text-muted">Guest areas</h2>
         <p className="mt-1 text-sm text-muted">
           Add what guests can tap on the standee QR (e.g. Food, Hall, Décor). Start empty — nothing

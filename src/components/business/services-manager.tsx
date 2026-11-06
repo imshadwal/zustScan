@@ -213,21 +213,21 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2 text-sm">
-        <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-white/90">
+        <span className="caption-1 rounded-full border border-black/10 bg-white px-3 py-1 text-ink">
           {services.length} service{services.length === 1 ? "" : "s"}
         </span>
-        <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-white/90">
+        <span className="caption-1 rounded-full border border-black/10 bg-white px-3 py-1 text-ink">
           {productTotal} product{productTotal === 1 ? "" : "s"}
         </span>
       </div>
 
       {error ? (
-        <p className="text-sm text-red-200" role="alert">
+        <p className="text-sm text-red-700" role="alert">
           {error}
         </p>
       ) : null}
 
-      <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
+      <section className="rounded-2xl border border-black/5 bg-white p-5 text-ink sm:p-6">
         <h2 className="text-sm font-semibold text-muted">New service</h2>
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
@@ -255,7 +255,7 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
       </section>
 
       {services.length === 0 ? (
-        <p className="text-center text-sm text-white/70">
+        <p className="body-2 text-center text-muted">
           Add a service above. Each one becomes its own card where you add products.
         </p>
       ) : (
@@ -268,7 +268,7 @@ export function ServicesManager({ initialServices }: { initialServices: Service[
             return (
               <li
                 key={service.id}
-                className={`flex flex-col rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6 ${
+                className={`flex flex-col rounded-2xl border border-black/5 bg-white p-5 text-ink sm:p-6 ${
                   needsProducts ? "ring-2 ring-amber-300/80" : ""
                 }`}
               >

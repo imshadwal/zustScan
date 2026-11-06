@@ -15,7 +15,7 @@ export default function WhoItsForPage() {
         eyebrow={whoItsForPage.eyebrow}
         title={whoItsForPage.title}
         description={whoItsForPage.description}
-        className="bg-white border-b border-slate-200"
+        className="bg-mist-deep"
       />
       <Audiences showHeading={false} />
     </main>

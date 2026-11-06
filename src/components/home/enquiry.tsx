@@ -96,7 +96,7 @@ export function EnquiryProvider({ children }: { children: ReactNode }) {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+                <p className="caption-1 text-muted">
                   Enquiry
                 </p>
                 <h2 id={titleId} className="mt-2 text-2xl font-semibold text-ink">

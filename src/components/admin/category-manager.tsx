@@ -128,7 +128,7 @@ export function CategoryManager({
         </p>
       ) : null}
 
-      <p className="text-sm leading-6 text-white/70">
+      <p className="body-2 text-muted">
         Categories appear in every business owner&apos;s profile dropdown. &quot;Why trust us&quot;
         is generated with AI on the profile page — not from templates here.
       </p>
@@ -137,7 +137,7 @@ export function CategoryManager({
         {categories.map((row) => (
           <li
             key={row.id}
-            className="rounded-3xl bg-white p-5 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)] sm:p-6"
+            className="rounded-2xl border border-black/5 bg-white p-5 text-ink sm:p-6"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-semibold tracking-wide text-muted uppercase">
@@ -194,10 +194,10 @@ export function CategoryManager({
 
       <form
         onSubmit={createCategory}
-        className="rounded-3xl border border-white/10 bg-white/5 p-6 text-white sm:p-8"
+        className="rounded-2xl border border-black/5 bg-white p-6 text-ink sm:p-8"
       >
         <h2 className="text-lg font-semibold">Add category</h2>
-        <p className="mt-2 text-sm text-white/65">
+        <p className="body-2 mt-2 text-muted">
           A URL-safe id is created from the label (e.g. &quot;Fitness Studio&quot; →
           fitness-studio).
         </p>

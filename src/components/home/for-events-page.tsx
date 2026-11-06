@@ -26,26 +26,19 @@ function CheckIcon() {
 export function ForEventsPage() {
   return (
     <>
-      <section className="relative overflow-hidden bg-navy text-white">
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-          <div className="absolute -top-20 right-[-5%] h-96 w-96 rounded-full bg-blue/25 blur-3xl" />
-          <div className="absolute bottom-[-10%] left-[-5%] h-72 w-72 rounded-full bg-blue/10 blur-3xl" />
-        </div>
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pt-32 pb-16 sm:px-6 sm:pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:pt-40 lg:pb-20">
+      <section className="bg-mist-deep text-ink">
+        <div className="mx-auto grid max-w-6xl items-center gap-16 px-4 pt-32 pb-24 sm:pt-40 lg:grid-cols-[1.05fr_0.95fr] lg:pt-48">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold tracking-[0.14em] text-white/85 uppercase">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue" />
-              {otherProductsPage.eyebrow}
-            </p>
-            <h1 className="mt-6 max-w-xl text-3xl leading-[1.08] font-semibold tracking-tight sm:text-5xl">
-              {otherProductsPage.title}
+            <p className="caption-1 text-muted">{otherProductsPage.eyebrow}</p>
+            <h1 className="heading-1 mt-4 max-w-[680px]">
+              <span className="hero-heading">{otherProductsPage.title}</span>
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg sm:leading-8">
+            <p className="body-1 mt-6 max-w-[680px] text-muted">
               {otherProductsPage.description}
             </p>
             <ul className="mt-6 space-y-3">
               {eventStandeeHeroHighlights.map((line) => (
-                <li key={line} className="flex gap-3 text-sm leading-6 text-white/80 sm:text-base">
+                <li key={line} className="body-2 flex gap-3 text-ink">
                   <CheckIcon />
                   {line}
                 </li>
@@ -53,46 +46,32 @@ export function ForEventsPage() {
             </ul>
             <div className="mt-8 flex flex-wrap items-end gap-4">
               <div>
-                <p className="text-xs font-semibold tracking-wide text-white/50 uppercase">
-                  Event standee
-                </p>
-                <p className="mt-1 text-4xl font-semibold tracking-tight sm:text-5xl">
-                  {eventStandeePrice}
-                </p>
+                <p className="caption-1 text-muted">Event standee</p>
+                <p className="heading-2 mt-2 text-ink">{eventStandeePrice}</p>
               </div>
               {"badge" in product && product.badge ? (
-                <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white/90">
+                <span className="caption-1 rounded-full bg-mist px-3 py-2 text-ink">
                   {product.badge}
                 </span>
               ) : null}
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <EnquiryButton className="inline-flex h-12 items-center justify-center rounded-full bg-blue px-6 text-sm font-semibold text-white transition-colors hover:bg-blue-deep">
-                Send an enquiry
-              </EnquiryButton>
-              <Link
-                href={eventStandeeWhatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-              >
-                WhatsApp
-              </Link>
+              <EnquiryButton className="btn-primary">Send an enquiry</EnquiryButton>
             </div>
           </div>
           <div className="mx-auto w-full max-w-[320px] lg:max-w-none lg:justify-self-end">
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:p-5">
+            <div className="rounded-2xl bg-mist p-4">
               <StandeeShowcase embedded className="w-full" />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-slate-200 bg-white">
+      <section className="bg-mist-deep">
         <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 lg:py-16">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-14">
             <div>
-              <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+              <p className="caption-1 text-muted">
                 {product.tagline}
               </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
@@ -124,7 +103,7 @@ export function ForEventsPage() {
 
       <section className={homeCardsSection}>
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6 lg:py-20">
-          <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">Process</p>
+          <p className="caption-1 text-muted">Process</p>
           <h2 className="mt-3 max-w-lg text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
             From event brief to Google reviews
           </h2>
@@ -142,7 +121,7 @@ export function ForEventsPage() {
         </div>
       </section>
 
-      <section className="border-t border-slate-200 bg-white">
+      <section className="bg-mist-deep">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6 lg:py-20">
           <div className="grid gap-8 lg:grid-cols-2">
             <div className={`p-6 sm:p-8 ${homeCardClass}`}>

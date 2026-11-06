@@ -170,7 +170,7 @@ export function ProfileForm({
   return (
     <form
       onSubmit={submit}
-      className="rounded-3xl bg-white p-6 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
+      className="rounded-2xl border border-black/5 bg-white p-6 text-ink"
     >
       <div className="space-y-5">
         <div>

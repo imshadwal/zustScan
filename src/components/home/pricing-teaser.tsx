@@ -13,7 +13,7 @@ export function PricingTeaser() {
           className={`overflow-hidden lg:grid lg:grid-cols-[1fr_auto] ${homeCardClass} !rounded-[32px]`}
         >
           <div className="border-b border-slate-300 p-8 sm:p-10 lg:border-r lg:border-b-0">
-            <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+            <p className="caption-1 text-muted">
               Pricing
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">

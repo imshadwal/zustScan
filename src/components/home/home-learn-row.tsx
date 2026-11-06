@@ -4,10 +4,10 @@ import { otherNavLinks } from "@/lib/site";
 
 export function HomeLearnRow() {
   return (
-    <section className="border-t border-slate-200 bg-white">
+    <section className="bg-mist-deep">
       <div className="mx-auto max-w-6xl px-5 py-12 sm:px-6 lg:py-14">
-        <p className="text-center text-xs font-semibold tracking-[0.16em] text-blue uppercase">
-          Learn more
+        <p className="text-center caption-1 text-muted">
+          More about Zust Scan
         </p>
         <ul className="mt-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
           {otherNavLinks.map((item) => (

@@ -82,7 +82,7 @@ export function FounderPhotoCrop({
         role="dialog"
         aria-modal="true"
         aria-labelledby="founder-crop-title"
-        className="relative w-full max-w-md rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-6"
+        className="relative w-full max-w-md rounded-2xl border border-black/5 bg-white p-5 text-ink sm:p-6"
       >
         <h2 id="founder-crop-title" className="text-xl font-semibold">
           Adjust photo

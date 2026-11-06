@@ -80,10 +80,10 @@ export function DashboardHome({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
+      <section className="rounded-2xl border border-black/5 bg-white p-6 sm:p-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/70">Welcome back</p>
+            <p className="caption-1 text-muted">Welcome back</p>
             <div className="mt-3">
               <OwnerIdentity
                 businessName={businessName}
@@ -92,26 +92,26 @@ export function DashboardHome({
                 size="xl"
               />
             </div>
-            <p className="mt-3 text-sm text-white/60">
-              Login id <span className="font-mono text-white/80">{loginId}</span>
+            <p className="body-2 mt-3 text-muted">
+              Login id <span className="font-mono text-ink">{loginId}</span>
             </p>
           </div>
           <div className="sm:text-right">
-            <p className="text-sm font-semibold text-white/80">Setup progress</p>
-            <p className="mt-1 text-3xl font-semibold tabular-nums">
+            <p className="caption-1 text-muted">Setup progress</p>
+            <p className="heading-3 mt-1 tabular-nums">
               {done}
-              <span className="text-lg text-white/50">/{total}</span>
+              <span className="text-lg text-muted">/{total}</span>
             </p>
           </div>
         </div>
         <div className="mt-6">
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="h-2 overflow-hidden rounded-full bg-mist-deep">
             <div
               className="h-full rounded-full bg-blue transition-all"
               style={{ width: `${percent}%` }}
             />
           </div>
-          <p className="mt-2 text-sm text-white/70">
+          <p className="body-2 mt-2 text-muted">
             {setupComplete
               ? "All steps complete — guests can use your QR."
               : percent === 0
@@ -126,8 +126,8 @@ export function DashboardHome({
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           {setupComplete ? (
-            <section className="rounded-3xl bg-blue p-5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-6">
-              <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
+            <section className="rounded-2xl bg-blue p-6 text-white sm:p-8">
+              <p className="caption-1 text-white/80">
                 Ready for guests
               </p>
               <p className="mt-2 text-base font-semibold leading-snug sm:text-lg">
@@ -151,7 +151,7 @@ export function DashboardHome({
             </section>
           ) : null}
 
-          <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8">
+          <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink sm:p-8">
             <h2 className="text-lg font-semibold">Setup checklist</h2>
             <p className="mt-2 text-sm text-muted">
               {setupComplete
@@ -196,18 +196,18 @@ export function DashboardHome({
         </div>
 
         <aside className="flex flex-col gap-4">
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-5 text-white backdrop-blur-sm">
-            <h2 className="text-sm font-semibold text-white/80">Guest activity</h2>
-            <p className="mt-1 text-xs text-white/60">
+          <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
+            <h2 className="title-3">Guest activity</h2>
+            <p className="caption-2 mt-1 text-muted">
               Anonymous counts — no guest names or review text stored.
             </p>
             <div className="mt-4">
-              <GuestAnalyticsStats variant="dark" counts={guestAnalytics} />
+              <GuestAnalyticsStats counts={guestAnalytics} />
             </div>
           </section>
 
-          <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-            <h2 className="text-sm font-semibold text-muted">Quick actions</h2>
+          <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
+            <h2 className="title-3 text-muted">Quick actions</h2>
             <div className="mt-4 flex flex-col gap-2">
               <Link href="/business/profile" className={primaryButtonClass}>
                 Business
@@ -229,16 +229,16 @@ export function DashboardHome({
             </p>
           </section>
 
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-5 text-white backdrop-blur-sm">
-            <h2 className="text-sm font-semibold text-white/80">Guest QR link</h2>
-            <p className="mt-2 text-xs text-white/65">
+          <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
+            <h2 className="title-3">Guest QR link</h2>
+            <p className="caption-2 mt-2 text-muted">
               Same URL as in your QR. Guests open this after they scan.
             </p>
-            <GuestLinkCopy url={guestUrl} onDark />
+            <GuestLinkCopy url={guestUrl} />
           </section>
 
           {!isEvent ? (
-            <section className="rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+            <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
               <h2 className="text-sm font-semibold text-muted">Catalog</h2>
               <dl className="mt-3 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl bg-mist px-3 py-3">

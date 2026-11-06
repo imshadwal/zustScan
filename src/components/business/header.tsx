@@ -23,7 +23,9 @@ export function BusinessHeader({
       href === "/business"
         ? pathname === "/business"
         : pathname === href || pathname.startsWith(`${href}/`);
-    return `rounded-full px-3 py-2 ${active ? "text-white" : "text-white/80 hover:text-white"}`;
+    return `rounded-full px-3 py-2 text-base ${
+      active ? "font-semibold text-blue" : "font-medium text-ink hover:text-blue"
+    }`;
   };
 
   async function signOut() {
@@ -37,27 +39,18 @@ export function BusinessHeader({
   }
 
   return (
-    <header className="border-b border-white/10">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-        <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
+    <header className="sticky top-0 z-40 px-4 pt-4">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 rounded-full border border-black/5 bg-white/80 px-3 py-2 backdrop-blur-md">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
           <Link href="/business" className="shrink-0">
-            <Image
-              src="/logo-on-dark.png"
-              alt="Zust Scan"
-              width={1493}
-              height={675}
-              className="h-10 w-auto sm:h-11"
-            />
+            <Image src="/LOGO ZS.png" alt="Zust Scan" width={2172} height={724} className="h-10 w-auto" />
           </Link>
-          <div className="hidden min-w-0 text-white sm:block">
-            <OwnerIdentity businessName={businessName} loginId={loginId} size="lg" showMark={false} />
+          <div className="hidden min-w-0 text-ink sm:block">
+            <OwnerIdentity businessName={businessName} loginId={loginId} size="sm" showMark={false} />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="min-w-0 text-white sm:hidden">
-            <OwnerIdentity businessName={businessName} loginId={loginId} size="md" showMark={false} />
-          </div>
-          <nav className="flex items-center gap-2 text-sm font-semibold" aria-label="Business portal">
+        <div className="flex flex-wrap items-center gap-2">
+          <nav className="flex items-center gap-1" aria-label="Business portal">
             <Link href="/business" prefetch={false} className={navLinkClass("/business")}>
               Home
             </Link>
@@ -81,7 +74,7 @@ export function BusinessHeader({
             type="button"
             onClick={signOut}
             disabled={pending}
-            className="inline-flex h-10 cursor-pointer items-center rounded-full px-3 text-sm font-semibold text-white/80 hover:text-white disabled:opacity-60"
+            className="cursor-pointer rounded-full px-3 py-2 text-base font-semibold text-muted hover:text-ink disabled:opacity-60"
           >
             {pending ? "Signing out…" : "Sign out"}
           </button>

@@ -17,7 +17,7 @@ const items = [
 
 export function SetupChecklistCard({ checklist }: { checklist: SetupChecklist }) {
   return (
-    <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+    <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
       {checklist.complete ? (
         <p className="mb-4 rounded-2xl bg-blue/10 px-4 py-3 text-sm font-semibold text-blue">
           Ready for guests — all steps complete.

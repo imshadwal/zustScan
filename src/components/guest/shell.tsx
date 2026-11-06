@@ -26,14 +26,8 @@ export function GuestShell({
       }`}
       style={shellStyle}
     >
-      <div
-        className={`pointer-events-none absolute inset-x-0 top-0 h-56 ${
-          themed ? "bg-gradient-to-b from-[color-mix(in_srgb,var(--guest-accent)_22%,transparent)] to-transparent" : "bg-gradient-to-b from-blue/10 to-transparent"
-        }`}
-        aria-hidden="true"
-      />
-      <header className="relative px-4 pt-5 pb-2">
-        <Link href="/" className="inline-flex rounded-full bg-white/90 px-3 py-2 shadow-sm">
+      <header className="relative px-4 pt-4 pb-2">
+        <Link href="/" className="inline-flex rounded-full border border-black/5 bg-white/80 px-3 py-2 backdrop-blur-md">
           <Image
             src="/LOGO ZS.png"
             alt="Zust Scan"
@@ -50,7 +44,7 @@ export function GuestShell({
         }`}
       >
         <div
-          className={`overflow-hidden rounded-[28px] border shadow-[0_16px_48px_rgba(7,20,40,0.12)] [&>:not([data-guest-flow])]:p-6 [&>:not([data-guest-flow])]:sm:p-8 ${
+          className={`overflow-hidden rounded-2xl border [&>:not([data-guest-flow])]:p-6 [&>:not([data-guest-flow])]:sm:p-8 ${
             themed
               ? "border-[var(--guest-border)] bg-[var(--guest-surface)]"
               : "border-slate-300 bg-white"

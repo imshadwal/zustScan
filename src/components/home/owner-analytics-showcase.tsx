@@ -14,7 +14,7 @@ export function OwnerAnalyticsShowcase({ className = "" }: { className?: string 
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+            <p className="caption-1 text-muted">
               Owner portal
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">

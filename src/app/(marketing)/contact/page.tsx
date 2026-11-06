@@ -20,7 +20,7 @@ export default function ContactPage() {
         eyebrow="Contact"
         title="Talk to us about setup."
         description="Tap a channel below — each link opens email, the dialler, or Instagram."
-        className="bg-white"
+        className="bg-mist-deep"
       />
       <section className={`${homeCardsSection} pt-8 pb-20 sm:pt-10 sm:pb-24`}>
         <div className="mx-auto max-w-6xl px-5 sm:px-6">

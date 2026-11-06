@@ -26,7 +26,7 @@ export function LanguageVoiceShowcase() {
   return (
     <section className={homeCardsSection}>
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+        <p className="caption-1 text-muted">
           Hindi · Hinglish · Voice
         </p>
         <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-4xl">

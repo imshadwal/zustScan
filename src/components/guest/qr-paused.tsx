@@ -18,7 +18,7 @@ export function GuestQrPausedCard({
   return (
     <div className="text-center sm:text-left">
       <div
-        className="-mx-6 -mt-6 mb-6 border-b border-slate-200 bg-gradient-to-r from-navy/5 via-amber-50/80 to-navy/5 px-6 py-5 sm:-mx-8 sm:-mt-8 sm:px-8"
+        className="-mx-6 -mt-6 mb-6 bg-amber-50 px-6 py-5 sm:-mx-8 sm:-mt-8 sm:px-8"
       >
         <div className="mx-auto flex max-w-sm flex-col items-center gap-3 sm:mx-0 sm:flex-row sm:items-start sm:text-left">
           <span
@@ -31,10 +31,10 @@ export function GuestQrPausedCard({
             </svg>
           </span>
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] text-amber-800 uppercase">
+            <p className="caption-1 text-amber-800">
               {guestQrPausedCopy.eyebrow}
             </p>
-            <h1 className="mt-1 text-xl font-semibold text-ink sm:text-2xl">{businessTitle}</h1>
+            <h1 className="heading-4 mt-1">{businessTitle}</h1>
             <p className="mt-0.5 font-mono text-xs text-muted">{loginId}</p>
           </div>
         </div>

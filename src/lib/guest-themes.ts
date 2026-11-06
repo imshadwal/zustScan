@@ -82,7 +82,7 @@ export function guestThemeCssVars(theme: GuestTheme): CSSProperties {
     ["--guest-header" as string]: header,
     ["--guest-accent" as string]: accent,
     ["--guest-header-eyebrow" as string]: theme.headerEyebrow,
-    ["--guest-page-bg" as string]: `color-mix(in srgb, ${accent} 16%, #e5eaf2)`,
+    ["--guest-page-bg" as string]: `color-mix(in srgb, ${accent} 24%, #d3e1f3)`,
     ["--guest-surface" as string]: `color-mix(in srgb, ${accent} 9%, white)`,
     ["--guest-panel" as string]: `color-mix(in srgb, ${accent} 14%, white)`,
     ["--guest-border" as string]: `color-mix(in srgb, ${accent} 30%, #cbd5e1)`,

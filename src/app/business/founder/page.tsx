@@ -32,8 +32,8 @@ async function FounderGate() {
         standeeType={profile.standeeType}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold text-white">Founder details</h1>
-        <p className="mt-2 max-w-2xl text-sm text-white/70">
+        <h1 className="heading-4">Founder details</h1>
+        <p className="body-2 mt-2 max-w-2xl text-muted">
           Turn this on when guests should be able to flip the review form and see the founder card.
         </p>
         <div className="mt-6 max-w-3xl">

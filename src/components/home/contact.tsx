@@ -19,12 +19,10 @@ export function Contact() {
   return (
     <footer id="contact" className="scroll-mt-28 bg-navy text-white">
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">
-          Contact
-        </p>
+        <p className="caption-1 text-white/60">Contact</p>
         <a
           href={emailHref}
-          className="mt-4 block text-3xl font-semibold tracking-tight break-all text-white transition-colors hover:text-blue sm:text-5xl lg:text-6xl"
+          className="heading-2 mt-4 block break-all text-white transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-blue"
         >
           {email}
         </a>
@@ -66,7 +64,7 @@ export function Contact() {
           </a>
         </div>
 
-        <div className="mt-16 grid gap-10 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
             <Link href="/" className="inline-flex w-fit">
             <Image
               src="/logo-on-dark.png"

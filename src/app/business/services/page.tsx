@@ -37,8 +37,8 @@ async function ServicesGate() {
         loginId={profile.loginId}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold text-white">Services & products</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
+        <h1 className="heading-4">Services and products</h1>
+        <p className="body-2 mt-2 max-w-2xl text-muted">
           Group what you offer into services, then add products under each. Guests will pick one of
           each after they scan your QR.
         </p>

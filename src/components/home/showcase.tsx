@@ -204,7 +204,7 @@ export function Showcase() {
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr]">
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+            <p className="caption-1 text-muted">
               The guest screen
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
@@ -266,7 +266,7 @@ export function Showcase() {
             </div>
 
             <div className="relative z-[1] w-[12.75rem] shrink-0">
-              <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+              <p className="caption-1 text-muted">
                 AI-powered draft
               </p>
               <p className="mt-2 text-sm leading-6 text-muted">

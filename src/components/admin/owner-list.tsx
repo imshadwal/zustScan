@@ -47,7 +47,7 @@ function OwnerSummaryCard({
     <button
       type="button"
       onClick={onOpen}
-      className="group w-full rounded-2xl bg-white p-4 text-left text-ink shadow-[0_12px_40px_rgba(0,0,0,0.22)] transition hover:ring-2 hover:ring-blue/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
+      className="group w-full rounded-2xl border border-black/5 bg-white p-4 text-left text-ink transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.01] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
     >
       <div className="flex gap-3">
         <div className="relative shrink-0">
@@ -479,33 +479,33 @@ export function OwnerList({
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+      <h1 className="heading-4">Dashboard</h1>
+      <p className="body-2 mt-2 max-w-[680px] text-muted">
         Pause or activate guest reviews per owner here — same printed QR, paused message for guests
         until you turn it back on. Tap a business card to manage QR, standee type, and password.
       </p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+        <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
           <p className="text-sm font-semibold text-muted">Business owners</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight">{owners.length}</p>
         </section>
-        <section className="rounded-3xl bg-blue p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+        <section className="rounded-2xl bg-blue p-6 text-white">
           <p className="text-sm font-semibold text-white/80">Made till now</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight">{totalLabel}</p>
         </section>
-        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+        <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
           <p className="text-sm font-semibold text-muted">Total scans</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
             {guestTotals.pageViews}
           </p>
         </section>
-        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+        <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink">
           <p className="text-sm font-semibold text-muted">Total drafts</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
             {guestTotals.draftsGenerated}
           </p>
         </section>
-        <section className="rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:col-span-2 lg:col-span-1">
+        <section className="rounded-2xl border border-black/5 bg-white p-6 text-ink sm:col-span-2 lg:col-span-1">
           <p className="text-sm font-semibold text-muted">Copy & Continue</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
             {guestTotals.copyContinueTaps}
@@ -513,12 +513,12 @@ export function OwnerList({
         </section>
       </div>
       {notice ? (
-        <p className="mt-4 text-sm text-red-200" role="alert">
+        <p className="mt-4 text-sm text-red-700" role="alert">
           {notice}
         </p>
       ) : null}
       {owners.length === 0 ? (
-        <div className="mt-6 rounded-3xl bg-white p-8 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+        <div className="mt-6 rounded-2xl border border-black/5 bg-white p-8 text-ink">
           <p className="text-sm text-muted">
             No business owners yet. Create one to get a login and a QR.
           </p>

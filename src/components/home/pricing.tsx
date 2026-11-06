@@ -10,14 +10,12 @@ import { planIncludes, price, productBrochurePath } from "@/lib/site";
 export function Pricing() {
   return (
     <section id="pricing" className={homeCardsSection}>
-      <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
-          Pricing
-        </p>
-        <h2 className="mt-3 max-w-xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
-          One plan for the business.
-        </h2>
-        <p className="mt-4 max-w-xl text-lg leading-8 text-muted">
+      <div className="mx-auto max-w-6xl px-4 pt-32 pb-24 sm:pt-40 lg:pt-48">
+        <p className="caption-1 text-muted">Pricing</p>
+        <h1 className="heading-1 mt-4 max-w-[680px]">
+          <span className="hero-heading">One plan for the business</span>
+        </h1>
+        <p className="body-1 mt-6 max-w-[680px] text-muted">
           The QR, the guest path, and the draft. Setup starts from the enquiry.
         </p>
         <SetupStandeeCallout className="mt-6 max-w-xl" />
@@ -35,13 +33,8 @@ export function Pricing() {
               with you.
             </p>
             <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <EnquiryButton className="inline-flex h-12 items-center justify-center rounded-full bg-blue px-6 text-sm font-semibold text-white transition-colors hover:bg-blue-deep">
-                Send an enquiry
-              </EnquiryButton>
-              <Link
-                href={productBrochurePath}
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/30 bg-white/5 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/15"
-              >
+              <EnquiryButton className="btn-primary">Send an enquiry</EnquiryButton>
+              <Link href={productBrochurePath} className="caption-1 text-white/80 underline">
                 Product PDF
               </Link>
             </div>

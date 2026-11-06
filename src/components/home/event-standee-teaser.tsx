@@ -19,7 +19,7 @@ export function EventStandeeTeaser() {
           className={`grid gap-8 overflow-visible p-6 sm:grid-cols-[1fr_min(100%,260px)] sm:items-start sm:p-8 ${homeCardClass}`}
         >
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+            <p className="caption-1 text-muted">
               Also for big nights
             </p>
             <h2 className="mt-2 text-xl font-semibold text-ink sm:text-2xl">{event.title}</h2>

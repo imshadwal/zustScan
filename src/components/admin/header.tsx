@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { primaryButtonClass } from "@/components/admin/styles";
 
 export function AdminHeader() {
   const [pending, setPending] = useState(false);
+  const pathname = usePathname();
+  const categoriesActive = pathname.startsWith("/admin/categories");
 
   async function signOut() {
     setPending(true);
@@ -15,37 +18,32 @@ export function AdminHeader() {
     } catch {
       /* still leave — cookie may already be cleared */
     }
-    // Full navigation avoids re-running the heavy /admin server page via router.refresh().
     window.location.assign("/admin/login");
   }
 
   return (
-    <header className="border-b border-white/10">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <header className="sticky top-0 z-40 px-4 pt-4">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-full border border-black/5 bg-white/80 px-3 py-2 backdrop-blur-md">
         <Link href="/admin" className="shrink-0">
-          <Image
-            src="/logo-on-dark.png"
-            alt="Zust Scan"
-            width={1493}
-            height={675}
-            className="h-10 w-auto"
-          />
+          <Image src="/LOGO ZS.png" alt="Zust Scan" width={2172} height={724} className="h-10 w-auto" />
         </Link>
         <div className="flex items-center gap-2">
           <Link
             href="/admin/categories"
-            className="inline-flex h-10 items-center rounded-full border border-white/20 px-4 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10"
+            className={`rounded-full px-3 py-2 text-base font-medium ${
+              categoriesActive ? "font-semibold text-blue" : "text-ink hover:text-blue"
+            }`}
           >
             Categories
           </Link>
-          <Link href="/admin/owners/new" className={`${primaryButtonClass} h-10 px-4`}>
+          <Link href="/admin/owners/new" className={primaryButtonClass}>
             New business owner
           </Link>
           <button
             type="button"
             onClick={signOut}
             disabled={pending}
-            className="inline-flex h-10 cursor-pointer items-center rounded-full px-3 text-sm font-semibold text-white/80 hover:text-white disabled:opacity-60"
+            className="cursor-pointer rounded-full px-3 py-2 text-base font-semibold text-muted hover:text-ink disabled:opacity-60"
           >
             {pending ? "Signing out…" : "Sign out"}
           </button>

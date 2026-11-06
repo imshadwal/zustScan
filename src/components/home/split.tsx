@@ -13,7 +13,7 @@ function Column({
 }) {
   return (
     <div className={`p-6 sm:p-8 ${homeCardClass}`}>
-      <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+      <p className="caption-1 text-muted">
         {eyebrow}
       </p>
       <h3 className="mt-3 text-2xl font-semibold text-ink">{title}</h3>

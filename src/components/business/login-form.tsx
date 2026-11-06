@@ -40,14 +40,12 @@ export function BusinessLoginForm() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+      <div className="w-full max-w-md rounded-2xl border border-black/5 bg-white p-8 text-ink">
         <div className="flex justify-center">
           <Image src="/logo.png" alt="Zust Scan" width={1493} height={675} className="h-10 w-auto" />
         </div>
-        <p className="mt-6 text-center text-xs font-semibold tracking-wide text-blue uppercase">
-          Business owner
-        </p>
-        <h1 className="mt-2 text-center text-2xl font-semibold">Sign in</h1>
+        <p className="caption-1 mt-6 text-center text-muted">Business owner</p>
+        <h1 className="heading-4 mt-2 text-center">Sign in</h1>
         <form onSubmit={submit} className="mt-8 space-y-5">
           <div>
             <label className="block text-sm font-semibold text-ink" htmlFor="business-login-id">
@@ -94,7 +92,7 @@ export function BusinessLoginForm() {
           </Link>
         </p>
       </div>
-      <p className="mt-8 text-sm text-white/70">Scan to share, review to care.</p>
+      <p className="caption-1 mt-8 text-muted">Scan to share, review to care.</p>
     </div>
   );
 }

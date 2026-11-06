@@ -19,7 +19,7 @@ export function HomePricingRow() {
     <section className={homeCardsSection}>
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">Pricing</p>
+          <p className="caption-1 text-muted">Pricing</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
             Two ways to collect reviews
           </h2>

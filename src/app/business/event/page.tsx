@@ -33,10 +33,10 @@ async function EventGate() {
         standeeType="event"
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold text-white">Event setup</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
+        <h1 className="heading-4">Event setup</h1>
+        <p className="body-2 mt-2 max-w-2xl text-muted">
           Optional event name and date for{" "}
-          <span className="font-medium text-white">/e/{profile.loginId}</span>, plus guest areas
+          <span className="font-medium text-ink">/e/{profile.loginId}</span>, plus guest areas
           guests tap on the standee.
         </p>
         <div className="mt-6">

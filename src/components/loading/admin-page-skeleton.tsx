@@ -1,14 +1,14 @@
-import { SkeletonBlock, SkeletonDark } from "@/components/loading/skeleton-primitives";
+import { SkeletonBlock, SkeletonLight } from "@/components/loading/skeleton-primitives";
 
 export function AdminHeaderSkeleton() {
   return (
-    <header className="border-b border-white/10">
+    <header className="px-4 pt-4">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <SkeletonDark className="h-10 w-28" />
+        <SkeletonLight className="h-10 w-28" />
         <div className="flex items-center gap-2">
-          <SkeletonDark className="h-10 w-24 rounded-full" />
-          <SkeletonDark className="h-10 w-36 rounded-full" />
-          <SkeletonDark className="h-10 w-20 rounded-full" />
+          <SkeletonLight className="h-10 w-24 rounded-full" />
+          <SkeletonLight className="h-10 w-36 rounded-full" />
+          <SkeletonLight className="h-10 w-20 rounded-full" />
         </div>
       </div>
     </header>
@@ -20,20 +20,20 @@ function OwnersListBodySkeleton() {
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
-          <SkeletonDark className="h-8 w-48" />
-          <SkeletonDark className="h-4 w-64" />
+          <SkeletonLight className="h-8 w-48" />
+          <SkeletonLight className="h-4 w-64" />
         </div>
-        <SkeletonDark className="h-10 w-32 rounded-full" />
+        <SkeletonLight className="h-10 w-32 rounded-full" />
       </div>
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
         {[1, 2, 3].map((i) => (
-          <SkeletonDark key={i} className="h-20 rounded-2xl" />
+          <SkeletonLight key={i} className="h-20 rounded-2xl" />
         ))}
       </div>
       <ul className="mt-8 space-y-4">
         {[1, 2, 3].map((i) => (
           <li key={i}>
-            <SkeletonDark className="h-36 rounded-2xl sm:h-32" />
+            <SkeletonLight className="h-36 rounded-2xl sm:h-32" />
           </li>
         ))}
       </ul>
@@ -44,15 +44,15 @@ function OwnersListBodySkeleton() {
 function FormBodySkeleton() {
   return (
     <div className="mx-auto max-w-xl space-y-4">
-      <SkeletonDark className="h-8 w-56" />
-      <SkeletonDark className="h-4 w-full max-w-md" />
+      <SkeletonLight className="h-8 w-56" />
+      <SkeletonLight className="h-4 w-full max-w-md" />
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="space-y-2">
-          <SkeletonDark className="h-3 w-24" />
-          <SkeletonDark className="h-11 w-full rounded-xl" />
+          <SkeletonLight className="h-3 w-24" />
+          <SkeletonLight className="h-11 w-full rounded-xl" />
         </div>
       ))}
-      <SkeletonDark className="mt-6 h-11 w-full rounded-full" />
+      <SkeletonLight className="mt-6 h-11 w-full rounded-full" />
     </div>
   );
 }
@@ -60,12 +60,12 @@ function FormBodySkeleton() {
 function CategoriesBodySkeleton() {
   return (
     <>
-      <SkeletonDark className="h-8 w-40" />
-      <SkeletonDark className="mt-2 h-4 w-72" />
+      <SkeletonLight className="h-8 w-40" />
+      <SkeletonLight className="mt-2 h-4 w-72" />
       <ul className="mt-8 space-y-3">
         {[1, 2, 3, 4].map((i) => (
           <li key={i}>
-            <SkeletonDark className="h-14 rounded-xl" />
+            <SkeletonLight className="h-14 rounded-xl" />
           </li>
         ))}
       </ul>

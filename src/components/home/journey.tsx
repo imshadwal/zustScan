@@ -10,9 +10,8 @@ import {
 import { journey } from "@/lib/site";
 
 /** Warm accent on navy (distinct from headline/link blue). */
-const stepIconClass = "h-7 w-7 text-amber-200";
-const stepBadgeClass =
-  "border-2 border-amber-200/90 bg-navy font-bold text-amber-50 shadow-[0_0_24px_rgba(251,191,36,0.35)]";
+const stepIconClass = "h-7 w-7 text-blue";
+const stepBadgeClass = "border-2 border-blue bg-white font-bold text-blue";
 
 function ScrollProgressTimeline({
   fill,
@@ -24,8 +23,6 @@ function ScrollProgressTimeline({
   const isCenter = variant === "center";
   const trackWidthPx = 4;
   const fillWidthPx = 4 + fill * 2;
-  const glow = 8 + fill * 24;
-  const glowAlpha = 0.2 + fill * 0.5;
   const barPositionClass = isCenter
     ? "left-1/2 -translate-x-1/2"
     : "left-0 -translate-x-1/2";
@@ -44,12 +41,11 @@ function ScrollProgressTimeline({
         style={{ width: trackWidthPx }}
       />
       <div
-        className={`absolute top-0 origin-top rounded-full bg-gradient-to-b from-amber-200/40 via-amber-200 to-amber-100/90 ${barPositionClass}`}
+        className={`absolute top-0 origin-top rounded-full bg-blue ${barPositionClass}`}
         style={{
           height: `${fill * 100}%`,
           width: fillWidthPx,
           opacity: 0.35 + fill * 0.65,
-          boxShadow: `0 0 ${glow}px rgba(251, 191, 36, ${glowAlpha})`,
         }}
       />
     </div>
@@ -168,14 +164,12 @@ function JourneyStepCard({
   icon: ReactNode;
 }) {
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:p-8">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-200/25 bg-amber-200/10">
+    <article className="rounded-2xl border border-black/5 bg-white p-6 sm:p-8">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-mist">
         {icon}
       </div>
-      <h3 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        {item.title}
-      </h3>
-      <p className="mt-3 text-sm leading-7 text-white/65 sm:text-base">{item.body}</p>
+      <h3 className="heading-4 text-ink">{item.title}</h3>
+      <p className="body-2 mt-3 text-muted">{item.body}</p>
       <ul className="mt-6 flex flex-wrap gap-2">
         {item.tags.map((tag) => (
           <li
@@ -197,34 +191,24 @@ export function Journey({ showHeading = true }: { showHeading?: boolean }) {
   return (
     <section
       id="journey"
-      className="relative overflow-hidden bg-navy text-white"
-      style={{
-        backgroundImage: `
-          linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
-        `,
-        backgroundSize: "56px 56px",
-      }}
+      className="relative bg-mist-deep text-ink"
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy via-transparent to-navy"
-        aria-hidden="true"
-      />
-      <div
-        className={`relative mx-auto max-w-6xl px-5 sm:px-6 ${
-          showHeading ? "py-20 lg:py-28" : "py-16 lg:py-24"
+        className={`relative mx-auto max-w-6xl px-4 ${
+          showHeading ? "py-24 lg:py-32" : "py-16 lg:py-24"
         }`}
       >
         {showHeading ? (
-          <header className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-semibold tracking-[0.2em] text-blue uppercase">
-              The guest path
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-              <span className="text-white">Six steps, </span>
-              <span className="text-blue">from the QR to the post.</span>
-            </h2>
-            <p className="mt-5 text-base leading-8 text-white/60 sm:text-lg">
+          <header className="mx-auto max-w-[680px]">
+            <p className="caption-1 text-muted">The guest path</p>
+            <h1 className="heading-1 mt-4">
+              <span className="hero-heading">
+                Six steps,
+                <br />
+                from the QR to the post
+              </span>
+            </h1>
+            <p className="body-1 mt-6 text-muted">
               The same path works at a restaurant table, a hotel desk, a shop counter, or
               after a service visit.
             </p>

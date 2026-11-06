@@ -186,7 +186,7 @@ function NoAppCard() {
 
 export function WhyDifferentSection({ showPageIntro = false }: { showPageIntro?: boolean }) {
   return (
-    <section id="why-different" className="relative overflow-hidden bg-white">
+    <section id="why-different" className="relative overflow-hidden bg-mist-deep">
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(0,102,255,0.14),transparent)]"
         aria-hidden="true"

@@ -177,7 +177,9 @@ export function FounderFlip({
   return (
     <div
       className={
-        animate ? "transition-transform duration-300 ease-in-out motion-reduce:transition-none" : undefined
+        animate
+          ? "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          : undefined
       }
       style={{ transform: `rotateY(${angle}deg)`, transformOrigin: "center" }}
       onTransitionEnd={onTransitionEnd}
@@ -188,7 +190,7 @@ export function FounderFlip({
             ref={frontRef}
             type="button"
             onClick={beginFlip}
-            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl border-2 border-[var(--guest-accent)] bg-[var(--guest-panel,#fff)] px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(0,0,0,0.12)]"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-[var(--guest-accent)] bg-white px-4 py-3 text-left"
           >
             {founder.photoUrl ? (
               <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[var(--guest-accent)] bg-white">
@@ -200,10 +202,10 @@ export function FounderFlip({
               </span>
             )}
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-semibold tracking-[0.14em] text-[var(--guest-accent)] uppercase">
+              <span className="caption-1 block text-[var(--guest-accent)]">
                 Meet {founder.name.trim().split(/\s+/)[0]}
               </span>
-              <span className="block truncate text-base font-semibold text-ink">
+              <span className="title-3 block truncate text-ink">
                 {founder.role?.trim() || "The founder"}
               </span>
             </span>

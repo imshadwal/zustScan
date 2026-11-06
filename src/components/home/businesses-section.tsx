@@ -12,7 +12,7 @@ async function BusinessesList() {
   return (
     <section id="businesses" className={homeCardsSection}>
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-6 lg:py-16">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">On Zust Scan</p>
+        <p className="caption-1 text-muted">On Zust Scan</p>
         <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           Businesses ready for guest reviews
         </h2>

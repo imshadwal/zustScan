@@ -61,7 +61,7 @@ function Section({
 }) {
   return (
     <section className="brochure-section mt-12">
-      <h2 className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">{title}</h2>
+      <h2 className="caption-1 text-muted">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );

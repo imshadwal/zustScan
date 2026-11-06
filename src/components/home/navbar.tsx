@@ -11,17 +11,24 @@ import { navLinks } from "@/lib/site";
 function navLinkClass(active: boolean) {
   return active
     ? "font-semibold text-blue"
-    : "font-medium text-ink transition-colors hover:text-blue";
+    : "font-medium text-ink transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-blue";
 }
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { openEnquiry } = useEnquiry();
+  const mobileLinks = [...navLinks];
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-full bg-white py-3 pr-2.5 pl-4 shadow-[0_12px_40px_rgba(7,20,40,0.14)] sm:py-3.5 sm:pr-3 sm:pl-5">
+    <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:bg-white focus:px-3 focus:py-2"
+      >
+        Skip to content
+      </a>
+      <div className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-full border border-black/5 bg-white/80 px-3 py-2 backdrop-blur-md">
         <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Image
             src="/LOGO ZS.png"
@@ -29,62 +36,57 @@ export function Navbar() {
             width={2172}
             height={724}
             priority
-            className="h-11 w-auto sm:h-12"
+            className="h-10 w-auto"
           />
         </Link>
-        <nav className="hidden items-center gap-6 text-base md:flex lg:gap-7 xl:gap-8">
+        <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => {
             const active =
               link.href === "/"
                 ? pathname === "/"
                 : pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (
-              <Link key={link.href} href={link.href} className={navLinkClass(active)}>
+              <Link key={link.href} href={link.href} className={`body-2 ${navLinkClass(active)}`}>
                 {link.label}
               </Link>
             );
           })}
           <NavOtherMenuDesktop />
         </nav>
-        <EnquiryButton className="hidden h-12 items-center rounded-full bg-blue px-6 text-base font-semibold text-white transition-colors hover:bg-blue-deep md:inline-flex">
-          Enquire
-        </EnquiryButton>
+        <EnquiryButton className="btn-primary hidden md:inline-flex">Enquire</EnquiryButton>
         <button
           type="button"
-          className="inline-flex h-12 w-12 items-center justify-center rounded-full text-ink md:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-ink md:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((value) => !value)}
         >
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-          <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">
-            {open ? (
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            ) : (
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            )}
-          </svg>
+          <span className="flex w-5 flex-col gap-1.5" aria-hidden="true">
+            <span
+              className={`block h-0.5 w-5 bg-ink transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                open ? "translate-y-2 rotate-45" : ""
+              }`}
+            />
+            <span
+              className={`block h-0.5 w-5 bg-ink transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                open ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block h-0.5 w-5 bg-ink transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                open ? "-translate-y-2 -rotate-45" : ""
+              }`}
+            />
+          </span>
         </button>
       </div>
       {open ? (
         <nav
           id="mobile-menu"
-          className="mx-auto mt-2 flex max-w-6xl flex-col gap-1 rounded-3xl bg-white p-4 shadow-[0_12px_40px_rgba(7,20,40,0.14)] md:hidden"
+          className="fixed inset-0 z-40 flex flex-col justify-center gap-2 bg-white/95 px-8 backdrop-blur-xl md:hidden"
         >
-          {navLinks.map((link) => {
+          {mobileLinks.map((link, index) => {
             const active =
               link.href === "/"
                 ? pathname === "/"
@@ -93,17 +95,21 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-2xl px-4 py-3.5 text-lg hover:bg-mist ${navLinkClass(active)}`}
+                className={`menu-link-in heading-3 ${navLinkClass(active)}`}
+                style={{ animationDelay: `${Math.min(index * 60, 400)}ms` }}
                 onClick={() => setOpen(false)}
               >
                 {link.label}
               </Link>
             );
           })}
-          <NavOtherMenuMobile onNavigate={() => setOpen(false)} />
+          <div className="menu-link-in" style={{ animationDelay: "360ms" }}>
+            <NavOtherMenuMobile onNavigate={() => setOpen(false)} />
+          </div>
           <button
             type="button"
-            className="mt-1 inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-blue px-4 text-base font-semibold text-white"
+            className="btn-primary menu-link-in mt-4 w-fit"
+            style={{ animationDelay: "400ms" }}
             onClick={() => {
               setOpen(false);
               openEnquiry();

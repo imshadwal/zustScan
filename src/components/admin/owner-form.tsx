@@ -125,12 +125,12 @@ function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
         : `${siteOrigin}/c/${created.loginId}`;
     return (
       <div>
-        <h1 className="text-2xl font-semibold text-white">Business owner created</h1>
-        <p className="mt-2 text-sm text-white/70">
+        <h1 className="heading-4">Business owner created</h1>
+        <p className="body-2 mt-2 text-muted">
           Copy the password now. A later visit can only set a new one.
         </p>
         <div
-          className="mt-6 rounded-3xl bg-white p-6 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
+          className="mt-6 rounded-2xl border border-black/5 bg-white p-6 text-ink"
           role="status"
         >
           <p className="text-sm font-semibold text-muted">Login id</p>
@@ -167,12 +167,12 @@ function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
           </div>
         </div>
         <div className="mt-4 flex gap-4 text-sm font-semibold">
-          <Link href="/admin" className="text-white hover:text-white/80">
+          <Link href="/admin" className="text-ink hover:text-blue">
             All business owners
           </Link>
           <button
             type="button"
-            className="cursor-pointer text-white/70 hover:text-white"
+            className="cursor-pointer text-muted hover:text-ink"
             onClick={() => {
               setCreated(null);
               setLoginId("");
@@ -190,13 +190,13 @@ function OwnerForm({ siteOrigin }: { siteOrigin: string }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-white">New business owner</h1>
-      <p className="mt-2 text-sm text-white/70">
+      <h1 className="heading-4">New business owner</h1>
+      <p className="body-2 mt-2 text-muted">
         The login id becomes sign-in and the address inside the QR.
       </p>
       <form
         onSubmit={submit}
-        className="mt-6 rounded-3xl bg-white p-6 text-ink shadow-[0_12px_40px_rgba(7,20,40,0.08)]"
+        className="mt-6 rounded-2xl border border-black/5 bg-white p-6 text-ink"
       >
         <div className="space-y-5">
           <div>

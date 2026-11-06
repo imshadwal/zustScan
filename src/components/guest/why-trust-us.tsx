@@ -30,7 +30,7 @@ export function WhyTrustUsInfo({ text }: { text: string }) {
         aria-label="Why trust us"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center text-white"
+        className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center text-ink"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6">
           <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.6" />
@@ -51,17 +51,17 @@ export function WhyTrustUsInfo({ text }: { text: string }) {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={titleId}
-                className="relative w-full max-w-sm rounded-3xl bg-white p-5 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+                className="relative w-full max-w-sm rounded-2xl border border-black/5 bg-white p-5 text-ink"
               >
-                <h2 id={titleId} className="text-lg font-semibold">
+                <h2 id={titleId} className="heading-4">
                   Why trust us
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-ink">{text}</p>
+                <p className="body-2 mt-3 text-ink">{text}</p>
                 <button
                   ref={closeRef}
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="mt-5 w-full cursor-pointer rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-white"
+                  className="btn-primary mt-6 w-full"
                 >
                   Close
                 </button>

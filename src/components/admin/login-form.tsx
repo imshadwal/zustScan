@@ -37,15 +37,11 @@ export function LoginForm() {
   }
 
   return (
-    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-navy px-4 py-16 text-white">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute -top-24 right-[-10%] h-80 w-80 rounded-full bg-blue/30 blur-3xl" />
-        <div className="absolute bottom-0 left-[-12%] h-64 w-64 rounded-full bg-blue/15 blur-3xl" />
-      </div>
-      <div className="relative w-full max-w-md">
+    <div className="flex min-h-dvh items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md">
         <form
           onSubmit={submit}
-          className="rounded-3xl bg-white p-8 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+          className="rounded-2xl border border-black/5 bg-white p-8 text-ink"
         >
           <Image
             src="/logo.png"
@@ -55,10 +51,8 @@ export function LoginForm() {
             preload
             className="h-12 w-auto"
           />
-          <p className="mt-8 inline-flex items-center gap-2 rounded-full bg-mist px-3 py-1 text-xs font-semibold tracking-[0.14em] text-blue uppercase">
-            Admin
-          </p>
-          <h1 className="mt-4 text-2xl font-semibold">Sign in</h1>
+          <p className="caption-1 mt-8 text-muted">Admin</p>
+          <h1 className="heading-4 mt-4">Sign in</h1>
           <p className="mt-2 text-sm text-muted">
             Create a customer login and download its QR.
           </p>
@@ -101,10 +95,10 @@ export function LoginForm() {
           </button>
         </form>
         <div className="mt-5 flex items-center justify-between gap-4 text-sm">
-          <Link href="/" className="font-semibold text-white/80 hover:text-white">
+          <Link href="/" className="font-semibold text-ink hover:text-blue">
             Back to the site
           </Link>
-          <p className="text-white/55">Scan to share, review to care.</p>
+          <p className="text-muted">Scan to share, review to care.</p>
         </div>
       </div>
     </div>

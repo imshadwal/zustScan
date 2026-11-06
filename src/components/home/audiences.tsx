@@ -48,7 +48,7 @@ export function Audiences({ showHeading = true }: { showHeading?: boolean }) {
       >
         {showHeading ? (
           <>
-            <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
+            <p className="caption-1 text-muted">
               Who it’s for
             </p>
             <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

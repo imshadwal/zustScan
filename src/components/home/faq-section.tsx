@@ -5,7 +5,7 @@ export function FaqSection({ className = "" }: { className?: string }) {
   return (
     <section id="faq" className={`${homeCardsSection} ${className}`}>
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 lg:py-24">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">FAQ</p>
+        <p className="caption-1 text-muted">FAQ</p>
         <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           Common questions before you enquire.
         </h2>

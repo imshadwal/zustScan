@@ -16,7 +16,7 @@ export default function WhyDifferentPage() {
         eyebrow={whyDifferentPage.eyebrow}
         title={whyDifferentPage.title}
         description={whyDifferentPage.description}
-        className="bg-white border-b border-slate-200"
+        className="bg-mist-deep"
       />
       <WhyDifferentSection showPageIntro />
       <LanguageVoiceShowcase />

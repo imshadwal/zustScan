@@ -11,7 +11,7 @@ async function TrustedPartnersContent() {
   return (
     <section
       aria-labelledby="trusted-partners-heading"
-      className="border-y border-slate-200/80 bg-white py-14 sm:py-16"
+      className="bg-mist-deep py-14 sm:py-16"
     >
       <div className="mx-auto max-w-6xl px-5 text-center sm:px-6">
         <h2

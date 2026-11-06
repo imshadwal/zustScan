@@ -39,8 +39,8 @@ async function ProfileGate() {
         standeeType={profile.standeeType}
       />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold text-white">Business</h1>
-        <p className="mt-2 text-sm text-white/70">
+        <h1 className="heading-4">Business</h1>
+        <p className="body-2 mt-2 text-muted">
           {profile.standeeType === "event"
             ? "Venue name, contact, and Google review link for your event standee. Event name, date, and guest areas are on Event setup."
             : "Complete profile, category, and services for guest QR setup."}

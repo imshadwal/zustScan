@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FounderFlip } from "@/components/guest/founder-flip";
-import { WhyTrustUsInfo } from "@/components/guest/why-trust-us";
+import { GuestPageHeader } from "@/components/guest/guest-page-header";
 import { GuestDraftLoadingPanel } from "@/components/guest/guest-draft-loading";
-import { BusinessOwnerMark } from "@/components/initials-badge";
 import { trackGuestMetric } from "@/lib/guest-analytics-client";
 import {
   guestAccentTextClass,
@@ -36,7 +35,7 @@ type StepIndex = 0 | 1 | 2;
 type Props = { experience: EventGuestExperience };
 
 const backButtonClass =
-  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-[var(--guest-border,#cbd5e1)] bg-[var(--guest-panel,#f4f7fb)] px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-[var(--guest-accent)] hover:text-[var(--guest-accent)] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white px-3 py-2 text-base font-semibold text-ink transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[var(--guest-accent)] hover:text-[var(--guest-accent)] disabled:cursor-not-allowed disabled:opacity-60";
 
 async function copyDraftToClipboard(text: string, textarea: HTMLTextAreaElement | null) {
   const value = text.trim();
@@ -198,45 +197,17 @@ export function EventGuestReviewFlow({ experience }: Props) {
 
   return (
     <div className="flex min-h-0 flex-col" data-guest-flow style={guestThemeCssVars(theme)}>
-      <div
-        className="px-5 py-7 text-white sm:px-6 sm:py-8"
-        style={{ backgroundColor: theme.header }}
-      >
-        <div className="flex items-start gap-4 sm:gap-5">
-          <BusinessOwnerMark
-            businessName={experience.businessName}
-            loginId={experience.loginId}
-            logoUrl={experience.logoUrl}
-            size="xl"
-          />
-          <div className="min-w-0 flex-1 pt-0.5">
-            <div className="flex items-center justify-between gap-3">
-              <p
-                className="text-[11px] font-semibold tracking-[0.16em] uppercase sm:text-xs"
-                style={{ color: theme.headerEyebrow }}
-              >
-                Share your experience
-              </p>
-              {experience.whyTrustUs ? <WhyTrustUsInfo text={experience.whyTrustUs} /> : null}
-            </div>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
-            {eventSubtitle ? (
-              <p className="mt-2 text-sm font-medium text-white/90">{eventSubtitle}</p>
-            ) : null}
-            {addressLine ? (
-              <p className="mt-2 text-sm leading-5 text-white/70">{addressLine}</p>
-            ) : null}
-            {contactPhone ? (
-              <a
-                href={`tel:${experience.phone}`}
-                className="mt-1.5 block text-sm font-medium text-white/90 hover:underline"
-              >
-                {contactPhone}
-              </a>
-            ) : null}
-          </div>
-        </div>
-      </div>
+      <GuestPageHeader
+        businessName={experience.businessName}
+        loginId={experience.loginId}
+        logoUrl={experience.logoUrl}
+        title={title}
+        detail={eventSubtitle}
+        addressLine={addressLine}
+        phone={experience.phone}
+        contactPhone={contactPhone}
+        whyTrustUs={experience.whyTrustUs}
+      />
 
       <FounderFlip founder={experience.founder}>
       <div className="bg-[var(--guest-surface,white)] px-4 py-4 sm:px-5">
@@ -253,7 +224,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
                   }`}
                 />
                 <p
-                  className={`mt-1.5 truncate text-center text-[10px] font-semibold uppercase tracking-wide ${
+                  className={`caption-1 mt-2 truncate text-center ${
                     current ? guestAccentTextClass : "text-muted"
                   }`}
                 >
@@ -278,7 +249,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
                       type="button"
                       aria-pressed={selected}
                       onClick={() => toggleArea(item.id)}
-                      className={`flex w-full cursor-pointer items-center rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all ${
+                      className={`flex w-full cursor-pointer items-center rounded-xl px-4 py-3 text-left text-base font-semibold ${
                         selected ? guestSelectedChipClass : guestChipClass
                       }`}
                     >
@@ -437,7 +408,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
             <button
               type="button"
               onClick={copyAndContinue}
-              className={`${guestPrimaryButtonClass} mt-4 w-full py-3.5`}
+              className={`${guestPrimaryButtonClass} mt-4 w-full`}
             >
               {copied ? "Copied — paste on Google" : "Copy & Continue"}
             </button>
@@ -462,7 +433,7 @@ export function EventGuestReviewFlow({ experience }: Props) {
         ) : null}
 
         {step < 2 ? (
-          <div className={`-mx-4 mt-5 flex gap-2 px-4 py-4 sm:-mx-5 sm:px-5 ${guestFlowFooterClass}`}>
+          <div className={`flex gap-2 ${guestFlowFooterClass}`}>
             {step > 0 ? (
               <button type="button" onClick={goBack} className={backButtonClass} disabled={pending}>
                 Back
@@ -472,13 +443,13 @@ export function EventGuestReviewFlow({ experience }: Props) {
               type="button"
               disabled={!canAdvance || pending}
               onClick={goNext}
-              className={`${guestPrimaryButtonClass} min-w-0 flex-1 py-3.5`}
+              className={`${guestPrimaryButtonClass} min-w-0 flex-1`}
             >
               {step === 1 ? (pending ? "Writing draft…" : "Next — get draft") : "Next"}
             </button>
           </div>
         ) : (
-          <div className={`-mx-4 mt-5 px-4 py-4 sm:-mx-5 sm:px-5 ${guestFlowFooterClass}`}>
+          <div className={guestFlowFooterClass}>
             <button type="button" onClick={goBack} className={backButtonClass}>
               Back
             </button>

@@ -36,7 +36,7 @@ async function CategoriesGate() {
     <>
       <AdminHeader />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="text-2xl font-semibold text-white">Business categories</h1>
+        <h1 className="heading-4">Business categories</h1>
         <div className="mt-6">
           <CategoryManager initialCategories={categories} notice={notice} />
         </div>

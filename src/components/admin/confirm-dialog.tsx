@@ -60,7 +60,7 @@ export function ConfirmDialog({
         role="alertdialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative w-full max-w-md rounded-3xl bg-white p-6 text-ink shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-7"
+        className="relative w-full max-w-md rounded-2xl border border-black/5 bg-white p-6 text-ink sm:p-7"
       >
         <p className="text-xs font-semibold tracking-[0.16em] text-red-700 uppercase">
           Cannot be undone

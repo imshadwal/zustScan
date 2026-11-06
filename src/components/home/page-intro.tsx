@@ -2,7 +2,7 @@ export function PageIntro({
   eyebrow,
   title,
   description,
-  className = "bg-mist",
+  className = "bg-mist-deep",
 }: {
   eyebrow: string;
   title: string;
@@ -11,15 +11,13 @@ export function PageIntro({
 }) {
   return (
     <section className={className}>
-      <div className="mx-auto max-w-6xl px-5 pt-32 pb-10 sm:px-6 lg:pt-36 lg:pb-14">
-        <p className="text-xs font-semibold tracking-[0.16em] text-blue uppercase">
-          {eyebrow}
-        </p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-ink sm:text-5xl">
-          {title}
+      <div className="mx-auto max-w-6xl px-4 pt-32 pb-16 sm:pt-40 lg:pt-48 lg:pb-24">
+        <p className="caption-1 text-muted">{eyebrow}</p>
+        <h1 className="heading-1 mt-4 max-w-[680px]">
+          <span className="hero-heading">{title}</span>
         </h1>
         {description ? (
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">{description}</p>
+          <p className="body-1 mt-6 max-w-[680px] text-muted">{description}</p>
         ) : null}
       </div>
     </section>
